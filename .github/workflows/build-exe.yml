@@ -1,4 +1,4 @@
-name: Build Windows Executable
+name: Build Windows Release
 
 on:
   push:
@@ -10,44 +10,39 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        build_type: [gpu, cpu]
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Build Executable (${{ matrix.build_type }})
+    - name: Package Application (Thin Client)
+      shell: pwsh
       run: |
-        python scripts/build_exe.py --type ${{ matrix.build_type }} --ci
+        # Create a clean release folder
+        mkdir release_build
         
-    - name: Zip Executable
-      shell: cmd
-      run: |
-        7z a -tzip -v1500m "TransformMovieToText-Windows-${{ matrix.build_type }}.zip" ".\dist\TransformMovieToText\*"
+        # Copy necessary files for the thin client
+        Copy-Item -Path "src" -Destination "release_build\src" -Recurse
+        Copy-Item -Path "main.py" -Destination "release_build\"
+        Copy-Item -Path "run.bat" -Destination "release_build\"
+        Copy-Item -Path "pyproject.toml" -Destination "release_build\"
+        Copy-Item -Path "README.md" -Destination "release_build\"
+        Copy-Item -Path "LICENSE" -Destination "release_build\"
+        
+        # Zip the clean folder
+        Compress-Archive -Path "release_build\*" -DestinationPath "TransformMovieToText-Windows-ThinClient.zip"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: TransformMovieToText-Windows-${{ matrix.build_type }}
-        path: TransformMovieToText-Windows-${{ matrix.build_type }}.zip*
+        name: TransformMovieToText-Windows-ThinClient
+        path: TransformMovieToText-Windows-ThinClient.zip
         retention-days: 7
 
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: TransformMovieToText-Windows-${{ matrix.build_type }}.zip*
+        files: TransformMovieToText-Windows-ThinClient.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
