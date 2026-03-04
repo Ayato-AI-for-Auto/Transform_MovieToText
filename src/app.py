@@ -1,6 +1,7 @@
 import logging
 import os
 import threading
+
 import flet as ft
 
 from src.config_manager import ConfigManager
@@ -23,7 +24,7 @@ class FletApp:
         self.config_mgr = ConfigManager()
         self.transcriber = WhisperTranscriber()
         self.gemini_client = None
-        
+
         # Hardware Info
         self.hw_info = self.transcriber.get_hardware_info()
 
@@ -47,9 +48,8 @@ class FletApp:
 
         # UI Components (Transcription)
         self.path_text = ft.Text("ファイルが選択されていません", color="grey500")
-        
+
         # Generate model options with device labels
-        hw = self.transcriber.get_hardware_info()
         model_options = []
         for model_name, req_gb in self.transcriber.MODEL_REQUIREMENTS.items():
             if self.transcriber.can_run_on_gpu(model_name):
@@ -173,17 +173,28 @@ class FletApp:
         return ft.Column(
             [
                 ft.Text("文字起こし (Whisper)", size=24, weight="bold"),
-                ft.Row([
-                    ft.ElevatedButton("動画ファイルを選択", icon="folder_open", on_click=lambda _: self.file_picker.pick_files()),
-                    self.path_text,
-                ]),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            "動画ファイルを選択",
+                            icon="folder_open",
+                            on_click=lambda _: self.file_picker.pick_files(),
+                        ),
+                        self.path_text,
+                    ]
+                ),
                 ft.Row([self.model_dropdown, self.transcribe_btn]),
                 self.status_text,
                 self.progress_bar,
                 self.result_area,
-                ft.Row([
-                    ft.ElevatedButton("結果を保存", icon="save", on_click=self.handle_save_transcript),
-                ], alignment="end"),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            "結果を保存", icon="save", on_click=self.handle_save_transcript
+                        ),
+                    ],
+                    alignment="end",
+                ),
             ],
             scroll="auto",
             expand=True,
@@ -193,16 +204,23 @@ class FletApp:
         return ft.Column(
             [
                 ft.Text("AI議事録生成 (Gemini)", size=24, weight="bold"),
-                ft.Row([
-                    self.gemini_model_dropdown,
-                    ft.IconButton("refresh", on_click=self.refresh_gemini_models),
-                    self.generate_btn,
-                ]),
+                ft.Row(
+                    [
+                        self.gemini_model_dropdown,
+                        ft.IconButton("refresh", on_click=self.refresh_gemini_models),
+                        self.generate_btn,
+                    ]
+                ),
                 ft.Text("※ 文字起こしが完了している場合、最新のテキストが使用されます。"),
                 self.minutes_area,
-                ft.Row([
-                    ft.ElevatedButton("議事録を保存", icon="save", on_click=self.handle_save_minutes),
-                ], alignment="end"),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            "議事録を保存", icon="save", on_click=self.handle_save_minutes
+                        ),
+                    ],
+                    alignment="end",
+                ),
             ],
             scroll="auto",
             expand=True,
@@ -219,12 +237,12 @@ class FletApp:
         # Model compatibility list
         comp_items = []
         for model, req in self.transcriber.MODEL_REQUIREMENTS.items():
-            can_gpu = self.hw_info['vram'] >= req
-            can_cpu = self.hw_info['ram'] >= req
+            can_gpu = self.hw_info["vram"] >= req
+            can_cpu = self.hw_info["ram"] >= req
             status_icon = "check_circle" if (can_gpu or can_cpu) else "cancel"
             status_color = "green" if can_gpu else ("amber" if can_cpu else "red")
             device_text = "(GPU可)" if can_gpu else ("(CPUのみ可)" if can_cpu else "(スペック不足)")
-            
+
             comp_items.append(
                 ft.ListTile(
                     leading=ft.Icon(status_icon, color=status_color),
@@ -275,12 +293,20 @@ class FletApp:
             self.page.update()
 
     def handle_save_transcript(self, e):
-        base_name = os.path.splitext(os.path.basename(self.selected_file_path))[0] if self.selected_file_path else "transcript"
+        base_name = (
+            os.path.splitext(os.path.basename(self.selected_file_path))[0]
+            if self.selected_file_path
+            else "transcript"
+        )
         default_name = f"【文字起こし】{base_name}.txt"
         self.save_picker.save_file(file_name=default_name)
 
     def handle_save_minutes(self, e):
-        base_name = os.path.splitext(os.path.basename(self.selected_file_path))[0] if self.selected_file_path else "minutes"
+        base_name = (
+            os.path.splitext(os.path.basename(self.selected_file_path))[0]
+            if self.selected_file_path
+            else "minutes"
+        )
         default_name = f"【議事録】{base_name}.md"
         self.save_picker.save_file(file_name=default_name)
 
@@ -326,7 +352,7 @@ class FletApp:
         if not api_key:
             self.show_snack("APIキーを入力してください")
             return
-        
+
         try:
             self.gemini_client = GeminiClient(api_key)
             self.load_gemini_models_to_dropdown()
@@ -345,7 +371,7 @@ class FletApp:
         if not self.selected_file_path:
             self.show_snack("ファイルを選択してください")
             return
-        
+
         model_name = self.model_dropdown.value
         self.transcribe_btn.disabled = True
         self.progress_bar.visible = True
@@ -373,7 +399,7 @@ class FletApp:
         if not text:
             self.show_snack("文字起こしテキストがありません")
             return
-        
+
         model = self.gemini_model_dropdown.value
         if not model:
             self.show_snack("Geminiモデルを選択してください")
