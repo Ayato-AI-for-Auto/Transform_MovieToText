@@ -2,12 +2,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.gemini_client import GeminiClient
+from src.llm.providers.gemini_client import GeminiLLMClient
 
 
 @pytest.fixture
 def mock_client():
-    with patch("src.gemini_client.genai.Client") as mock:
+    with patch("src.llm.providers.gemini_client.genai.Client") as mock:
         yield mock
 
 
@@ -28,7 +28,7 @@ def test_get_available_models(mock_client):
     # Mocking the client instance's models.list return value
     mock_client.return_value.models.list.return_value = [mock_model_1, mock_model_2, mock_model_3]
 
-    client = GeminiClient(api_key="test_key")
+    client = GeminiLLMClient(api_key="test_key")
     models = client.get_available_models()
 
     # Should filter out embedding and sort (descending gemini-1.5-pro, gemini-1.5-flash)
@@ -43,7 +43,7 @@ def test_generate_minutes(mock_client):
     mock_response.text = "Generated Minutes Content"
     mock_client.return_value.models.generate_content.return_value = mock_response
 
-    client = GeminiClient(api_key="test_key")
+    client = GeminiLLMClient(api_key="test_key")
     result = client.generate_minutes("Test Transcript", "gemini-1.5-flash")
 
     assert result == "Generated Minutes Content"

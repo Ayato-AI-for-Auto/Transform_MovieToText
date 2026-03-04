@@ -5,7 +5,7 @@ import threading
 import flet as ft
 
 from src.config_manager import ConfigManager
-from src.gemini_client import GeminiClient
+from src.llm.factory import get_llm_client
 from src.transcriber import WhisperTranscriber
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class FletApp:
         # Backend instances
         self.config_mgr = ConfigManager()
         self.transcriber = WhisperTranscriber()
-        self.gemini_client = None
+        self.llm_client = None
 
         # Hardware Info
         self.hw_info = self.transcriber.get_hardware_info()
@@ -87,10 +87,21 @@ class FletApp:
         )
 
         # UI Components (Minutes)
-        self.gemini_model_dropdown = ft.Dropdown(
-            label="Geminiモデル",
+        self.llm_provider_dropdown = ft.Dropdown(
+            label="AIプロバイダー",
+            options=[
+                ft.dropdown.Option("gemini", "Gemini (Google)"),
+                ft.dropdown.Option("ollama_cloud", "Ollama Cloud"),
+                ft.dropdown.Option("openai_custom", "OpenAI互換 (Groq等)"),
+            ],
+            width=200,
+            on_change=self.on_provider_change,
+        )
+
+        self.llm_model_dropdown = ft.Dropdown(
+            label="モデルを選択",
             options=[],
-            width=300,
+            width=250,
         )
         self.generate_btn = ft.ElevatedButton(
             "議事録を生成",
@@ -112,13 +123,31 @@ class FletApp:
         )
 
         # UI Components (Settings)
+        self.provider_settings_dropdown = ft.Dropdown(
+            label="設定対象プロバイダー",
+            options=[
+                ft.dropdown.Option("gemini", "Gemini"),
+                ft.dropdown.Option("ollama_cloud", "Ollama Cloud"),
+                ft.dropdown.Option("openai_custom", "OpenAI互換 (Groq等)"),
+            ],
+            width=300,
+            on_change=self.on_settings_provider_change,
+        )
+
         self.api_key_field = ft.TextField(
-            label="Gemini API Key",
+            label="API Key",
             password=True,
             can_reveal_password=True,
             width=500,
+            on_change=self.on_api_settings_change,
         )
-        self.api_key_field.on_change = lambda e: self.config_mgr.set_api_key(e.control.value)
+        self.base_url_field = ft.TextField(
+            label="Base URL",
+            width=500,
+            hint_text="https://api.groq.com/openai/v1",
+            visible=False,
+            on_change=self.on_api_settings_change,
+        )
 
     def build_ui(self):
         # Navigation Rail
@@ -189,9 +218,7 @@ class FletApp:
                 self.result_area,
                 ft.Row(
                     [
-                        ft.ElevatedButton(
-                            "結果を保存", icon="save", on_click=self.handle_save_transcript
-                        ),
+                        ft.ElevatedButton("結果を保存", icon="save", on_click=self.handle_save_transcript),
                     ],
                     alignment="end",
                 ),
@@ -203,11 +230,12 @@ class FletApp:
     def get_minutes_view(self):
         return ft.Column(
             [
-                ft.Text("AI議事録生成 (Gemini)", size=24, weight="bold"),
+                ft.Text("AI議事録生成", size=24, weight="bold"),
                 ft.Row(
                     [
-                        self.gemini_model_dropdown,
-                        ft.IconButton("refresh", on_click=self.refresh_gemini_models),
+                        self.llm_provider_dropdown,
+                        self.llm_model_dropdown,
+                        ft.IconButton("refresh", on_click=self.refresh_llm_models),
                         self.generate_btn,
                     ]
                 ),
@@ -215,9 +243,7 @@ class FletApp:
                 self.minutes_area,
                 ft.Row(
                     [
-                        ft.ElevatedButton(
-                            "議事録を保存", icon="save", on_click=self.handle_save_minutes
-                        ),
+                        ft.ElevatedButton("議事録を保存", icon="save", on_click=self.handle_save_minutes),
                     ],
                     alignment="end",
                 ),
@@ -255,8 +281,10 @@ class FletApp:
             [
                 ft.Text("設定", size=24, weight="bold"),
                 ft.Divider(),
-                ft.Text("API 設定", size=18, weight="w500"),
+                ft.Text("AIプロバイダー設定", size=18, weight="w500"),
+                self.provider_settings_dropdown,
                 self.api_key_field,
+                self.base_url_field,
                 ft.Divider(),
                 ft.Text("ハードウェア情報", size=18, weight="w500"),
                 ft.Column(hw_rows),
@@ -280,7 +308,7 @@ class FletApp:
             self.content_container.content = self.get_transcription_view()
         elif idx == 1:
             self.content_container.content = self.get_minutes_view()
-            self.load_gemini_models_to_dropdown()
+            self.load_llm_models_to_dropdown()
         elif idx == 2:
             self.content_container.content = self.get_settings_view()
             self.load_settings()
@@ -289,24 +317,17 @@ class FletApp:
     def on_file_result(self, e):
         if e.files:
             self.selected_file_path = e.files[0].path
-            self.path_text.value = os.path.basename(self.selected_file_path)
+            filename = os.path.basename(self.selected_file_path)
+            self.path_text.value = filename
             self.page.update()
 
     def handle_save_transcript(self, e):
-        base_name = (
-            os.path.splitext(os.path.basename(self.selected_file_path))[0]
-            if self.selected_file_path
-            else "transcript"
-        )
+        base_name = os.path.splitext(os.path.basename(self.selected_file_path))[0] if self.selected_file_path else "transcript"
         default_name = f"【文字起こし】{base_name}.txt"
         self.save_picker.save_file(file_name=default_name)
 
     def handle_save_minutes(self, e):
-        base_name = (
-            os.path.splitext(os.path.basename(self.selected_file_path))[0]
-            if self.selected_file_path
-            else "minutes"
-        )
+        base_name = os.path.splitext(os.path.basename(self.selected_file_path))[0] if self.selected_file_path else "minutes"
         default_name = f"【議事録】{base_name}.md"
         self.save_picker.save_file(file_name=default_name)
 
@@ -323,40 +344,88 @@ class FletApp:
                 self.show_snack(f"保存失敗: {ex}")
 
     def load_settings(self):
-        self.api_key_field.value = self.config_mgr.get_api_key()
-        # Initial model loading for Gemini if possible
-        if self.api_key_field.value:
-            threading.Thread(target=self.silent_refresh_gemini, daemon=True).start()
+        # Sync provider dropdowns
+        active = self.config_mgr.get_active_provider()
+        self.llm_provider_dropdown.value = active
+        self.provider_settings_dropdown.value = active
 
-    def silent_refresh_gemini(self):
+        # Load API fields for active provider
+        conf = self.config_mgr.get_provider_config(active)
+        self.api_key_field.value = conf.get("api_key", "")
+        self.base_url_field.value = conf.get("base_url", "")
+        self.base_url_field.visible = active == "openai_custom"
+
+        # Initial model loading
+        if self.api_key_field.value:
+            threading.Thread(target=self.silent_refresh_llm, daemon=True).start()
+
+    def on_provider_change(self, e):
+        provider = e.control.value
+        self.config_mgr.set_active_provider(provider)
+        self.provider_settings_dropdown.value = provider
+        self.load_settings()
+        self.load_llm_models_to_dropdown()
+
+    def on_settings_provider_change(self, e):
+        # When user switches target provider in settings tab
+        provider = e.control.value
+        conf = self.config_mgr.get_provider_config(provider)
+        self.api_key_field.value = conf.get("api_key", "")
+        self.base_url_field.value = conf.get("base_url", "")
+        self.base_url_field.visible = provider == "openai_custom"
+        self.page.update()
+
+    def on_api_settings_change(self, e):
+        provider = self.provider_settings_dropdown.value
+        conf = {
+            "api_key": self.api_key_field.value,
+        }
+        if provider == "openai_custom":
+            conf["base_url"] = self.base_url_field.value
+        self.config_mgr.set_provider_config(provider, conf)
+
+    def silent_refresh_llm(self):
         try:
-            if not self.gemini_client:
-                self.gemini_client = GeminiClient(self.api_key_field.value)
-            self.load_gemini_models_to_dropdown()
-        except:
+            self._init_llm_client()
+            self.load_llm_models_to_dropdown()
+        except Exception:
             pass
 
-    def load_gemini_models_to_dropdown(self):
-        if self.gemini_client:
-            models = self.gemini_client.get_available_models()
-            self.gemini_model_dropdown.options = [ft.dropdown.Option(m) for m in models]
-            last = self.config_mgr.get_last_model()
-            if last in models:
-                self.gemini_model_dropdown.value = last
-            elif models:
-                self.gemini_model_dropdown.value = models[0]
-            self.page.update()
+    def _init_llm_client(self):
+        active = self.config_mgr.get_active_provider()
+        conf = self.config_mgr.get_provider_config(active)
+        if conf.get("api_key"):
+            self.llm_client = get_llm_client(provider_name=active, api_key=conf["api_key"], base_url=conf.get("base_url"))
 
-    def refresh_gemini_models(self, e):
-        api_key = self.api_key_field.value
-        if not api_key:
-            self.show_snack("APIキーを入力してください")
+    def load_llm_models_to_dropdown(self):
+        if not self.llm_client:
+            self._init_llm_client()
+
+        if self.llm_client:
+            try:
+                models = self.llm_client.get_available_models()
+                self.llm_model_dropdown.options = [ft.dropdown.Option(m) for m in models]
+                active = self.config_mgr.get_active_provider()
+                last = self.config_mgr.get_last_model(active)
+                if last in models:
+                    self.llm_model_dropdown.value = last
+                elif models:
+                    self.llm_model_dropdown.value = models[0]
+                self.page.update()
+            except Exception as e:
+                logger.error(f"Error loading models: {e}")
+
+    def refresh_llm_models(self, e):
+        active = self.config_mgr.get_active_provider()
+        conf = self.config_mgr.get_provider_config(active)
+        if not conf.get("api_key"):
+            self.show_snack("APIキーを設定画面で入力してください")
             return
 
         try:
-            self.gemini_client = GeminiClient(api_key)
-            self.load_gemini_models_to_dropdown()
-            self.show_snack("モデルリストを更新しました")
+            self._init_llm_client()
+            self.load_llm_models_to_dropdown()
+            self.show_snack(f"{active} のモデルリストを更新しました")
         except Exception as ex:
             self.show_snack(f"取得失敗: {ex}")
 
@@ -400,9 +469,9 @@ class FletApp:
             self.show_snack("文字起こしテキストがありません")
             return
 
-        model = self.gemini_model_dropdown.value
+        model = self.llm_model_dropdown.value
         if not model:
-            self.show_snack("Geminiモデルを選択してください")
+            self.show_snack("モデルを選択してください")
             return
 
         self.generate_btn.disabled = True
@@ -413,9 +482,15 @@ class FletApp:
 
     def _minutes_worker(self, transcript, model):
         try:
-            res = self.gemini_client.generate_minutes(transcript, model)
+            if not self.llm_client:
+                self._init_llm_client()
+
+            res = self.llm_client.generate_minutes(transcript, model)
             self.minutes_area.value = res
             self.minutes_text = res
+
+            # Save as last used model
+            self.config_mgr.set_last_model(model)
         except Exception as ex:
             self.minutes_area.value = f"エラー: {ex}"
         finally:

@@ -7,6 +7,7 @@ name = "transform-movie-to-text"
 version = "0.1.0"
 description = "A UI app to extract text from video files using Whisper."
 readme = "README.md"
+license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
     "openai-whisper",
