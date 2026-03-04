@@ -1,0 +1,39 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: |
+        uv pip install -e . --system
+        uv pip install pyinstaller --system
+        uv pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --extra-index-url https://download.pytorch.org/whl/cu121 --system
+        
+    - name: Build with PyInstaller
+      run: |
+        uv run pyinstaller --noconfirm --onedir --windowed --name "TransformMovieToText" --collect-all whisper --collect-all tiktoken --collect-data torch main.py
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TransformMovieToText-Windows
+        path: dist/TransformMovieToText
+        retention-days: 7
