@@ -2,11 +2,13 @@ import os
 import torch
 import whisper
 
+
 class WhisperTranscriber:
     """
     Backend class for Whisper transcription logic.
     Handles device selection, model loading, and transcription.
     """
+
     def __init__(self):
         self.model = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -24,6 +26,6 @@ class WhisperTranscriber:
         """
         if self.model is None:
             self.load_model()
-        
+
         result = self.model.transcribe(path)
         return result.get("text", "").strip()

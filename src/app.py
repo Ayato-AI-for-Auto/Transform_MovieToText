@@ -6,11 +6,13 @@ from src.transcriber import WhisperTranscriber
 from src.config_manager import ConfigManager
 from src.gemini_client import GeminiClient
 
+
 class WhisperApp:
     """
     Frontend class for the Whisper GUI.
     Handles UI elements and user interactions.
     """
+
     def __init__(self, root):
         self.root = root
         self.root.title("Movie to Text (Whisper) + AI Minutes")
@@ -22,7 +24,7 @@ class WhisperApp:
         # Backend instance
         self.transcriber = WhisperTranscriber()
         self.gemini_client = None
-        
+
         # UI Setup
         self.setup_ui()
         self.load_settings()
@@ -43,7 +45,7 @@ class WhisperApp:
         tk.Label(file_frame, text="動画ファイル:").pack(side=tk.LEFT)
         self.entry_path = tk.Entry(file_frame, width=60)
         self.entry_path.pack(side=tk.LEFT, padx=5)
-        
+
         btn_browse = tk.Button(file_frame, text="選択...", command=self.select_file)
         btn_browse.pack(side=tk.LEFT)
 
@@ -52,12 +54,12 @@ class WhisperApp:
         control_frame.pack(fill=tk.X, padx=20)
 
         self.btn_transcribe = tk.Button(
-            control_frame, 
-            text="文字起こし開始", 
+            control_frame,
+            text="文字起こし開始",
             command=self.start_transcription,
-            bg="#4CAF50", 
+            bg="#4CAF50",
             fg="white",
-            font=("Arial", 10, "bold")
+            font=("Arial", 10, "bold"),
         )
         self.btn_transcribe.pack(side=tk.LEFT)
 
@@ -74,10 +76,10 @@ class WhisperApp:
         save_frame.pack(fill=tk.X, padx=20)
 
         self.btn_save_transcript = tk.Button(
-            save_frame, 
-            text="文字起こしを保存...", 
+            save_frame,
+            text="文字起こしを保存...",
             command=lambda: self.save_file(self.text_result, "transcript"),
-            state=tk.DISABLED
+            state=tk.DISABLED,
         )
         self.btn_save_transcript.pack(side=tk.RIGHT)
 
@@ -92,34 +94,42 @@ class WhisperApp:
         tk.Label(settings_frame, text="Gemini API Key:").pack(side=tk.LEFT)
         self.entry_api_key = tk.Entry(settings_frame, width=30, show="*")
         self.entry_api_key.pack(side=tk.LEFT, padx=5)
-        self.entry_api_key.bind("<FocusOut>", lambda e: self.config_mgr.set_api_key(self.entry_api_key.get()))
+        self.entry_api_key.bind(
+            "<FocusOut>", lambda e: self.config_mgr.set_api_key(self.entry_api_key.get())
+        )
 
         tk.Label(settings_frame, text="モデル:").pack(side=tk.LEFT, padx=(15, 0))
         self.combo_model = ttk.Combobox(settings_frame, width=25, state="readonly")
         self.combo_model.pack(side=tk.LEFT, padx=5)
-        self.combo_model.bind("<<ComboboxSelected>>", lambda e: self.config_mgr.set_last_model(self.combo_model.get()))
+        self.combo_model.bind(
+            "<<ComboboxSelected>>", lambda e: self.config_mgr.set_last_model(self.combo_model.get())
+        )
 
-        btn_refresh = tk.Button(settings_frame, text="モデル取得", command=self.refresh_gemini_models)
+        btn_refresh = tk.Button(
+            settings_frame, text="モデル取得", command=self.refresh_gemini_models
+        )
         btn_refresh.pack(side=tk.LEFT, padx=5)
 
         self.btn_generate_minutes = tk.Button(
-            settings_frame, 
-            text="議事録生成", 
+            settings_frame,
+            text="議事録生成",
             command=self.start_minutes_generation,
             bg="#2196F3",
             fg="white",
-            state=tk.DISABLED
+            state=tk.DISABLED,
         )
         self.btn_generate_minutes.pack(side=tk.LEFT, padx=10)
 
         # Minutes Result Area
-        self.text_minutes = scrolledtext.ScrolledText(lower_frame, wrap=tk.WORD, font=("Meiryo", 10), bg="#F5F5F5")
+        self.text_minutes = scrolledtext.ScrolledText(
+            lower_frame, wrap=tk.WORD, font=("Meiryo", 10), bg="#F5F5F5"
+        )
         self.text_minutes.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
 
         btn_save_minutes = tk.Button(
             lower_frame,
             text="議事録を保存...",
-            command=lambda: self.save_file(self.text_minutes, "minutes")
+            command=lambda: self.save_file(self.text_minutes, "minutes"),
         )
         btn_save_minutes.pack(side=tk.RIGHT, padx=20, pady=5)
 
@@ -128,7 +138,7 @@ class WhisperApp:
         api_key = self.config_mgr.get_api_key()
         if api_key:
             self.entry_api_key.insert(0, api_key)
-        
+
         last_model = self.config_mgr.get_last_model()
         if last_model:
             self.combo_model.set(last_model)
@@ -136,7 +146,7 @@ class WhisperApp:
     def select_file(self):
         filename = filedialog.askopenfilename(
             title="動画ファイルを選択",
-            filetypes=[("Video files", "*.mp4 *.mkv *.avi *.mov *.flv *.ts"), ("All files", "*.*")]
+            filetypes=[("Video files", "*.mp4 *.mkv *.avi *.mov *.flv *.ts"), ("All files", "*.*")],
         )
         if filename:
             self.entry_path.delete(0, tk.END)
@@ -147,17 +157,21 @@ class WhisperApp:
         if not video_path:
             messagebox.showwarning("警告", "動画ファイルを選択してください。")
             return
-        
+
         if not os.path.exists(video_path):
             messagebox.showerror("エラー", "ファイルが見つかりません。")
             return
 
         self.toggle_ui(False)
-        self.lbl_status.config(text="処理中... (初回はモデルのダウンロードが発生する場合があります)", fg="blue")
+        self.lbl_status.config(
+            text="処理中... (初回はモデルのダウンロードが発生する場合があります)", fg="blue"
+        )
         self.text_result.delete(1.0, tk.END)
-        
+
         # Run in worker thread
-        threading.Thread(target=self._run_transcription_thread, args=(video_path,), daemon=True).start()
+        threading.Thread(
+            target=self._run_transcription_thread, args=(video_path,), daemon=True
+        ).start()
 
     def _run_transcription_thread(self, path):
         try:
@@ -169,7 +183,9 @@ class WhisperApp:
         except Exception as e:
             error_msg = str(e)
             if "ffmpeg" in error_msg.lower():
-                error_msg = "FFmpegが見つかりません。システムにインストールしてパスを通してください。"
+                error_msg = (
+                    "FFmpegが見つかりません。システムにインストールしてパスを通してください。"
+                )
             self.root.after(0, self.on_transcription_error, error_msg)
 
     def on_transcription_complete(self, text):
@@ -224,14 +240,16 @@ class WhisperApp:
         self.btn_generate_minutes.config(state=tk.DISABLED)
         self.text_minutes.delete(1.0, tk.END)
         self.text_minutes.insert(tk.END, "議事録を生成中...")
-        
-        threading.Thread(target=self._run_minutes_thread, args=(transcript, api_key, model_name), daemon=True).start()
+
+        threading.Thread(
+            target=self._run_minutes_thread, args=(transcript, api_key, model_name), daemon=True
+        ).start()
 
     def _run_minutes_thread(self, transcript, api_key, model_name):
         try:
             if not self.gemini_client:
                 self.gemini_client = GeminiClient(api_key)
-            
+
             minutes = self.gemini_client.generate_minutes(transcript, model_name)
             self.root.after(0, self.on_minutes_complete, minutes)
         except Exception as e:
@@ -257,9 +275,9 @@ class WhisperApp:
         save_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("Markdown files", "*.md"), ("All files", "*.*")],
-            title=f"{default_name}の保存先を指定"
+            title=f"{default_name}の保存先を指定",
         )
-        
+
         if save_path:
             try:
                 with open(save_path, "w", encoding="utf-8") as f:

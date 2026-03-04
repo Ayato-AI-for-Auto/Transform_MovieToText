@@ -1,6 +1,7 @@
 from genai import Client
 from genai.types import GenerateContentConfig
 
+
 class GeminiClient:
     def __init__(self, api_key):
         self.client = Client(api_key=api_key)
@@ -18,7 +19,7 @@ class GeminiClient:
                     # Clean the name (remove 'models/' prefix if present)
                     name = m.name.replace("models/", "")
                     filtered_models.append(name)
-            
+
             # Sort models, putting newer ones at the top if possible
             # Just alphabetical sort for now
             return sorted(filtered_models, reverse=True)
@@ -32,14 +33,14 @@ class GeminiClient:
             "項目は「会議の概要」「決定事項」「ネクストアクション」を含めてください。\n\n"
             f"--- 文字起こしテキスト ---\n{transcript}"
         )
-        
+
         try:
             response = self.client.models.generate_content(
                 model=model_name,
                 contents=prompt,
                 config=GenerateContentConfig(
                     temperature=0.7,
-                )
+                ),
             )
             return response.text
         except Exception as e:
