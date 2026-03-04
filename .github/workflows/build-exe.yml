@@ -8,6 +8,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [gpu, cpu]
     
     steps:
     - name: Checkout repository
@@ -21,19 +25,13 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install Dependencies
+    - name: Build Executable (${{ matrix.build_type }})
       run: |
-        uv pip install -e . --system
-        uv pip install pyinstaller --system
-        uv pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --extra-index-url https://download.pytorch.org/whl/cu121 --system
-        
-    - name: Build with PyInstaller
-      run: |
-        uv run pyinstaller --noconfirm --onedir --windowed --name "TransformMovieToText" --collect-all whisper --collect-all tiktoken --collect-data torch main.py
+        python scripts/build_exe.py --type ${{ matrix.build_type }} --ci
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: TransformMovieToText-Windows
+        name: TransformMovieToText-Windows-${{ matrix.build_type }}
         path: dist/TransformMovieToText
         retention-days: 7
