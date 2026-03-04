@@ -9,7 +9,7 @@ echo.
 echo Launching application using uv...
 echo.
 
-uv run src/main.py
+uv run main.py
 
 if %errorlevel% neq 0 (
     echo.
