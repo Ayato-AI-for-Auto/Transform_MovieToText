@@ -1,41 +1,55 @@
-# Transform Movie to Text
+# Transform Movie to Text (+ AI Minutes)
 
-A simple Python application to transcribe video files into text using OpenAI's Whisper model.
+動画ファイルから音声を高精度に文字起こしし、Google Gemini APIを活用してAI議事録を自動生成するWindows向けデスクトップアプリケーションです。
 
-## Features
-- Select video files via a GUI.
-- High-performance transcription using GPU (CUDA) support.
-- Live text display and editing.
-- Save transcripts to any arbitrary path.
+## 主な機能 (Features)
+- **高品質文字起こし**: OpenAIの軽量かつ高精度なローカルモデル（Whisper）を使用して、動画・音声ファイルからテキストを生成します。
+- **AI議事録生成 (Gemini)**: 文字起こししたテキストをもとに、Gemini APIを用いて「会議の概要」「決定事項」「ネクストアクション」を自動で要約・抽出します。
+- **モデルの自動取得**: Gemini APIの利用可能な最新・最適なモデルを自動的に取得して選択可能です。
+- **GPU対応**: NVIDIA GPU搭載PCではCUDAを活用した超高速な文字起こしが可能です。
+- **環境構築不要**: GitHub Releasesからダウンロード可能なStandalone版(`.exe`)を提供しています。
 
-## Requirements
-- Python 3.10+
-- FFmpeg (must be installed on the system and in PATH)
+## 使い方 (How to Use)
+### 方法1: 実行ファイル (.exe) を使う（おすすめ）
+最も簡単な方法です。Pythonの環境構築は必要ありません。
 
-## Installation
+1. [Releasesページ](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/releases) にアクセスします。
+2. 環境に合わせてZIPファイルをダウンロード・展開します。
+   - `TransformMovieToText-Windows-gpu.zip` : NVIDIA GPU搭載PC用（高速）
+   - `TransformMovieToText-Windows-cpu.zip` : GPU非搭載のPC用（軽量）
+3. 展開したフォルダ内の `TransformMovieToText.exe` をダブルクリックで起動します。
+
+※ **補足**: AI議事録生成機能の利用には、無料の [Google AI Studio API Key](https://aistudio.google.com/app/apikey) が必要です。
+
+---
+
+### 方法2: ソースコードから実行する
+開発やカスタマイズを行いたい場合は、ソースコードから実行できます。
+
+**必須要件**:
+- Python 3.10以降
+- [uv](https://github.com/astral-sh/uv) (高速なPythonパッケージマネージャ)
+- FFmpeg (システムにインストールされ、PATHが通っていること)
+
+**セットアップ手順**:
 ```bash
-uv venv .venv
-# Activate venv
+# クローンと依存関係のインストール
+git clone https://github.com/Ayato-AI-for-Auto/Transform_MovieToText.git
+cd Transform_MovieToText
+
+# uvを利用したローカルインストール
 uv pip install -e .
+
+# [GPUを使う場合] CUDA版のPyTorchをインストール
 uv pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
-```
 
-## Usage
-### Using Source Code
-```bash
+# 起動
 uv run main.py
-# Or use the batch file (Windows)
-run.bat
 ```
 
-### Using Executable (.exe)
-You can download the pre-built executables from the GitHub Releases/Actions page:
-- **GPU version**: For PCs with NVIDIA GPUs (Fast transcription).
-- **CPU version**: For any PC (Small size, works everywhere).
-
-## Building from Source
-To create your own standalone executable:
+## ソースからEXEをビルドする
+もし自分で実行ファイル (`.exe`) を構築したい場合は、プロジェクトに同梱されているビルドスクリプトを利用します。
 ```bash
 python scripts/build_exe.py
 ```
-This script will automatically detect your GPU and ask which version of Torch to install before building.
+このスクリプトは、ローカル環境のGPUの有無を自動判定し、最適なバージョンのPyInstallerビルドを実行します。
