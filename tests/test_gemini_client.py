@@ -1,11 +1,13 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from src.gemini_client import GeminiClient
 
 
 @pytest.fixture
 def mock_client():
-    with patch("src.gemini_client.Client") as mock:
+    with patch("src.gemini_client.genai.Client") as mock:
         yield mock
 
 
@@ -13,15 +15,15 @@ def test_get_available_models(mock_client):
     # Setup mock response for models.list()
     mock_model_1 = MagicMock()
     mock_model_1.name = "models/gemini-1.5-pro"
-    mock_model_1.supported_generation_methods = ["generateContent"]
+    mock_model_1.supported_actions = ["generate_content"]
 
     mock_model_2 = MagicMock()
     mock_model_2.name = "models/gemini-embedding-exp"
-    mock_model_2.supported_generation_methods = ["embedContent"]
+    mock_model_2.supported_actions = ["embedContent"]
 
     mock_model_3 = MagicMock()
     mock_model_3.name = "models/gemini-1.5-flash"
-    mock_model_3.supported_generation_methods = ["generateContent"]
+    mock_model_3.supported_actions = ["generate_content"]
 
     # Mocking the client instance's models.list return value
     mock_client.return_value.models.list.return_value = [mock_model_1, mock_model_2, mock_model_3]
