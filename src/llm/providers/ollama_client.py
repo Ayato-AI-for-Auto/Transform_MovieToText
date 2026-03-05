@@ -1,4 +1,5 @@
 import logging
+import time
 
 from ollama import Client
 
@@ -17,11 +18,14 @@ class OllamaCloudClient(BaseLLMClient):
         """Fetches available cloud models from Ollama."""
         try:
             logger.info("Fetching available Ollama Cloud models...")
+            start_time = time.time()
             # According to docs: curl https://ollama.com/api/tags
             # The python sdk's list() might need the host setup
             response = self.client.list()
+            duration = time.time() - start_time
+            
             models = [m["name"] for m in response["models"]]
-            logger.info(f"Successfully fetched {len(models)} Ollama models.")
+            logger.info(f"Successfully fetched {len(models)} Ollama models in {duration:.2f}s.")
             return sorted(models)
         except Exception as e:
             logger.error(f"Failed to fetch Ollama models: {e}")
@@ -45,8 +49,10 @@ class OllamaCloudClient(BaseLLMClient):
             # We use chat() for generation
             # Note: Cloud models might not support streaming in the same way,
             # but we'll use non-streaming for simplicity here.
+            start_time = time.time()
             response = self.client.chat(model=model_name, messages=messages)
-            logger.info("Minutes generated successfully by Ollama.")
+            duration = time.time() - start_time
+            logger.info(f"Minutes generated successfully by Ollama in {duration:.2f}s.")
             return response["message"]["content"]
         except Exception as e:
             logger.error(f"Ollama generation failed: {e}")

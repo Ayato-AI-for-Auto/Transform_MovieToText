@@ -1,15 +1,12 @@
-import subprocess
-import os
-import sys
 import argparse
+import subprocess
+import sys
 
 
 def run_cmd(cmd):
     """Executes a shell command and prints its output."""
     print(f"Executing: {cmd}")
-    process = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
-    )
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     for line in process.stdout:
         print(line, end="")
     process.wait()
@@ -63,7 +60,9 @@ def main():
     if build_type == "gpu":
         print("Installing GPU-enabled PyTorch (CUDA 12.1)...")
         run_cmd(
-            "uv pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --extra-index-url https://download.pytorch.org/whl/cu121 --system"
+            "uv pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 "
+            "torchaudio==2.5.1+cu121 --extra-index-url "
+            "https://download.pytorch.org/whl/cu121 --system"
         )
     else:
         print("Installing CPU version of PyTorch...")
@@ -77,12 +76,14 @@ def main():
     run_cmd(
         "uv run pyinstaller --noconfirm --onedir --windowed "
         '--name "TransformMovieToText" '
-        "--collect-all whisper --collect-all tiktoken --collect-data torch "
+        '--icon "assets/icon.ico" '
+        '--add-data "assets;assets" '
+        "--collect-all whisper --collect-all tiktoken --collect-all flet --collect-data torch "
         "main.py"
     )
 
     print("\nBuild completed successfully!")
-    print(f"Executable directory: dist/TransformMovieToText")
+    print("Executable directory: dist/TransformMovieToText")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,115 @@
+﻿ffmpeg.exe : [dshow @ 0
+000020befc542c0] "HD We
+bcam" (video)
+発生場所 行:1 文字:1
++ & ffmpeg -hide_banner
+ -list_devices true -f 
+dshow -i dummy 2>&1 | O
+ut ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ([dshow @ 0000   
+ 02...Webcam" (vide    
+o):String) [], Rem    o
+teException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+[dshow @ 0000020befc542
+c0]   Alternative name 
+"@device_pnp_\\?\usb#vi
+d_5986&pid_211b&mi_00#6
+&1d2656b7&1&0000#{65e87
+73d-8f56-11d0-a3b9-00a0
+c9223196}\global"
+Could not create log fi
+le: No such file or dir
+ectory
+COULD NOT CREATE LOGFIL
+E '20260305-010912.2669
+6'!
+I2026-03-05 01:09:12.50
+5483 ( 4604) [INFO] [VC
+AMDS] ffmpeg.exe
+Could not create log fi
+le: No such file or dir
+ectory
+COULD NOT CREATE LOGFIL
+E '20260305-010912.2669
+6'!
+Could not create log fi
+le: No such file or dir
+ectory
+COULD NOT CREATE LOGFIL
+E '20260305-010912.2669
+6'!
+E2026-03-05 01:09:12.50
+5483 ( 4604)  [ERR] [VC
+AMDS] Failed to open se
+ttings hive
+E2026-03-05 01:09:12.50
+5483 ( 4604)  [ERR] [VC
+AMDS] Failed to open NB
+X hive
+I2026-03-05 01:09:12.50
+5483 ( 4604) [INFO] [VC
+AMDS] Creating WndMsg L
+istener Window
+I2026-03-05 01:09:12.50
+9013 ( 4604) [INFO] [VC
+AMDS] Destroying parent
+ object
+I2026-03-05 01:09:12.50
+9013 ( 4604) [INFO] [VC
+AMDS] Destroying WndMsg
+ Listener Window
+I2026-03-05 01:09:12.51
+0043 ( 4604) [INFO] [VC
+AMDS] Destroyed window
+I2026-03-05 01:09:12.51
+0043 ( 4604) [INFO] [VC
+AMDS] Unregistered wind
+ow class
+I2026-03-05 01:09:12.51
+0043 ( 4604) [INFO] [VC
+AMDS] NvMxnCltShmConsum
+er Skip removing app tr
+acker DLL loaded status
+. Parent source filter 
+is not initialized
+[dshow @ 0000020befc542
+c0] "Camera (NVIDIA Bro
+adcast)" (video)
+[dshow @ 0000020befc542
+c0]   Alternative name 
+"@device_sw_{860BB310-5
+D01-11D0-BD3B-00A0C911C
+E86}\{7BBFF097-B3FB-4B2
+6-B685-7A998DE7CEAC}"
+[dshow @ 0000020befc542
+c0] "OBS Virtual Camera
+" (none)
+[dshow @ 0000020befc542
+c0]   Alternative name 
+"@device_sw_{860BB310-5
+D01-11D0-BD3B-00A0C911C
+E86}\{A3FCE0F5-3493-419
+F-958A-ABA1250EC20B}"
+[dshow @ 0000020befc542
+c0] "繝槭う繧ｯ驟榊・ (繝・ず繧ｿ繝ｫ繝
+槭う繧ｯ蜷代￠繧､繝ｳ繝・Νﾂｮ 繧ｹ繝槭・繝
+医・繧ｵ繧ｦ繝ｳ繝峨・繝・け繝弱Ο繧ｸ繝ｼ)"
+ (audio)
+[dshow @ 0000020befc542
+c0]   Alternative name 
+"@device_cm_{33D9A762-9
+0C8-11D0-BD43-00A0C911C
+E86}\wave_{E88FEB60-CFE
+F-49B7-B33D-BB358E182EB
+0}"
+Error opening input fil
+e dummy.

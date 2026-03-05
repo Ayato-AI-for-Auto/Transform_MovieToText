@@ -1,4 +1,5 @@
 import logging
+import time
 
 from google import genai
 from google.genai import types
@@ -17,7 +18,10 @@ class GeminiLLMClient(BaseLLMClient):
         """Fetches and filters Gemini models."""
         try:
             logger.info("Fetching available Gemini models...")
+            start_time = time.time()
             models = self.client.models.list()
+            duration = time.time() - start_time
+            
             filtered_models = []
             for m in models:
                 if any(x in m.name.lower() for x in ["gemini", "gemma"]):
@@ -27,7 +31,7 @@ class GeminiLLMClient(BaseLLMClient):
                         filtered_models.append(name)
 
             result = sorted(filtered_models, reverse=True)
-            logger.info(f"Successfully fetched {len(result)} models.")
+            logger.info(f"Successfully fetched {len(result)} models in {duration:.2f}s.")
             return result
         except Exception as e:
             logger.error(f"Failed to fetch Gemini models: {e}")
@@ -43,6 +47,7 @@ class GeminiLLMClient(BaseLLMClient):
         )
 
         try:
+            start_time = time.time()
             response = self.client.models.generate_content(
                 model=model_name,
                 contents=prompt,
@@ -50,7 +55,8 @@ class GeminiLLMClient(BaseLLMClient):
                     temperature=0.7,
                 ),
             )
-            logger.info("Minutes generated successfully by Gemini.")
+            duration = time.time() - start_time
+            logger.info(f"Minutes generated successfully by Gemini in {duration:.2f}s.")
             return response.text
         except Exception as e:
             logger.error(f"Gemini generation failed: {e}")

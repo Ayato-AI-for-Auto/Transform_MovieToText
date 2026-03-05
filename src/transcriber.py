@@ -1,5 +1,8 @@
 import logging
+import os
 import subprocess
+import time
+
 import psutil
 import torch
 import whisper
@@ -13,14 +16,15 @@ class WhisperTranscriber:
     Handles hardware detection, model loading, and transcription.
     """
 
-    # Model requirements in GB (approximate VRAM/RAM for FP16)
+    # Relaxed Model requirements in GB (approximate VRAM/RAM for FP16)
+    # Lowered slightly to be more inclusive for cards like RTX 3050 (4GB)
     MODEL_REQUIREMENTS = {
-        "tiny": 1.0,
-        "base": 1.0,
-        "small": 2.0,
-        "medium": 5.0,
-        "large-v3": 10.0,
-        "turbo": 6.0,
+        "tiny": 0.5,
+        "base": 0.5,
+        "small": 1.2,
+        "medium": 3.5,
+        "large-v3": 8.0,
+        "turbo": 5.0,
     }
 
     def __init__(self):
@@ -28,6 +32,7 @@ class WhisperTranscriber:
         self.current_model_name = None
         self._hardware_info = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.last_warning = ""
         logger.info(f"Initialized WhisperTranscriber on device: {self.device}")
 
     @staticmethod
@@ -36,7 +41,9 @@ class WhisperTranscriber:
         try:
             result = subprocess.run(
                 ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode == 0 and result.stdout.strip():
                 vram_mb = float(result.stdout.strip().split("\n")[0])
@@ -66,14 +73,27 @@ class WhisperTranscriber:
         self._hardware_info = info
         return info
 
-    def get_model_device(self, model_name):
+    def get_model_device(self, model_name, force_gpu=False):
         """Determines the best device (cuda or cpu) for a specific model."""
+        self.last_warning = ""
+        
         if not torch.cuda.is_available():
             return "cpu"
 
+        if force_gpu:
+            logger.info(f"GPU usage FORCED for model {model_name}.")
+            return "cuda"
+
         req = self.MODEL_REQUIREMENTS.get(model_name, 1.0)
         vram = self.get_hardware_info()["vram"]
-        return "cuda" if vram >= req else "cpu"
+        
+        if vram >= req:
+            return "cuda"
+        else:
+            reason = f"VRAM不足 (必要: {req}GB / 使用可能: {vram}GB)。安全のためCPUに切り替えました。"
+            self.last_warning = reason
+            logger.warning(f"GPU safety triggered: {reason}")
+            return "cpu"
 
     def can_run_on_gpu(self, model_name):
         """Checks if the GPU has enough VRAM for this model (independent of PyTorch CUDA)."""
@@ -81,26 +101,41 @@ class WhisperTranscriber:
         vram = self.get_hardware_info()["vram"]
         return vram >= req
 
-    def load_model(self, model_name="base"):
+    def load_model(self, model_name="base", force_gpu=False):
         """Loads or reloads the Whisper model on the appropriate device."""
-        device = self.get_model_device(model_name)
+        device = self.get_model_device(model_name, force_gpu=force_gpu)
 
-        if self.model is None or self.current_model_name != model_name:
+        if self.model is None or self.current_model_name != model_name or self.model.device.type != device:
             logger.info(f"Loading Whisper model: {model_name} on {device}...")
             self.model = whisper.load_model(model_name, device=device)
             self.current_model_name = model_name
-            logger.info(f"Model {model_name} loaded successfully.")
+            # Verify actual device of the loaded model
+            actual_device = next(self.model.parameters()).device
+            logger.info(f"Model {model_name} loaded successfully on {actual_device}.")
         return self.model
 
-    def transcribe(self, path, model_name="base"):
+    def transcribe(self, path, model_name="base", force_gpu=False):
         """
         Transcribes the file at the given path.
         Ensures the correct model is loaded.
         """
-        self.load_model(model_name)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Transcription file not found: {path}")
+        
+        file_size = os.path.getsize(path)
+        if file_size == 0:
+            raise ValueError(f"Transcription file is empty (0 bytes): {path}")
 
-        logger.info(f"Starting transcription for: {path}")
-        result = self.model.transcribe(path)
-        logger.info("Transcription completed.")
-        return result.get("text", "").strip()
+        self.load_model(model_name, force_gpu=force_gpu)
 
+        logger.info(f"Starting transcription for: {path} (Size: {file_size/1024:.1f} KB, Device: {next(self.model.parameters()).device})")
+        start_time = time.time()
+        
+        try:
+            result = self.model.transcribe(path)
+            duration = time.time() - start_time
+            logger.info(f"Transcription completed in {duration:.2f}s for {path}")
+            return result.get("text", "").strip()
+        except Exception as e:
+            logger.error(f"Error during whisper transcription: {e}", exc_info=True)
+            raise

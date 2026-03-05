@@ -5,6 +5,7 @@ import threading
 import flet as ft
 
 from src.config_manager import ConfigManager
+from src.live_processor import LiveTranscriptionManager
 from src.llm.factory import get_llm_client
 from src.transcriber import WhisperTranscriber
 
@@ -19,19 +20,29 @@ class FletApp:
         self.page.window_width = 1100
         self.page.window_height = 850
         self.page.padding = 0
+        self.page.window_icon = "assets/icon.png"
 
+        logger.info("FletApp: Initializing backend components...")
         # Backend instances
         self.config_mgr = ConfigManager()
+        logger.info("FletApp: ConfigManager initialized.")
         self.transcriber = WhisperTranscriber()
+        logger.info("FletApp: WhisperTranscriber initialized.")
         self.llm_client = None
+        self.live_mgr = None
 
         # Hardware Info
+        logger.info("FletApp: Detecting hardware...")
         self.hw_info = self.transcriber.get_hardware_info()
+        logger.info(f"FletApp: Hardware detected: {self.hw_info}")
 
         # UI Components
+        logger.info("FletApp: Building UI components...")
         self.setup_components()
         self.build_ui()
+        logger.info("FletApp: Loading settings...")
         self.load_settings()
+        logger.info("FletApp: Initialization complete.")
 
     def setup_components(self):
         # File Pickers
@@ -67,13 +78,30 @@ class FletApp:
         self.model_dropdown.on_change = lambda e: self.config_mgr.set_whisper_model(e.control.value)
 
         self.transcribe_btn = ft.ElevatedButton(
-            "文字起こし開始",
+            "動画ファイルを選択して開始",
             icon="play_arrow",
             style=ft.ButtonStyle(color="white", bgcolor="green700"),
         )
         self.transcribe_btn.on_click = self.start_transcription
 
+        self.live_record_btn = ft.ElevatedButton(
+            "録音文字起こし開始",
+            icon="mic",
+            style=ft.ButtonStyle(color="white", bgcolor="red700"),
+        )
+        self.live_record_btn.on_click = self.toggle_live_recording
+
+        self.audio_source_radio = ft.RadioGroup(
+            content=ft.Row([
+                ft.Radio(value="system", label="システム音 (Stereo Mix)"),
+                ft.Radio(value="microphone", label="マイク (Default Mic)"),
+            ]),
+            value=self.config_mgr.get_audio_source(),
+            on_change=lambda e: self.config_mgr.set_audio_source(e.control.value)
+        )
+
         self.status_text = ft.Text("待機中", color="grey400")
+        self.gpu_warning_text = ft.Text("", color="orange700", weight="bold", size=12)
         self.progress_bar = ft.ProgressBar(width=400, color="blue", visible=False)
 
         self.result_area = ft.TextField(
@@ -132,6 +160,12 @@ class FletApp:
             ],
             width=300,
             on_change=self.on_settings_provider_change,
+        )
+        
+        self.force_gpu_checkbox = ft.Checkbox(
+            label="GPUを強制使用する (VRAM不足警告を無視)",
+            value=self.config_mgr.get_force_gpu(),
+            on_change=lambda e: self.config_mgr.set_force_gpu(e.control.value)
         )
 
         self.api_key_field = ft.TextField(
@@ -212,9 +246,32 @@ class FletApp:
                         self.path_text,
                     ]
                 ),
-                ft.Row([self.model_dropdown, self.transcribe_btn]),
-                self.status_text,
-                self.progress_bar,
+                ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                self.model_dropdown,
+                                self.force_gpu_checkbox,
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("録音ソース: ", weight="bold"),
+                                self.audio_source_radio,
+                            ]
+                        ),
+                        ft.Row(
+                            [
+                                self.transcribe_btn,
+                                self.live_record_btn,
+                            ]
+                        ),
+                        self.status_text,
+                        self.gpu_warning_text,
+                        self.progress_bar,
+                    ],
+                ),
                 self.result_area,
                 ft.Row(
                     [
@@ -295,6 +352,9 @@ class FletApp:
                     border_radius=10,
                     padding=10,
                 ),
+                ft.Divider(),
+                ft.Text("Whisper設定", size=18, weight="w500"),
+                self.force_gpu_checkbox,
             ],
             scroll="auto",
             expand=True,
@@ -451,12 +511,24 @@ class FletApp:
 
     def _transcribe_worker(self, model_name):
         try:
-            text = self.transcriber.transcribe(self.selected_file_path, model_name)
-            self.transcript_text = text
-            self.result_area.value = text
+            # Load model and transcribe
+            force_gpu = self.config_mgr.get_force_gpu()
+            
+            # Transcription (ensure it runs on requested device if possible)
+            self.transcriber.load_model(model_name, force_gpu=force_gpu)
+            
+            # Check for safety trigger warning
+            if self.transcriber.last_warning:
+                self.gpu_warning_text.value = f"⚠️ {self.transcriber.last_warning}"
+            else:
+                self.gpu_warning_text.value = ""
+            self.page.update()
+
+            self.transcript_text = self.transcriber.transcribe(self.selected_file_path, model_name=model_name, force_gpu=force_gpu)
+            self.result_area.value = self.transcript_text
             self.status_text.value = "文字起こし完了"
         except Exception as ex:
-            logger.error(f"Transcription error: {ex}")
+            logger.error(f"Transcription error: {ex}", exc_info=True)
             self.status_text.value = f"エラー: {ex}"
         finally:
             self.transcribe_btn.disabled = False
@@ -492,7 +564,79 @@ class FletApp:
             # Save as last used model
             self.config_mgr.set_last_model(model)
         except Exception as ex:
+            logger.error(f"Minutes generation error: {ex}", exc_info=True)
             self.minutes_area.value = f"エラー: {ex}"
         finally:
             self.generate_btn.disabled = False
             self.page.update()
+
+    # --- Live Recording Handlers ---
+
+    def toggle_live_recording(self, e):
+        if self.live_mgr and self.live_mgr.recorder.is_recording:
+            self.stop_live_recording()
+        else:
+            self.start_live_recording()
+
+    def start_live_recording(self):
+        model_name = self.model_dropdown.value
+        self.live_record_btn.text = "録音停止"
+        self.live_record_btn.icon = "stop"
+        self.live_record_btn.style.bgcolor = "grey700"
+        self.transcribe_btn.disabled = True
+        source = self.audio_source_radio.value
+        source_label = "システム音" if source == "system" else "マイク"
+        self.status_text.value = f"{source_label}をリアルタイム録音・文字起こし中..."
+        self.result_area.value = ""
+        self.page.update()
+
+        # Start Recording & Processing
+        force_gpu = self.config_mgr.get_force_gpu()
+        
+        # Initial load to check for safety trigger
+        self.transcriber.load_model(model_name, force_gpu=force_gpu)
+        if self.transcriber.last_warning:
+            self.gpu_warning_text.value = f"⚠️ {self.transcriber.last_warning}"
+        else:
+            self.gpu_warning_text.value = ""
+        self.page.update()
+
+        # Initialize manager if needed
+        self.live_mgr = LiveTranscriptionManager(
+            transcriber=self.transcriber,
+            model_name=model_name,
+            force_gpu=force_gpu,
+            on_text_added=self.on_live_text_added,
+            source=source
+        )
+        self.live_mgr.start()
+
+    def stop_live_recording(self):
+        if not self.live_mgr:
+            return
+
+        self.status_text.value = "録音を終了し、最後のチャンクを処理中..."
+        self.live_record_btn.disabled = True
+        self.page.update()
+
+        def _stop_worker():
+            full_text = self.live_mgr.stop()
+            self.transcript_text = full_text
+            self.result_area.value = full_text
+            self.status_text.value = "ライブ文字起こし完了"
+            self.live_record_btn.text = "録音文字起こし開始"
+            self.live_record_btn.icon = "mic"
+            self.live_record_btn.style.bgcolor = "red700"
+            self.live_record_btn.disabled = False
+            self.transcribe_btn.disabled = False
+            self.page.update()
+
+        threading.Thread(target=_stop_worker, daemon=True).start()
+
+    def on_live_text_added(self, text):
+        # Callback from background thread
+        if self.result_area.value == "文字起こしテキストがありません":
+            self.result_area.value = ""
+        
+        self.result_area.value += text + " "
+        self.page.update()

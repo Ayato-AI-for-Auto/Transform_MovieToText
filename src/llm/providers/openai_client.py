@@ -1,4 +1,5 @@
 import logging
+import time
 
 from openai import OpenAI
 
@@ -18,12 +19,15 @@ class OpenAICompatibleClient(BaseLLMClient):
         """Fetches models from the compatible API."""
         try:
             logger.info("Fetching models from OpenAI compatible API...")
+            start_time = time.time()
             models = self.client.models.list()
+            duration = time.time() - start_time
+            
             result = [m.id for m in models.data]
-            logger.info(f"Successfully fetched {len(result)} models.")
+            logger.info(f"Successfully fetched {len(result)} models in {duration:.2f}s.")
             return sorted(result)
         except Exception as e:
-            logger.warn(f"Failed to fetch models from compatible API: {e}. User might need to enter model name manually.")
+            logger.warning(f"Failed to fetch models from compatible API: {e}. User might need to enter model name manually.")
             return []
 
     def generate_minutes(self, transcript: str, model_name: str) -> str:
@@ -36,12 +40,14 @@ class OpenAICompatibleClient(BaseLLMClient):
         )
 
         try:
+            start_time = time.time()
             response = self.client.chat.completions.create(
                 model=model_name,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
             )
-            logger.info("Minutes generated successfully.")
+            duration = time.time() - start_time
+            logger.info(f"Minutes generated successfully in {duration:.2f}s.")
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"OpenAI-compatible generation failed: {e}")

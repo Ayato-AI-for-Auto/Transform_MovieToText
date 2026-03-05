@@ -12,11 +12,14 @@ requires-python = ">=3.10"
 dependencies = [
     "openai-whisper",
     "google-genai",
-    "flet<0.80.0",
+    "flet[all]>=0.21.0",
+    "flet-desktop",
     "psutil",
     "torch",
     "torchvision",
     "torchaudio",
+    "ollama",
+    "openai",
 ]
 
 [project.optional-dependencies]

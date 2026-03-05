@@ -1,0 +1,662 @@
+2026-03-05 00:33:02,942 [INFO] root: --- APP START ---
+2026-03-05 00:33:02,942 [INFO] root: Logger Initialized (RotatingFileHandler)
+2026-03-05 00:33:02,942 [INFO] root: --- Python Startup: Logger Initialized ---
+2026-03-05 00:33:09,951 [INFO] root: Starting main process...
+2026-03-05 00:33:09,952 [INFO] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 00:33:09,954 [INFO] flet: Starting up TCP server on localhost:64420
+2026-03-05 00:33:09,958 [INFO] flet: Flet app has started...
+2026-03-05 00:33:44,053 [INFO] root: --- APP START ---
+2026-03-05 00:33:44,053 [INFO] root: Logger Initialized (RotatingFileHandler)
+2026-03-05 00:33:44,053 [INFO] root: --- Python Startup: Logger Initialized ---
+2026-03-05 00:33:47,663 [INFO] root: Starting main process...
+2026-03-05 00:33:47,665 [INFO] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 00:33:47,667 [INFO] flet: Starting up TCP server on localhost:55527
+2026-03-05 00:33:47,671 [INFO] flet: Flet app has started...
+2026-03-05 00:34:32,129 [INFO] root: --- APP START ---
+2026-03-05 00:34:32,129 [INFO] root: Logger Initialized (RotatingFileHandler)
+2026-03-05 00:34:32,130 [INFO] root: --- Python Startup: Logger Initialized ---
+2026-03-05 00:34:37,131 [INFO] root: Starting main process...
+2026-03-05 00:34:37,132 [INFO] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 00:34:37,133 [INFO] flet: Starting up TCP server on localhost:55583
+2026-03-05 00:34:37,138 [INFO] flet: Flet app has started...
+2026-03-05 00:34:37,142 [INFO] flet: App URL: tcp://localhost:55583
+2026-03-05 00:34:37,142 [INFO] flet_desktop: Starting Flet View app...
+2026-03-05 00:34:37,143 [INFO] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 00:34:37,143 [INFO] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 00:34:37,468 [INFO] flet: App session started
+2026-03-05 00:34:37,469 [INFO] root: main: Entered flet main function.
+2026-03-05 00:34:37,469 [INFO] src.app: FletApp: Initializing backend components...
+2026-03-05 00:34:37,477 [INFO] src.app: FletApp: ConfigManager initialized.
+2026-03-05 00:34:38,820 [INFO] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 00:34:38,820 [INFO] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 00:34:38,821 [INFO] src.app: FletApp: Detecting hardware...
+2026-03-05 00:34:38,927 [INFO] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 00:34:38,929 [INFO] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 00:34:38,929 [INFO] src.app: FletApp: Building UI components...
+2026-03-05 00:34:38,932 [INFO] src.app: FletApp: Loading settings...
+2026-03-05 00:34:38,933 [INFO] src.app: FletApp: Initialization complete.
+2026-03-05 00:34:38,957 [INFO] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 00:34:38,957 [INFO] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 00:34:39,371 [INFO] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 00:34:39,373 [ERROR] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:34:39,373 [ERROR] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:34:48,972 [INFO] src.recorder: Starting loopback recording: ffmpeg -y -f wasapi -i default -f segment -segment_time 30 -segment_format wav temp_chunks\chunk_%03d.wav
+2026-03-05 00:34:50,263 [INFO] src.live_processor: Live transcription manager started.
+2026-03-05 00:38:54,830 [INFO] src.recorder: Stopping loopback recording...
+2026-03-05 00:38:56,335 [INFO] src.live_processor: Live transcription manager stopped.
+2026-03-05 00:44:08,926 [INFO] root: --- APP START ---
+2026-03-05 00:44:08,927 [INFO] root: Logger Initialized (RotatingFileHandler)
+2026-03-05 00:44:08,927 [INFO] root: --- Python Startup: Logger Initialized ---
+2026-03-05 00:44:47,861 [INFO] root: --- APP START ---
+2026-03-05 00:44:47,861 [INFO] root: Logger Initialized (RotatingFileHandler)
+2026-03-05 00:44:47,861 [INFO] root: --- Python Startup: Logger Initialized ---
+2026-03-05 00:44:51,587 [INFO] root: Starting main process...
+2026-03-05 00:44:51,588 [INFO] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 00:44:51,591 [INFO] flet: Starting up TCP server on localhost:49888
+2026-03-05 00:44:51,594 [INFO] flet: Flet app has started...
+2026-03-05 00:44:51,597 [INFO] flet: App URL: tcp://localhost:49888
+2026-03-05 00:44:51,597 [INFO] flet_desktop: Starting Flet View app...
+2026-03-05 00:44:51,598 [INFO] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 00:44:51,598 [INFO] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 00:44:51,973 [INFO] flet: App session started
+2026-03-05 00:44:51,974 [INFO] root: main: Entered flet main function.
+2026-03-05 00:44:51,974 [INFO] src.app: FletApp: Initializing backend components...
+2026-03-05 00:44:51,974 [INFO] src.app: FletApp: ConfigManager initialized.
+2026-03-05 00:44:53,263 [INFO] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 00:44:53,263 [INFO] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 00:44:53,263 [INFO] src.app: FletApp: Detecting hardware...
+2026-03-05 00:44:53,324 [INFO] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 00:44:53,324 [INFO] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 00:44:53,324 [INFO] src.app: FletApp: Building UI components...
+2026-03-05 00:44:53,327 [INFO] src.app: FletApp: Loading settings...
+2026-03-05 00:44:53,327 [INFO] src.app: FletApp: Initialization complete.
+2026-03-05 00:44:53,351 [INFO] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 00:44:53,351 [INFO] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 00:44:53,571 [INFO] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 00:44:53,572 [ERROR] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:44:53,572 [ERROR] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:45:09,193 [INFO] src.transcriber: Loading Whisper model: small on cuda...
+2026-03-05 00:45:13,407 [INFO] src.transcriber: Model small loaded successfully on cuda:0.
+2026-03-05 00:45:13,409 [INFO] src.recorder: Starting loopback recording: ffmpeg -y -f wasapi -i default -f segment -segment_time 30 -segment_format wav temp_chunks\chunk_%03d.wav
+2026-03-05 00:45:13,423 [INFO] src.live_processor: Live transcription manager started.
+2026-03-05 00:45:33,474 [INFO] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 00:45:33,474 [INFO] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 00:45:33,573 [INFO] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 00:45:33,574 [ERROR] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:45:33,574 [ERROR] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:51:32,170 [INFO] src.recorder: Stopping loopback recording...
+2026-03-05 00:51:33,536 [INFO] src.live_processor: Live transcription manager stopped.
+2026-03-05 00:52:03,482 [INFO] [MainThread] root: --- APP START at 2026-03-05 00:52:03 ---
+2026-03-05 00:52:03,482 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-05 00:52:03,482 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-05 00:52:07,772 [INFO] [MainThread] root: Starting main process...
+2026-03-05 00:52:07,774 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 00:52:07,777 [INFO] [MainThread] flet: Starting up TCP server on localhost:51697
+2026-03-05 00:52:07,780 [INFO] [MainThread] flet: Flet app has started...
+2026-03-05 00:52:07,783 [INFO] [MainThread] flet: App URL: tcp://localhost:51697
+2026-03-05 00:52:07,783 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-05 00:52:07,783 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 00:52:07,783 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 00:52:08,029 [INFO] [MainThread] flet: App session started
+2026-03-05 00:52:08,029 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-05 00:52:08,030 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-05 00:52:08,030 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: ConfigManager initialized.
+2026-03-05 00:52:09,285 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 00:52:09,285 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 00:52:09,286 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Detecting hardware...
+2026-03-05 00:52:09,346 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 00:52:09,346 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 00:52:09,346 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI components...
+2026-03-05 00:52:09,349 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Loading settings...
+2026-03-05 00:52:09,350 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.factory: Creating LLM client for provider: gemini (API Key: AIza...sxlA)
+2026-03-05 00:52:09,350 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-05 00:52:09,372 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 00:52:09,373 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 00:52:09,605 [INFO] [Thread-3 (silent_refresh_llm)] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 00:52:09,607 [ERROR] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:52:09,607 [ERROR] [Thread-3 (silent_refresh_llm)] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 00:52:18,406 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Loading Whisper model: small on cuda...
+2026-03-05 00:52:22,073 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Model small loaded successfully on cuda:0.
+2026-03-05 00:52:22,075 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Starting loopback recording on device: default
+2026-03-05 00:52:22,080 [INFO] [ThreadPoolExecutor-0_0] src.live_processor: Live transcription manager started.
+2026-03-05 00:52:22,108 [ERROR] [FFmpegStderrReader] src.recorder: [FFmpeg] Error opening input file default.
+2026-03-05 00:52:22,109 [ERROR] [FFmpegStderrReader] src.recorder: [FFmpeg] Error opening input files: Invalid argument
+2026-03-05 00:52:24,081 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:26,082 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:28,083 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:30,084 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:32,085 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:34,086 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:36,087 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:38,088 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:40,089 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:42,089 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:44,090 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:46,091 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:48,092 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:50,092 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:52,094 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:54,094 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:56,095 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:52:58,096 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:00,097 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:02,098 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:04,099 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:06,100 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:08,100 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:10,101 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:12,102 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:14,102 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:16,104 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:18,104 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:20,105 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:22,106 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:24,107 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:26,108 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:28,109 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:30,110 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:32,111 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:34,112 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:36,113 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:38,113 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:40,114 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:42,115 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:44,116 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:46,117 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:48,118 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:50,119 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:52,119 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:54,120 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:56,121 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:53:58,122 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:00,123 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:02,124 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:04,125 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:06,125 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:08,126 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:10,127 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:12,128 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:14,129 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:16,130 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:18,130 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:20,131 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:22,132 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:24,133 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:26,133 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:28,134 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:30,135 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:32,137 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:34,138 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 00:54:34,360 [INFO] [Thread-5 (_stop_worker)] src.recorder: Stopping loopback recording...
+2026-03-05 00:54:36,139 [INFO] [Thread-5 (_stop_worker)] src.live_processor: Live transcription stopped. Summary: 0 chunks processed, 0 errors, Duration: 134.1s, Total text length: 0 chars
+2026-03-05 01:12:36,612 [INFO] [MainThread] root: --- APP START at 2026-03-05 01:12:36 ---
+2026-03-05 01:12:36,613 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-05 01:12:36,613 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-05 01:12:42,149 [INFO] [MainThread] root: Starting main process...
+2026-03-05 01:12:42,150 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 01:12:42,154 [INFO] [MainThread] flet: Starting up TCP server on localhost:60105
+2026-03-05 01:12:42,157 [INFO] [MainThread] flet: Flet app has started...
+2026-03-05 01:12:42,160 [INFO] [MainThread] flet: App URL: tcp://localhost:60105
+2026-03-05 01:12:42,160 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-05 01:12:42,160 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 01:12:42,161 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 01:12:42,546 [INFO] [MainThread] flet: App session started
+2026-03-05 01:12:42,547 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-05 01:12:42,548 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-05 01:12:42,548 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: ConfigManager initialized.
+2026-03-05 01:12:43,889 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 01:12:43,889 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 01:12:43,890 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Detecting hardware...
+2026-03-05 01:12:43,951 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 01:12:43,951 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 01:12:43,952 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI components...
+2026-03-05 01:12:43,955 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Loading settings...
+2026-03-05 01:12:43,956 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.factory: Creating LLM client for provider: gemini (API Key: AIza...sxlA)
+2026-03-05 01:12:43,956 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-05 01:12:43,980 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 01:12:43,981 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 01:12:44,342 [INFO] [Thread-3 (silent_refresh_llm)] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 01:12:44,344 [ERROR] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 01:12:44,344 [ERROR] [Thread-3 (silent_refresh_llm)] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 01:12:47,877 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Loading Whisper model: small on cuda...
+2026-03-05 01:12:51,430 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Model small loaded successfully on cuda:0.
+2026-03-05 01:12:51,431 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Starting loopback recording on device: default
+2026-03-05 01:12:51,698 [INFO] [ThreadPoolExecutor-0_0] src.live_processor: Live transcription manager started.
+2026-03-05 01:12:53,699 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:12:55,700 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:12:57,701 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:12:59,702 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:01,703 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:03,703 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:05,704 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:07,705 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:09,705 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:11,706 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:13,707 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:15,708 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:17,709 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:19,710 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:21,711 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:23,712 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:25,713 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:27,713 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:29,714 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:31,715 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:33,716 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:35,717 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:37,717 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:39,718 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:41,719 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:43,720 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:45,720 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:47,721 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:49,722 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:51,723 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:53,724 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:55,725 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:57,725 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:13:59,726 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:01,727 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:03,728 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:05,729 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:07,730 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:09,731 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:11,731 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:13,732 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:15,733 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:17,733 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:19,734 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:21,735 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:23,736 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:25,736 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:27,737 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:29,738 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:31,739 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:33,740 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:35,741 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:37,742 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:39,743 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:41,744 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:43,745 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:45,746 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:47,746 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:49,747 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:51,748 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:53,748 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:55,749 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:57,750 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:14:59,751 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:01,752 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:03,753 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:05,754 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:07,755 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:09,756 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:11,756 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:13,758 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:15,759 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:17,760 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:19,761 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:21,763 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:23,763 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:25,764 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:27,765 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:29,766 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:31,767 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:33,768 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:35,769 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:37,769 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:39,770 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:41,771 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:43,772 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:45,773 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:47,774 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:49,774 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:51,775 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:53,775 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:55,776 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:57,777 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:15:59,778 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:01,778 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:03,779 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:05,780 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:07,781 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:09,781 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:11,782 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:13,783 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:15,784 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:17,785 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:19,785 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:21,786 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:23,787 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:25,788 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:27,789 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:29,790 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:31,791 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:33,791 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:35,792 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:37,794 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:39,795 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:41,796 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:43,797 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:45,797 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:47,798 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:49,799 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:51,800 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:53,801 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:55,802 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:57,803 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:16:59,804 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:01,804 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:03,805 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:05,806 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:07,806 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:09,807 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:11,807 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:13,808 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:15,809 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:17,810 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:19,811 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:21,812 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:23,813 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:25,814 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:27,815 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:29,816 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:31,816 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:33,817 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:35,818 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:37,819 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:39,820 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:41,821 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:43,821 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:45,823 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:47,823 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:49,824 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:51,825 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:53,826 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:55,827 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:57,828 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:17:59,829 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:01,830 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:03,830 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:05,832 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:07,832 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:09,833 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:11,834 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:13,835 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:15,835 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:17,836 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:19,837 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:21,838 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:23,839 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:25,839 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:27,840 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:29,841 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:31,842 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:33,843 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:35,844 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:37,845 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:39,845 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:41,846 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:43,847 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:45,848 [ERROR] [Thread-4 (_process_chunks_loop)] src.live_processor: Recording process (FFmpeg) died unexpectedly!
+2026-03-05 01:18:52,041 [INFO] [MainThread] root: --- APP START at 2026-03-05 01:18:52 ---
+2026-03-05 01:18:52,041 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-05 01:18:52,042 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-05 01:18:56,551 [INFO] [MainThread] root: Starting main process...
+2026-03-05 01:18:56,553 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 01:18:56,555 [INFO] [MainThread] flet: Starting up TCP server on localhost:63627
+2026-03-05 01:18:56,559 [INFO] [MainThread] flet: Flet app has started...
+2026-03-05 01:18:56,561 [INFO] [MainThread] flet: App URL: tcp://localhost:63627
+2026-03-05 01:18:56,561 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-05 01:18:56,562 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 01:18:56,562 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 01:18:56,872 [INFO] [MainThread] flet: App session started
+2026-03-05 01:18:56,873 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-05 01:18:56,873 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-05 01:18:56,873 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: ConfigManager initialized.
+2026-03-05 01:18:58,126 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 01:18:58,126 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 01:18:58,126 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Detecting hardware...
+2026-03-05 01:18:58,180 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 01:18:58,181 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 01:18:58,181 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI components...
+2026-03-05 01:18:58,184 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Loading settings...
+2026-03-05 01:18:58,184 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.factory: Creating LLM client for provider: gemini (API Key: AIza...sxlA)
+2026-03-05 01:18:58,184 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-05 01:18:58,207 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 01:18:58,207 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 01:18:58,319 [INFO] [Thread-3 (silent_refresh_llm)] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 01:18:58,320 [ERROR] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 01:18:58,320 [ERROR] [Thread-3 (silent_refresh_llm)] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 01:19:00,509 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Loading Whisper model: small on cuda...
+2026-03-05 01:19:03,720 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Model small loaded successfully on cuda:0.
+2026-03-05 01:19:03,722 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Starting loopback recording on device: default
+2026-03-05 01:19:03,726 [INFO] [ThreadPoolExecutor-0_0] src.live_processor: Live transcription manager started.
+2026-03-05 01:19:35,739 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_000.wav
+2026-03-05 01:19:35,739 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_000.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:19:37,720 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 1.98s for temp_chunks\chunk_000.wav
+2026-03-05 01:20:05,731 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_001.wav
+2026-03-05 01:20:05,731 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_001.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:20:06,353 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.62s for temp_chunks\chunk_001.wav
+2026-03-05 01:20:36,365 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_002.wav
+2026-03-05 01:20:36,366 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_002.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:20:56,743 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 20.38s for temp_chunks\chunk_002.wav
+2026-03-05 01:21:04,748 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_003.wav
+2026-03-05 01:21:04,749 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_003.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:21:25,545 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 20.80s for temp_chunks\chunk_003.wav
+2026-03-05 01:21:35,550 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_004.wav
+2026-03-05 01:21:35,550 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_004.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:21:56,655 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 21.10s for temp_chunks\chunk_004.wav
+2026-03-05 01:22:04,660 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_005.wav
+2026-03-05 01:22:04,660 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_005.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:22:05,338 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.68s for temp_chunks\chunk_005.wav
+2026-03-05 01:22:35,350 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_006.wav
+2026-03-05 01:22:35,350 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_006.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:22:35,920 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.57s for temp_chunks\chunk_006.wav
+2026-03-05 01:23:05,932 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_007.wav
+2026-03-05 01:23:05,932 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_007.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:23:25,668 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 19.74s for temp_chunks\chunk_007.wav
+2026-03-05 01:23:35,674 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_008.wav
+2026-03-05 01:23:35,675 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_008.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:23:36,455 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.78s for temp_chunks\chunk_008.wav
+2026-03-05 01:24:04,465 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_009.wav
+2026-03-05 01:24:04,465 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_009.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:24:25,386 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 20.92s for temp_chunks\chunk_009.wav
+2026-03-05 01:24:35,390 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_010.wav
+2026-03-05 01:24:35,390 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_010.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:24:36,050 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.66s for temp_chunks\chunk_010.wav
+2026-03-05 01:25:06,061 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_011.wav
+2026-03-05 01:25:06,061 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_011.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:25:22,382 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 16.32s for temp_chunks\chunk_011.wav
+2026-03-05 01:25:36,388 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_012.wav
+2026-03-05 01:25:36,388 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_012.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:25:37,171 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.78s for temp_chunks\chunk_012.wav
+2026-03-05 01:26:05,182 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_013.wav
+2026-03-05 01:26:05,182 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_013.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:26:05,840 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.66s for temp_chunks\chunk_013.wav
+2026-03-05 01:26:35,851 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_014.wav
+2026-03-05 01:26:35,851 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_014.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:26:36,433 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.58s for temp_chunks\chunk_014.wav
+2026-03-05 01:27:02,136 [INFO] [MainThread] root: --- APP START at 2026-03-05 01:27:02 ---
+2026-03-05 01:27:02,136 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-05 01:27:02,136 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-05 01:27:04,443 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_015.wav
+2026-03-05 01:27:04,443 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_015.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:27:05,034 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.59s for temp_chunks\chunk_015.wav
+2026-03-05 01:27:06,752 [INFO] [MainThread] root: Starting main process...
+2026-03-05 01:27:06,753 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 01:27:06,756 [INFO] [MainThread] flet: Starting up TCP server on localhost:58282
+2026-03-05 01:27:06,760 [INFO] [MainThread] flet: Flet app has started...
+2026-03-05 01:27:06,762 [INFO] [MainThread] flet: App URL: tcp://localhost:58282
+2026-03-05 01:27:06,762 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-05 01:27:06,763 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 01:27:06,763 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 01:27:07,025 [INFO] [MainThread] flet: App session started
+2026-03-05 01:27:07,026 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-05 01:27:07,027 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-05 01:27:07,027 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: ConfigManager initialized.
+2026-03-05 01:27:07,044 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 01:27:07,044 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 01:27:07,044 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Detecting hardware...
+2026-03-05 01:27:07,091 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 01:27:07,091 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 01:27:07,091 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI components...
+2026-03-05 01:27:07,094 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Loading settings...
+2026-03-05 01:27:07,096 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.factory: Creating LLM client for provider: gemini (API Key: AIza...sxlA)
+2026-03-05 01:27:07,096 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-05 01:27:07,118 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 01:27:07,118 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 01:27:07,254 [INFO] [Thread-3 (silent_refresh_llm)] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 01:27:07,255 [ERROR] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 01:27:07,256 [ERROR] [Thread-3 (silent_refresh_llm)] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 01:27:09,453 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Loading Whisper model: small on cuda...
+2026-03-05 01:27:12,383 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Model small loaded successfully on cuda:0.
+2026-03-05 01:27:12,386 [WARNING] [ThreadPoolExecutor-0_0] src.recorder: Failed to delete chunk temp_chunks\chunk_016.wav: [WinError 32] プロセスはファイルにアクセスできません。別のプロセスが使用中です。: 'temp_chunks\\chunk_016.wav'
+2026-03-05 01:27:12,609 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Stereo Mix device found: [dshow @ 000001c962ff3bc0] "ステレオ ミキサー (Realtek(R) Audio)" (audio)
+2026-03-05 01:27:12,609 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Stereo Mix device ID: @device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{057EB3D1-C978-43AD-984A-C956D8DB98F1}
+2026-03-05 01:27:12,609 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Starting loopback recording on device: @device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{057EB3D1-C978-43AD-984A-C956D8DB98F1}
+2026-03-05 01:27:12,613 [INFO] [ThreadPoolExecutor-0_0] src.live_processor: Live transcription manager started.
+2026-03-05 01:27:14,615 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_000.wav
+2026-03-05 01:27:14,615 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_000.wav (Size: 256.0 KB, Device: cuda:0)
+2026-03-05 01:27:15,693 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 1.08s for temp_chunks\chunk_000.wav
+2026-03-05 01:27:15,694 [ERROR] [Thread-6 (_process_chunks_loop)] src.live_processor: Error processing chunk temp_chunks\chunk_000.wav:
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\live_processor.py", line 118, in _handle_chunk
+    os.remove(path)
+PermissionError: [WinError 32] プロセスはファイルにアクセスできません。別のプロセスが使用中です。: 'temp_chunks\\chunk_000.wav'
+
+2026-03-05 01:27:35,046 [INFO] [Thread-4 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_016.wav
+2026-03-05 01:27:35,046 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_016.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:27:35,569 [INFO] [Thread-4 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.52s for temp_chunks\chunk_016.wav
+2026-03-05 01:27:43,704 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_001.wav
+2026-03-05 01:27:43,705 [ERROR] [Thread-6 (_process_chunks_loop)] src.live_processor: Error processing chunk temp_chunks\chunk_001.wav:
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\live_processor.py", line 106, in _handle_chunk
+    text = self.transcriber.transcribe(str(path), model_name=self.model_name, force_gpu=self.force_gpu)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\transcriber.py", line 127, in transcribe
+    raise ValueError(f"Transcription file is empty (0 bytes): {path}")
+ValueError: Transcription file is empty (0 bytes): temp_chunks\chunk_001.wav
+
+2026-03-05 01:27:45,706 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_001.wav
+2026-03-05 01:27:45,706 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_001.wav (Size: 256.0 KB, Device: cuda:0)
+2026-03-05 01:27:46,296 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 0.59s for temp_chunks\chunk_001.wav
+2026-03-05 01:27:46,296 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_001.wav: これが歴史的に...
+2026-03-05 01:27:46,297 [ERROR] [Thread-6 (_process_chunks_loop)] src.live_processor: Error processing chunk temp_chunks\chunk_001.wav:
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\live_processor.py", line 118, in _handle_chunk
+    os.remove(path)
+PermissionError: [WinError 32] プロセスはファイルにアクセスできません。別のプロセスが使用中です。: 'temp_chunks\\chunk_001.wav'
+
+2026-03-05 01:27:58,392 [INFO] [Thread-40 (_stop_worker)] src.recorder: Stopping loopback recording...
+2026-03-05 01:27:59,578 [INFO] [Thread-40 (_stop_worker)] src.live_processor: Processing chunk: chunk_017.wav
+2026-03-05 01:27:59,580 [INFO] [Thread-40 (_stop_worker)] src.transcriber: Starting transcription for: temp_chunks\chunk_017.wav (Size: 4096.0 KB, Device: cuda:0)
+2026-03-05 01:28:00,198 [INFO] [Thread-40 (_stop_worker)] src.transcriber: Transcription completed in 0.62s for temp_chunks\chunk_017.wav
+2026-03-05 01:28:00,200 [INFO] [Thread-40 (_stop_worker)] src.live_processor: Live transcription stopped. Summary: 18 chunks processed, 0 errors, Duration: 536.5s, Total text length: 0 chars
+2026-03-05 01:28:44,317 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_002.wav
+2026-03-05 01:28:44,317 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_002.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:28:47,410 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 3.09s for temp_chunks\chunk_002.wav
+2026-03-05 01:28:47,411 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_002.wav: になったからといって本当に同じ ことが起きないかって言われるとまた同じことの繰り返しになる 可能性も...
+2026-03-05 01:29:13,421 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_003.wav
+2026-03-05 01:29:13,421 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_003.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:29:15,583 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 2.16s for temp_chunks\chunk_003.wav
+2026-03-05 01:29:15,583 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_003.wav: これぐらいいるから結構あれなんですよね でも人口の7割年分に住んでるって書いてありますねうん 世界中...
+2026-03-05 01:29:43,595 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_004.wav
+2026-03-05 01:29:43,595 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_004.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:29:46,834 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 3.24s for temp_chunks\chunk_004.wav
+2026-03-05 01:29:46,835 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_004.wav: 88名で構成されている専門会会議みたいなのが開催されて これまでこれから3なんか候補者を選んでその次...
+2026-03-05 01:30:14,847 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_005.wav
+2026-03-05 01:30:14,847 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_005.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:30:17,000 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 2.15s for temp_chunks\chunk_005.wav
+2026-03-05 01:30:17,000 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_005.wav: という感じですねいやーうまくいったらいいんですけどねー新覇なフォルムス海峡ですよね はいあのやっぱ日...
+2026-03-05 01:30:45,011 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_006.wav
+2026-03-05 01:30:45,011 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_006.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:30:46,953 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 1.94s for temp_chunks\chunk_006.wav
+2026-03-05 01:30:46,953 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_006.wav: するのかっていうところが結構 重要なポイントかなと思いますまだ当面攻撃は続くんですかいや 相手が打ち...
+2026-03-05 01:31:14,964 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_007.wav
+2026-03-05 01:31:14,964 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_007.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:31:17,973 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 3.01s for temp_chunks\chunk_007.wav
+2026-03-05 01:31:17,973 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_007.wav: 打ち返すっていうことよりも僕はミサイルどんどん打つってよりはなんかドローン型の攻撃の方が増えると思い...
+2026-03-05 01:31:43,983 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_008.wav
+2026-03-05 01:31:43,983 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_008.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:31:47,389 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 3.41s for temp_chunks\chunk_008.wav
+2026-03-05 01:31:47,389 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_008.wav: 今日もドバイにドローンのアレが飛んだりとかして今日も来たら知ってましたけどはい今日もだからでもミサイ...
+2026-03-05 01:32:13,422 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_009.wav
+2026-03-05 01:32:13,422 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_009.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:32:16,178 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 2.76s for temp_chunks\chunk_009.wav
+2026-03-05 01:32:16,178 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_009.wav: うんうんうんうんうん だドローン戦があの怒った後の街ってすごいリストピアみたいになってるらしい です...
+2026-03-05 01:32:44,191 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_010.wav
+2026-03-05 01:32:44,191 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_010.wav (Size: 5168.0 KB, Device: cuda:0)
+2026-03-05 01:32:46,743 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 2.55s for temp_chunks\chunk_010.wav
+2026-03-05 01:32:46,743 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_010.wav: 入れてましたけど だからそれによってねギリの先者とかすごい上がったりとかして すごいはいいやすごいで...
+2026-03-05 01:33:12,852 [INFO] [Thread-30 (_stop_worker)] src.recorder: Stopping loopback recording...
+2026-03-05 01:33:14,756 [INFO] [Thread-30 (_stop_worker)] src.live_processor: Processing chunk: chunk_011.wav
+2026-03-05 01:33:14,757 [INFO] [Thread-30 (_stop_worker)] src.transcriber: Starting transcription for: temp_chunks\chunk_011.wav (Size: 5120.0 KB, Device: cuda:0)
+2026-03-05 01:33:16,836 [INFO] [Thread-30 (_stop_worker)] src.transcriber: Transcription completed in 2.08s for temp_chunks\chunk_011.wav
+2026-03-05 01:33:16,836 [INFO] [Thread-30 (_stop_worker)] src.live_processor: Transcribed chunk chunk_011.wav: ドローンで交話攻撃の1万機のドローンで 方話攻撃とかってやられるとドローン対ドローンはドローンで耐え...
+2026-03-05 01:33:16,838 [INFO] [Thread-30 (_stop_worker)] src.live_processor: Live transcription stopped. Summary: 12 chunks processed, 3 errors, Duration: 364.5s, Total text length: 1401 chars
+2026-03-05 10:34:09,900 [INFO] [MainThread] root: --- APP START at 2026-03-05 10:34:09 ---
+2026-03-05 10:34:09,901 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-05 10:34:09,902 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-05 10:34:14,562 [INFO] [MainThread] root: Starting main process...
+2026-03-05 10:34:14,563 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-05 10:34:14,566 [INFO] [MainThread] flet: Starting up TCP server on localhost:59986
+2026-03-05 10:34:14,569 [INFO] [MainThread] flet: Flet app has started...
+2026-03-05 10:34:14,573 [INFO] [MainThread] flet: App URL: tcp://localhost:59986
+2026-03-05 10:34:14,573 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-05 10:34:14,574 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 10:34:14,574 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-05 10:34:15,165 [INFO] [MainThread] flet: App session started
+2026-03-05 10:34:15,166 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-05 10:34:15,167 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-05 10:34:15,167 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: ConfigManager initialized.
+2026-03-05 10:34:16,529 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-05 10:34:16,530 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: WhisperTranscriber initialized.
+2026-03-05 10:34:16,530 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Detecting hardware...
+2026-03-05 10:34:16,593 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-05 10:34:16,593 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-05 10:34:16,593 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI components...
+2026-03-05 10:34:16,598 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Loading settings...
+2026-03-05 10:34:16,599 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.factory: Creating LLM client for provider: gemini (API Key: AIza...sxlA)
+2026-03-05 10:34:16,599 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-05 10:34:16,622 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: GeminiLLMClient initialized.
+2026-03-05 10:34:16,623 [INFO] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Fetching available Gemini models...
+2026-03-05 10:34:17,122 [INFO] [Thread-3 (silent_refresh_llm)] httpx: HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 403 Forbidden"
+2026-03-05 10:34:17,123 [ERROR] [Thread-3 (silent_refresh_llm)] src.llm.providers.gemini_client: Failed to fetch Gemini models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 10:34:17,123 [ERROR] [Thread-3 (silent_refresh_llm)] src.app: Error loading models: Failed to fetch models: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your API key was reported as leaked. Please use another API key.', 'status': 'PERMISSION_DENIED'}}
+2026-03-05 10:34:39,157 [INFO] [ThreadPoolExecutor-0_0] src.config_manager: Audio source changed: system -> microphone
+2026-03-05 10:34:44,242 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Loading Whisper model: small on cuda...
+2026-03-05 10:34:48,500 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Model small loaded successfully on cuda:0.
+2026-03-05 10:34:48,975 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Microphone device found: [dshow @ 0000021f5fcb3bc0] "マイク配列 (デジタルマイク向けインテル® スマート・サウンド・テクノロジー)" (audio)
+2026-03-05 10:34:48,975 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Microphone device ID: @device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{E88FEB60-CFEF-49B7-B33D-BB358E182EB0}
+2026-03-05 10:34:48,976 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Starting Microphone recording on device: @device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{E88FEB60-CFEF-49B7-B33D-BB358E182EB0}
+2026-03-05 10:34:48,982 [INFO] [ThreadPoolExecutor-0_0] src.live_processor: Live transcription manager started.
+2026-03-05 10:35:20,992 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_000.wav
+2026-03-05 10:35:20,993 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_000.wav (Size: 912.0 KB, Device: cuda:0)
+2026-03-05 10:35:36,043 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 15.05s for temp_chunks\chunk_000.wav
+2026-03-05 10:35:50,048 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_001.wav
+2026-03-05 10:35:50,048 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_001.wav (Size: 1088.0 KB, Device: cuda:0)
+2026-03-05 10:35:51,597 [INFO] [Thread-6 (_process_chunks_loop)] src.transcriber: Transcription completed in 1.55s for temp_chunks\chunk_001.wav
+2026-03-05 10:35:51,597 [INFO] [Thread-6 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_001.wav: 2. カラーの中心にカラーを欠かせる3. カラーの中心にカラーを欠かせる4. カラーの中心にカラーを...
+2026-03-05 10:36:11,033 [INFO] [Thread-12 (_stop_worker)] src.recorder: Stopping loopback recording...
+2026-03-05 10:36:11,605 [INFO] [Thread-12 (_stop_worker)] src.live_processor: Processing chunk: chunk_002.wav
+2026-03-05 10:36:11,606 [INFO] [Thread-12 (_stop_worker)] src.transcriber: Starting transcription for: temp_chunks\chunk_002.wav (Size: 1091.3 KB, Device: cuda:0)
+2026-03-05 10:36:14,310 [INFO] [ThreadPoolExecutor-0_0] src.config_manager: Audio source changed: microphone -> system
+2026-03-05 10:36:14,325 [INFO] [Thread-12 (_stop_worker)] src.transcriber: Transcription completed in 2.72s for temp_chunks\chunk_002.wav
+2026-03-05 10:36:14,325 [INFO] [Thread-12 (_stop_worker)] src.live_processor: Live transcription stopped. Summary: 3 chunks processed, 0 errors, Duration: 85.8s, Total text length: 55 chars
+2026-03-05 10:36:15,727 [INFO] [ThreadPoolExecutor-0_0] src.config_manager: Audio source changed: system -> microphone
+2026-03-05 10:36:17,257 [INFO] [ThreadPoolExecutor-0_0] src.config_manager: Audio source changed: microphone -> system
+2026-03-05 10:36:19,998 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Stereo Mix device found: [dshow @ 00000255d3ce3bc0] "ステレオ ミキサー (Realtek(R) Audio)" (audio)
+2026-03-05 10:36:19,998 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Stereo Mix device ID: @device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{057EB3D1-C978-43AD-984A-C956D8DB98F1}
+2026-03-05 10:36:19,998 [INFO] [ThreadPoolExecutor-0_0] src.recorder: Starting Stereo Mix recording on device: @device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{057EB3D1-C978-43AD-984A-C956D8DB98F1}
+2026-03-05 10:36:20,003 [INFO] [ThreadPoolExecutor-0_0] src.live_processor: Live transcription manager started.
+2026-03-05 10:36:52,014 [INFO] [Thread-17 (_process_chunks_loop)] src.live_processor: Processing chunk: chunk_000.wav
+2026-03-05 10:36:52,014 [INFO] [Thread-17 (_process_chunks_loop)] src.transcriber: Starting transcription for: temp_chunks\chunk_000.wav (Size: 928.0 KB, Device: cuda:0)
+2026-03-05 10:36:53,529 [INFO] [Thread-20 (_stop_worker)] src.recorder: Stopping loopback recording...
+2026-03-05 10:36:55,772 [INFO] [Thread-17 (_process_chunks_loop)] src.transcriber: Transcription completed in 3.76s for temp_chunks\chunk_000.wav
+2026-03-05 10:36:55,773 [INFO] [Thread-17 (_process_chunks_loop)] src.live_processor: Transcribed chunk chunk_000.wav: 一方で今回の風想が長期化、ドロンの昔の場合、 現有価格が100ドルを超えていった場合、株価は暴落、ス...
+2026-03-05 10:36:57,776 [INFO] [Thread-20 (_stop_worker)] src.live_processor: Processing chunk: chunk_001.wav
+2026-03-05 10:36:57,776 [INFO] [Thread-20 (_stop_worker)] src.transcriber: Starting transcription for: temp_chunks\chunk_001.wav (Size: 1031.3 KB, Device: cuda:0)
+2026-03-05 10:37:01,419 [INFO] [Thread-20 (_stop_worker)] src.transcriber: Transcription completed in 3.64s for temp_chunks\chunk_001.wav
+2026-03-05 10:37:01,419 [INFO] [Thread-20 (_stop_worker)] src.live_processor: Transcribed chunk chunk_001.wav: 一方で今回の風走が長期化、ドロンの昔 た場合、減油価格が100ドルを超えていった場合株価は暴落、スタ...
+2026-03-05 10:37:01,421 [INFO] [Thread-20 (_stop_worker)] src.live_processor: Live transcription stopped. Summary: 2 chunks processed, 0 errors, Duration: 41.6s, Total text length: 438 chars
