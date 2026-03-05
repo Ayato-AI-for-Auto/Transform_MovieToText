@@ -3,9 +3,10 @@ import os
 import subprocess
 import time
 
+import numpy as np
 import psutil
 import torch
-import whisper
+from faster_whisper import WhisperModel
 
 logger = logging.getLogger(__name__)
 
@@ -16,15 +17,14 @@ class WhisperTranscriber:
     Handles hardware detection, model loading, and transcription.
     """
 
-    # Relaxed Model requirements in GB (approximate VRAM/RAM for FP16)
-    # Lowered slightly to be more inclusive for cards like RTX 3050 (4GB)
+    # Modified for faster-whisper (CTranslate2 float16) approximate VRAM usage
     MODEL_REQUIREMENTS = {
-        "tiny": 0.5,
+        "tiny": 0.3,
         "base": 0.5,
-        "small": 1.2,
-        "medium": 3.5,
-        "large-v3": 8.0,
-        "turbo": 5.0,
+        "small": 1.0,
+        "medium": 2.5,
+        "large-v3": 3.5,
+        "turbo": 2.0,
     }
 
     def __init__(self):
@@ -102,40 +102,53 @@ class WhisperTranscriber:
         return vram >= req
 
     def load_model(self, model_name="base", force_gpu=False):
-        """Loads or reloads the Whisper model on the appropriate device."""
+        """Loads or reloads the Faster Whisper model on the appropriate device."""
         device = self.get_model_device(model_name, force_gpu=force_gpu)
+        compute_type = "float16" if device == "cuda" else "int8"
 
-        if self.model is None or self.current_model_name != model_name or self.model.device.type != device:
-            logger.info(f"Loading Whisper model: {model_name} on {device}...")
-            self.model = whisper.load_model(model_name, device=device)
+        if self.model is None or self.current_model_name != model_name:
+            logger.info(f"Loading Faster Whisper model: {model_name} on {device} ({compute_type})...")
+            # faster-whisper uses WhisperModel
+            self.model = WhisperModel(model_name, device=device, compute_type=compute_type)
             self.current_model_name = model_name
-            # Verify actual device of the loaded model
-            actual_device = next(self.model.parameters()).device
-            logger.info(f"Model {model_name} loaded successfully on {actual_device}.")
+            logger.info(f"Model {model_name} loaded successfully on {device}.")
         return self.model
 
-    def transcribe(self, path, model_name="base", force_gpu=False):
+    def transcribe(self, path_or_io, model_name="base", force_gpu=False):
         """
-        Transcribes the file at the given path.
+        Transcribes the file or BytesIO at the given path/object.
         Ensures the correct model is loaded.
         """
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"Transcription file not found: {path}")
-        
-        file_size = os.path.getsize(path)
-        if file_size == 0:
-            raise ValueError(f"Transcription file is empty (0 bytes): {path}")
+        if isinstance(path_or_io, str):
+            if not os.path.exists(path_or_io):
+                raise FileNotFoundError(f"Transcription file not found: {path_or_io}")
+            file_size = os.path.getsize(path_or_io)
+            if file_size == 0:
+                raise ValueError(f"Transcription file is empty (0 bytes): {path_or_io}")
+            input_source = path_or_io
+        elif isinstance(path_or_io, np.ndarray):
+            # Input is directly a numpy array (from live recorder)
+            input_source = path_or_io
+        else:
+            # Assume it's a file-like object (BytesIO)
+            input_source = path_or_io
 
         self.load_model(model_name, force_gpu=force_gpu)
 
-        logger.info(f"Starting transcription for: {path} (Size: {file_size/1024:.1f} KB, Device: {next(self.model.parameters()).device})")
+        logger.info(f"Starting faster-whisper transcription (Device: {self.model.model.device})")
         start_time = time.time()
         
         try:
-            result = self.model.transcribe(path)
+            # faster-whisper returns a generator of segments
+            segments, info = self.model.transcribe(input_source, beam_size=5)
+            
+            # Combine segments into a single string
+            text_parts = [segment.text for segment in segments]
+            full_text = "".join(text_parts).strip()
+            
             duration = time.time() - start_time
-            logger.info(f"Transcription completed in {duration:.2f}s for {path}")
-            return result.get("text", "").strip()
+            logger.info(f"Transcription completed in {duration:.2f}s (Detected lang: {info.language})")
+            return full_text
         except Exception as e:
-            logger.error(f"Error during whisper transcription: {e}", exc_info=True)
+            logger.error(f"Error during faster-whisper transcription: {e}", exc_info=True)
             raise

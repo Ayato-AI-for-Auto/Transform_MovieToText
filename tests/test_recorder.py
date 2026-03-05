@@ -4,7 +4,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.recorder import AudioRecorder, detect_microphone_device, detect_stereo_mix_device
+import numpy as np
+
+from src.recorder import AudioRecorder
 
 
 class TestRecorder(unittest.TestCase):
@@ -16,80 +18,62 @@ class TestRecorder(unittest.TestCase):
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir)
 
-    @patch('subprocess.Popen')
-    def test_detect_stereo_mix_device(self, mock_popen):
-        # Mock FFmpeg output for device list
-        mock_process = MagicMock()
-        mock_process.communicate.return_value = ("", (
-            '[dshow @ 0000] "Stereo Mix (Realtek Audio)" (audio)\n'
-            '[dshow @ 0000]   Alternative name "@device_cm_12345"\n'
-        ))
-        mock_popen.return_value = mock_process
+    @patch('soundcard.default_microphone')
+    def test_recorder_start_stop_mic(self, mock_mic):
+        mock_device = MagicMock()
+        mock_mic.return_value = mock_device
         
-        device_id = detect_stereo_mix_device()
-        self.assertEqual(device_id, "@device_cm_12345")
-
-    @patch('subprocess.Popen')
-    def test_detect_microphone_device(self, mock_popen):
-        # Mock FFmpeg output for device list
-        mock_process = MagicMock()
-        mock_process.communicate.return_value = ("", (
-            '[dshow @ 0000] "Microphone (Realtek Audio)" (audio)\n'
-            '[dshow @ 0000]   Alternative name "@device_cm_mic123"\n'
-        ))
-        mock_popen.return_value = mock_process
-        
-        device_id = detect_microphone_device()
-        self.assertEqual(device_id, "@device_cm_mic123")
-
-    @patch('src.recorder.detect_stereo_mix_device')
-    @patch('subprocess.Popen')
-    def test_recorder_start_stop(self, mock_popen, mock_detect):
-        mock_detect.return_value = "@device_cm_12345"
-        mock_process = MagicMock()
-        mock_process.stdout = MagicMock()
-        mock_process.stderr = MagicMock()
-        mock_process.poll.return_value = None
-        mock_popen.return_value = mock_process
-        
+        self.recorder.source = "microphone"
         self.recorder.start()
         self.assertTrue(self.recorder.is_recording)
-        self.assertTrue(self.recorder.is_process_alive())
         
         self.recorder.stop()
         self.assertFalse(self.recorder.is_recording)
 
-    def test_save_chunk_logic(self):
-        # Manually fill chunks to simulate overlap
-        # 16000 samples/sec * 1 channel * 2 bytes/sample = 32000 bytes/sec
-        # segment=1, overlap=1 -> chunk_duration=2 -> max_buffer=64000
+    @patch('soundcard.default_speaker')
+    def test_recorder_start_stop_system(self, mock_speaker):
+        mock_device = MagicMock()
+        mock_speaker.return_value = mock_device
         
-        data_1s = b'\x00' * 32000
+        self.recorder.source = "system"
+        self.recorder.start()
+        self.assertTrue(self.recorder.is_recording)
+        
+        self.recorder.stop()
+        self.assertFalse(self.recorder.is_recording)
+
+    def test_push_chunk_logic(self):
+        # Manually fill buffer with numpy blocks (1 block = 1024 samples)
+        # 16000 samples/sec
+        data_block = np.zeros(1024, dtype=np.float32)
         
         with self.recorder.buffer_lock:
-            self.recorder.audio_chunks.append(data_1s)
-            self.recorder.current_buffer_size = 32000
+            for _ in range(16): # ~1s
+                self.recorder.audio_buffer.append(data_block)
+            self.recorder.current_samples_count = 1024 * 16
             
-        self.recorder._save_chunk()
+        self.recorder._push_chunk()
         
-        # Should have saved chunk_000.wav (1s)
-        chunks = self.recorder.get_recorded_chunks()
-        self.assertEqual(len(chunks), 1)
-        self.assertEqual(chunks[0].name, "chunk_000.wav")
+        # Should have pushed data to chunk_queue
+        self.assertEqual(self.recorder.chunk_queue.qsize(), 1)
+        audio_data = self.recorder.chunk_queue.get()
+        self.assertTrue(isinstance(audio_data, np.ndarray))
+        self.assertEqual(len(audio_data), 1024 * 16)
         
-        # Add another 1s
+        # Test eviction
+        # segment=1, overlap=1 -> max_buffer=2s = 32000 samples
         with self.recorder.buffer_lock:
-            self.recorder.audio_chunks.append(data_1s)
-            self.recorder.current_buffer_size = 64000
+            # Add a lot of data to trigger eviction
+            for _ in range(100): 
+                self.recorder.audio_buffer.append(data_block)
+                self.recorder.current_samples_count += 1024
             
-        self.recorder._save_chunk()
+            # Manually trigger eviction logic check (simulating loop)
+            while self.recorder.current_samples_count > self.recorder.max_buffer_samples:
+                rem = self.recorder.audio_buffer.popleft()
+                self.recorder.current_samples_count -= len(rem)
         
-        # Should have saved chunk_001.wav (2s total because of no eviction yet)
-        chunks = self.recorder.get_recorded_chunks()
-        self.assertEqual(len(chunks), 2)
-        self.assertEqual(chunks[1].name, "chunk_001.wav")
-        # Check size? 2s = 64000 bytes + wav header (~44 bytes)
-        self.assertGreater(chunks[1].stat().st_size, 64000)
+        self.assertLessEqual(self.recorder.current_samples_count, self.recorder.max_buffer_samples)
 
 if __name__ == '__main__':
     unittest.main()

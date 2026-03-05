@@ -1,27 +1,31 @@
 import logging
 
 from src.llm.providers.gemini_client import GeminiLLMClient
-from src.llm.providers.ollama_client import OllamaCloudClient
-from src.llm.providers.openai_client import OpenAICompatibleClient
+from src.llm.providers.ollama_client import OllamaCloudClient, OllamaLocalClient
 
 logger = logging.getLogger(__name__)
 
 
-def get_llm_client(provider_name, api_key, base_url=None):
-    """Factory function to get the appropriate LLM client."""
-    masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else "****"
-    logger.info(f"Creating LLM client for provider: {provider_name} (API Key: {masked_key})")
+class LLMFactory:
+    """Factory class to create LLM clients."""
     
-    if provider_name == "gemini":
-        return GeminiLLMClient(api_key=api_key)
-    elif provider_name == "ollama_cloud":
-        return OllamaCloudClient(api_key=api_key)
-    elif provider_name == "openai_custom":
-        if not base_url:
-            logger.error("Attempted to create openai_custom client without base_url")
-            raise ValueError("base_url is required for openai_custom provider.")
-        logger.debug(f"OpenAI compatible base_url: {base_url}")
-        return OpenAICompatibleClient(api_key=api_key, base_url=base_url)
-    else:
-        logger.error(f"Unsupported LLM provider requested: {provider_name}")
-        raise ValueError(f"Unknown LLM provider: {provider_name}")
+    @staticmethod
+    def create_client(provider_name, api_key=None, base_url=None):
+        """Creates and returns the appropriate LLM client."""
+        masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else "****"
+        logger.info(f"LLMFactory: Creating client for {provider_name} (API Key: {masked_key}, Base URL: {base_url})")
+        
+        if provider_name == "gemini":
+            return GeminiLLMClient(api_key=api_key)
+        elif provider_name == "ollama_local":
+            return OllamaLocalClient(base_url=base_url)
+        elif provider_name == "ollama_cloud":
+            return OllamaCloudClient(api_key=api_key, base_url=base_url)
+        else:
+            logger.error(f"Unsupported LLM provider: {provider_name}")
+            raise ValueError(f"Unknown LLM provider: {provider_name}")
+
+
+def get_llm_client(provider_name, api_key, base_url=None):
+    """Legacy function support for factory creation."""
+    return LLMFactory.create_client(provider_name, api_key, base_url)

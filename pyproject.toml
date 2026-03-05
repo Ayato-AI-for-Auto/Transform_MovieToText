@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transform-movie-to-text"
-version = "0.1.0"
+version = "2.0.0"
 description = "A UI app to extract text from video files using Whisper."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "openai-whisper",
+    "faster-whisper",
     "google-genai",
     "flet[all]>=0.21.0",
     "flet-desktop",
@@ -20,6 +20,7 @@ dependencies = [
     "torchaudio",
     "ollama",
     "openai",
+    "soundcard",
 ]
 
 [project.optional-dependencies]
@@ -36,6 +37,9 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E", "F", "I"] # Basic errors, formatting, and imports
 ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"src/app.py" = ["E402"] # Environment setup requires imports after os.environ calls
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

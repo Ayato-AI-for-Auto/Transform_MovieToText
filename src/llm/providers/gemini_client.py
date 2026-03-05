@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiLLMClient(BaseLLMClient):
-    def __init__(self, api_key):
+    def __init__(self, api_key, **kwargs):
         self.client = genai.Client(api_key=api_key)
         logger.info("GeminiLLMClient initialized.")
 

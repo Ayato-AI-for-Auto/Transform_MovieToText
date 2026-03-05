@@ -1,16 +1,31 @@
-import logging
 import os
-import threading
+import warnings
+
+# Suppress HuggingFace and Requests warnings before other imports
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+warnings.filterwarnings("ignore", category=UserWarning, module="huggingface_hub")
+try:
+    from requests.exceptions import RequestsDependencyWarning
+    warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
+except ImportError:
+    pass
+
+import logging
 
 import flet as ft
 
 from src.config_manager import ConfigManager
-from src.live_processor import LiveTranscriptionManager
-from src.llm.factory import get_llm_client
+from src.controllers.minutes_ctrl import MinutesController
+from src.controllers.transcription_ctrl import TranscriptionController
+from src.core.state import state
 from src.transcriber import WhisperTranscriber
+from src.ui.main_window import MainWindow
+from src.ui.views.minutes_view import MinutesView
+from src.ui.views.settings_view import SettingsView
+from src.ui.views.transcription_view import TranscriptionView
 
 logger = logging.getLogger(__name__)
-
 
 class FletApp:
     def __init__(self, page: ft.Page):
@@ -23,620 +38,70 @@ class FletApp:
         self.page.window_icon = "assets/icon.png"
 
         logger.info("FletApp: Initializing backend components...")
-        # Backend instances
         self.config_mgr = ConfigManager()
-        logger.info("FletApp: ConfigManager initialized.")
         self.transcriber = WhisperTranscriber()
-        logger.info("FletApp: WhisperTranscriber initialized.")
-        self.llm_client = None
-        self.live_mgr = None
-
-        # Hardware Info
-        logger.info("FletApp: Detecting hardware...")
+        
+        # Detect hardware
         self.hw_info = self.transcriber.get_hardware_info()
         logger.info(f"FletApp: Hardware detected: {self.hw_info}")
 
-        # UI Components
-        logger.info("FletApp: Building UI components...")
-        self.setup_components()
-        self.build_ui()
-        logger.info("FletApp: Loading settings...")
-        self.load_settings()
-        logger.info("FletApp: Initialization complete.")
+        # Initialize Controllers
+        self.trans_ctrl = TranscriptionController(self.config_mgr, self.transcriber)
+        self.minutes_ctrl = MinutesController(self.config_mgr)
 
-    def setup_components(self):
-        # File Pickers
-        self.file_picker = ft.FilePicker()
-        self.file_picker.on_result = self.on_file_result
-        self.save_picker = ft.FilePicker()
-        self.save_picker.on_result = self.on_save_result
+        # Setup File Pickers
+        self.file_picker = ft.FilePicker(on_result=self._on_file_result)
+        self.save_picker = ft.FilePicker(on_result=self._on_save_result)
         self.page.overlay.extend([self.file_picker, self.save_picker])
 
-        # State Variables
-        self.selected_file_path = ""
-        self.transcript_text = ""
-        self.minutes_text = ""
+        # Initialize Views
+        self.transcription_view = TranscriptionView(self.trans_ctrl, self.file_picker, self.save_picker)
+        self.minutes_view = MinutesView(self.minutes_ctrl, self.save_picker)
+        self.settings_view = SettingsView(self.config_mgr, self.hw_info, self.transcriber.MODEL_REQUIREMENTS)
 
-        # UI Components (Transcription)
-        self.path_text = ft.Text("ファイルが選択されていません", color="grey500")
+        # Build Main UI
+        logger.info("FletApp: Building UI...")
+        self.main_window = MainWindow(
+            self.transcription_view,
+            self.minutes_view,
+            self.settings_view
+        )
+        self.page.add(self.main_window)
 
-        # Generate model options with device labels
+        # Initial View Setup
+        self._setup_initial_values()
+        logger.info("FletApp: Initialization complete.")
+
+    def _setup_initial_values(self):
+        # Whisper model options
         model_options = []
         for model_name, req_gb in self.transcriber.MODEL_REQUIREMENTS.items():
-            if self.transcriber.can_run_on_gpu(model_name):
-                label = f"{model_name} (GPU - {req_gb:.0f}GB)"
-            else:
-                label = f"{model_name} (CPU - {req_gb:.0f}GB)"
+            device = "GPU" if self.transcriber.can_run_on_gpu(model_name) else "CPU"
+            label = f"{model_name} ({device} - {req_gb:.0f}GB)"
             model_options.append(ft.dropdown.Option(key=model_name, text=label))
 
-        self.model_dropdown = ft.Dropdown(
-            label="Whisperモデル",
-            options=model_options,
-            value=self.config_mgr.get_whisper_model(),
-            width=250,
-        )
-        self.model_dropdown.on_change = lambda e: self.config_mgr.set_whisper_model(e.control.value)
+        self.transcription_view.init_view(model_options)
+        # Other views initialized on selection
 
-        self.transcribe_btn = ft.ElevatedButton(
-            "動画ファイルを選択して開始",
-            icon="play_arrow",
-            style=ft.ButtonStyle(color="white", bgcolor="green700"),
-        )
-        self.transcribe_btn.on_click = self.start_transcription
-
-        self.live_record_btn = ft.ElevatedButton(
-            "録音文字起こし開始",
-            icon="mic",
-            style=ft.ButtonStyle(color="white", bgcolor="red700"),
-        )
-        self.live_record_btn.on_click = self.toggle_live_recording
-
-        self.audio_source_radio = ft.RadioGroup(
-            content=ft.Row([
-                ft.Radio(value="system", label="システム音 (Stereo Mix)"),
-                ft.Radio(value="microphone", label="マイク (Default Mic)"),
-            ]),
-            value=self.config_mgr.get_audio_source(),
-            on_change=lambda e: self.config_mgr.set_audio_source(e.control.value)
-        )
-
-        self.status_text = ft.Text("待機中", color="grey400")
-        self.gpu_warning_text = ft.Text("", color="orange700", weight="bold", size=12)
-        self.progress_bar = ft.ProgressBar(width=400, color="blue", visible=False)
-
-        self.result_area = ft.TextField(
-            label="文字起こし結果",
-            multiline=True,
-            min_lines=15,
-            max_lines=20,
-            expand=True,
-            read_only=False,
-            text_size=14,
-        )
-
-        # UI Components (Minutes)
-        self.llm_provider_dropdown = ft.Dropdown(
-            label="AIプロバイダー",
-            options=[
-                ft.dropdown.Option("gemini", "Gemini (Google)"),
-                ft.dropdown.Option("ollama_cloud", "Ollama Cloud"),
-                ft.dropdown.Option("openai_custom", "OpenAI互換 (Groq等)"),
-            ],
-            width=200,
-            on_change=self.on_provider_change,
-        )
-
-        self.llm_model_dropdown = ft.Dropdown(
-            label="モデルを選択",
-            options=[],
-            width=250,
-        )
-        self.generate_btn = ft.ElevatedButton(
-            "議事録を生成",
-            icon="stars",
-            bgcolor="blue700",
-            color="white",
-        )
-        self.generate_btn.on_click = self.start_minutes_generation
-
-        self.minutes_area = ft.TextField(
-            label="生成された議事録",
-            multiline=True,
-            min_lines=20,
-            max_lines=25,
-            expand=True,
-            read_only=False,
-            text_size=14,
-            bgcolor="grey900",
-        )
-
-        # UI Components (Settings)
-        self.provider_settings_dropdown = ft.Dropdown(
-            label="設定対象プロバイダー",
-            options=[
-                ft.dropdown.Option("gemini", "Gemini"),
-                ft.dropdown.Option("ollama_cloud", "Ollama Cloud"),
-                ft.dropdown.Option("openai_custom", "OpenAI互換 (Groq等)"),
-            ],
-            width=300,
-            on_change=self.on_settings_provider_change,
-        )
-        
-        self.force_gpu_checkbox = ft.Checkbox(
-            label="GPUを強制使用する (VRAM不足警告を無視)",
-            value=self.config_mgr.get_force_gpu(),
-            on_change=lambda e: self.config_mgr.set_force_gpu(e.control.value)
-        )
-
-        self.api_key_field = ft.TextField(
-            label="API Key",
-            password=True,
-            can_reveal_password=True,
-            width=500,
-            on_change=self.on_api_settings_change,
-        )
-        self.base_url_field = ft.TextField(
-            label="Base URL",
-            width=500,
-            hint_text="https://api.groq.com/openai/v1",
-            visible=False,
-            on_change=self.on_api_settings_change,
-        )
-
-    def build_ui(self):
-        # Navigation Rail
-        self.nav_rail = ft.NavigationRail(
-            selected_index=0,
-            label_type="all",
-            min_width=100,
-            min_extended_width=200,
-            group_alignment=-0.9,
-            destinations=[
-                ft.NavigationRailDestination(
-                    icon="mic",
-                    selected_icon="mic",
-                    label="文字起こし",
-                ),
-                ft.NavigationRailDestination(
-                    icon="stars",
-                    selected_icon="stars",
-                    label="AI議事録",
-                ),
-                ft.NavigationRailDestination(
-                    icon="settings",
-                    selected_icon="settings",
-                    label="設定",
-                ),
-            ],
-        )
-        self.nav_rail.on_change = self.on_nav_change
-
-        # Content Container
-        self.content_container = ft.Container(
-            content=self.get_transcription_view(),
-            expand=True,
-            padding=20,
-        )
-
-        # Layout
-        self.page.add(
-            ft.Row(
-                [
-                    self.nav_rail,
-                    ft.VerticalDivider(width=1),
-                    self.content_container,
-                ],
-                expand=True,
-            )
-        )
-
-    # --- View Generators ---
-
-    def get_transcription_view(self):
-        return ft.Column(
-            [
-                ft.Text("文字起こし (Whisper)", size=24, weight="bold"),
-                ft.Row(
-                    [
-                        ft.ElevatedButton(
-                            "動画ファイルを選択",
-                            icon="folder_open",
-                            on_click=lambda _: self.file_picker.pick_files(),
-                        ),
-                        self.path_text,
-                    ]
-                ),
-                ft.Column(
-                    [
-                        ft.Row(
-                            [
-                                self.model_dropdown,
-                                self.force_gpu_checkbox,
-                            ],
-                            alignment=ft.MainAxisAlignment.START,
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text("録音ソース: ", weight="bold"),
-                                self.audio_source_radio,
-                            ]
-                        ),
-                        ft.Row(
-                            [
-                                self.transcribe_btn,
-                                self.live_record_btn,
-                            ]
-                        ),
-                        self.status_text,
-                        self.gpu_warning_text,
-                        self.progress_bar,
-                    ],
-                ),
-                self.result_area,
-                ft.Row(
-                    [
-                        ft.ElevatedButton("結果を保存", icon="save", on_click=self.handle_save_transcript),
-                    ],
-                    alignment="end",
-                ),
-            ],
-            scroll="auto",
-            expand=True,
-        )
-
-    def get_minutes_view(self):
-        return ft.Column(
-            [
-                ft.Text("AI議事録生成", size=24, weight="bold"),
-                ft.Row(
-                    [
-                        self.llm_provider_dropdown,
-                        self.llm_model_dropdown,
-                        ft.IconButton("refresh", on_click=self.refresh_llm_models),
-                        self.generate_btn,
-                    ]
-                ),
-                ft.Text("※ 文字起こしが完了している場合、最新のテキストが使用されます。"),
-                self.minutes_area,
-                ft.Row(
-                    [
-                        ft.ElevatedButton("議事録を保存", icon="save", on_click=self.handle_save_minutes),
-                    ],
-                    alignment="end",
-                ),
-            ],
-            scroll="auto",
-            expand=True,
-        )
-
-    def get_settings_view(self):
-
-        # Hardware display
-        hw_rows = [
-            ft.Row([ft.Icon("computer"), ft.Text(f"System RAM: {self.hw_info['ram']} GB")]),
-            ft.Row([ft.Icon("storage"), ft.Text(f"GPU VRAM: {self.hw_info['vram']} GB")]),
-        ]
-
-        # Model compatibility list
-        comp_items = []
-        for model, req in self.transcriber.MODEL_REQUIREMENTS.items():
-            can_gpu = self.hw_info["vram"] >= req
-            can_cpu = self.hw_info["ram"] >= req
-            status_icon = "check_circle" if (can_gpu or can_cpu) else "cancel"
-            status_color = "green" if can_gpu else ("amber" if can_cpu else "red")
-            device_text = "(GPU可)" if can_gpu else ("(CPUのみ可)" if can_cpu else "(スペック不足)")
-
-            comp_items.append(
-                ft.ListTile(
-                    leading=ft.Icon(status_icon, color=status_color),
-                    title=ft.Text(f"{model} (要 {req}GB)"),
-                    subtitle=ft.Text(device_text),
-                )
-            )
-
-        return ft.Column(
-            [
-                ft.Text("設定", size=24, weight="bold"),
-                ft.Divider(),
-                ft.Text("AIプロバイダー設定", size=18, weight="w500"),
-                self.provider_settings_dropdown,
-                self.api_key_field,
-                self.base_url_field,
-                ft.Divider(),
-                ft.Text("ハードウェア情報", size=18, weight="w500"),
-                ft.Column(hw_rows),
-                ft.Text("モデル適合状況 (目安):", size=14, italic=True),
-                ft.Container(
-                    content=ft.Column(comp_items, spacing=0),
-                    border=ft.border.all(1, "grey700"),
-                    border_radius=10,
-                    padding=10,
-                ),
-                ft.Divider(),
-                ft.Text("Whisper設定", size=18, weight="w500"),
-                self.force_gpu_checkbox,
-            ],
-            scroll="auto",
-            expand=True,
-        )
-
-    # --- Event Handlers ---
-
-    def on_nav_change(self, e):
-        idx = e.control.selected_index
-        if idx == 0:
-            self.content_container.content = self.get_transcription_view()
-        elif idx == 1:
-            self.content_container.content = self.get_minutes_view()
-            self.load_llm_models_to_dropdown()
-        elif idx == 2:
-            self.content_container.content = self.get_settings_view()
-            self.load_settings()
-        self.page.update()
-
-    def on_file_result(self, e):
+    def _on_file_result(self, e):
         if e.files:
-            self.selected_file_path = e.files[0].path
-            filename = os.path.basename(self.selected_file_path)
-            self.path_text.value = filename
-            self.page.update()
+            path = e.files[0].path
+            state.set("selected_file_path", path)
+            logger.info(f"File selected: {path}")
 
-    def handle_save_transcript(self, e):
-        base_name = os.path.splitext(os.path.basename(self.selected_file_path))[0] if self.selected_file_path else "transcript"
-        default_name = f"【文字起こし】{base_name}.txt"
-        self.save_picker.save_file(file_name=default_name)
-
-    def handle_save_minutes(self, e):
-        base_name = os.path.splitext(os.path.basename(self.selected_file_path))[0] if self.selected_file_path else "minutes"
-        default_name = f"【議事録】{base_name}.md"
-        self.save_picker.save_file(file_name=default_name)
-
-    def on_save_result(self, e):
+    def _on_save_result(self, e):
         if e.path:
             # Check file extension to decide content
             is_md = e.path.endswith(".md")
-            content = self.minutes_area.value if is_md else self.result_area.value
+            content = state.get("minutes_text") if is_md else state.get("transcript_text")
             try:
                 with open(e.path, "w", encoding="utf-8") as f:
                     f.write(content)
-                self.show_snack(f"ファイルを保存しました: {os.path.basename(e.path)}")
+                self._show_snack(f"ファイルを保存しました: {os.path.basename(e.path)}")
             except Exception as ex:
-                self.show_snack(f"保存失敗: {ex}")
+                self._show_snack(f"保存失敗: {ex}")
 
-    def load_settings(self):
-        # Sync provider dropdowns
-        active = self.config_mgr.get_active_provider()
-        self.llm_provider_dropdown.value = active
-        self.provider_settings_dropdown.value = active
-
-        # Load API fields for active provider
-        conf = self.config_mgr.get_provider_config(active)
-        self.api_key_field.value = conf.get("api_key", "")
-        self.base_url_field.value = conf.get("base_url", "")
-        self.base_url_field.visible = active == "openai_custom"
-
-        # Initial model loading
-        if self.api_key_field.value:
-            threading.Thread(target=self.silent_refresh_llm, daemon=True).start()
-
-    def on_provider_change(self, e):
-        provider = e.control.value
-        self.config_mgr.set_active_provider(provider)
-        self.provider_settings_dropdown.value = provider
-        self.load_settings()
-        self.load_llm_models_to_dropdown()
-
-    def on_settings_provider_change(self, e):
-        # When user switches target provider in settings tab
-        provider = e.control.value
-        conf = self.config_mgr.get_provider_config(provider)
-        self.api_key_field.value = conf.get("api_key", "")
-        self.base_url_field.value = conf.get("base_url", "")
-        self.base_url_field.visible = provider == "openai_custom"
-        self.page.update()
-
-    def on_api_settings_change(self, e):
-        provider = self.provider_settings_dropdown.value
-        conf = {
-            "api_key": self.api_key_field.value,
-        }
-        if provider == "openai_custom":
-            conf["base_url"] = self.base_url_field.value
-        self.config_mgr.set_provider_config(provider, conf)
-
-    def silent_refresh_llm(self):
-        try:
-            self._init_llm_client()
-            self.load_llm_models_to_dropdown()
-        except Exception:
-            pass
-
-    def _init_llm_client(self):
-        active = self.config_mgr.get_active_provider()
-        conf = self.config_mgr.get_provider_config(active)
-        if conf.get("api_key"):
-            self.llm_client = get_llm_client(provider_name=active, api_key=conf["api_key"], base_url=conf.get("base_url"))
-
-    def load_llm_models_to_dropdown(self):
-        if not self.llm_client:
-            self._init_llm_client()
-
-        if self.llm_client:
-            try:
-                models = self.llm_client.get_available_models()
-                self.llm_model_dropdown.options = [ft.dropdown.Option(m) for m in models]
-                active = self.config_mgr.get_active_provider()
-                last = self.config_mgr.get_last_model(active)
-                if last in models:
-                    self.llm_model_dropdown.value = last
-                elif models:
-                    self.llm_model_dropdown.value = models[0]
-                self.page.update()
-            except Exception as e:
-                logger.error(f"Error loading models: {e}")
-
-    def refresh_llm_models(self, e):
-        active = self.config_mgr.get_active_provider()
-        conf = self.config_mgr.get_provider_config(active)
-        if not conf.get("api_key"):
-            self.show_snack("APIキーを設定画面で入力してください")
-            return
-
-        try:
-            self._init_llm_client()
-            self.load_llm_models_to_dropdown()
-            self.show_snack(f"{active} のモデルリストを更新しました")
-        except Exception as ex:
-            self.show_snack(f"取得失敗: {ex}")
-
-    def show_snack(self, message):
+    def _show_snack(self, message):
         self.page.snack_bar = ft.SnackBar(ft.Text(message))
         self.page.snack_bar.open = True
-        self.page.update()
-
-    # --- Business Logic Threads ---
-
-    def start_transcription(self, e):
-        if not self.selected_file_path:
-            self.show_snack("ファイルを選択してください")
-            return
-
-        model_name = self.model_dropdown.value
-        self.transcribe_btn.disabled = True
-        self.progress_bar.visible = True
-        self.status_text.value = "文字起こし中... (初回モデルDL時は時間がかかります)"
-        self.page.update()
-
-        threading.Thread(target=self._transcribe_worker, args=(model_name,), daemon=True).start()
-
-    def _transcribe_worker(self, model_name):
-        try:
-            # Load model and transcribe
-            force_gpu = self.config_mgr.get_force_gpu()
-            
-            # Transcription (ensure it runs on requested device if possible)
-            self.transcriber.load_model(model_name, force_gpu=force_gpu)
-            
-            # Check for safety trigger warning
-            if self.transcriber.last_warning:
-                self.gpu_warning_text.value = f"⚠️ {self.transcriber.last_warning}"
-            else:
-                self.gpu_warning_text.value = ""
-            self.page.update()
-
-            self.transcript_text = self.transcriber.transcribe(self.selected_file_path, model_name=model_name, force_gpu=force_gpu)
-            self.result_area.value = self.transcript_text
-            self.status_text.value = "文字起こし完了"
-        except Exception as ex:
-            logger.error(f"Transcription error: {ex}", exc_info=True)
-            self.status_text.value = f"エラー: {ex}"
-        finally:
-            self.transcribe_btn.disabled = False
-            self.progress_bar.visible = False
-            self.page.update()
-
-    def start_minutes_generation(self, e):
-        text = self.result_area.value
-        if not text:
-            self.show_snack("文字起こしテキストがありません")
-            return
-
-        model = self.llm_model_dropdown.value
-        if not model:
-            self.show_snack("モデルを選択してください")
-            return
-
-        self.generate_btn.disabled = True
-        self.minutes_area.value = "議事録を生成中..."
-        self.page.update()
-
-        threading.Thread(target=self._minutes_worker, args=(text, model), daemon=True).start()
-
-    def _minutes_worker(self, transcript, model):
-        try:
-            if not self.llm_client:
-                self._init_llm_client()
-
-            res = self.llm_client.generate_minutes(transcript, model)
-            self.minutes_area.value = res
-            self.minutes_text = res
-
-            # Save as last used model
-            self.config_mgr.set_last_model(model)
-        except Exception as ex:
-            logger.error(f"Minutes generation error: {ex}", exc_info=True)
-            self.minutes_area.value = f"エラー: {ex}"
-        finally:
-            self.generate_btn.disabled = False
-            self.page.update()
-
-    # --- Live Recording Handlers ---
-
-    def toggle_live_recording(self, e):
-        if self.live_mgr and self.live_mgr.recorder.is_recording:
-            self.stop_live_recording()
-        else:
-            self.start_live_recording()
-
-    def start_live_recording(self):
-        model_name = self.model_dropdown.value
-        self.live_record_btn.text = "録音停止"
-        self.live_record_btn.icon = "stop"
-        self.live_record_btn.style.bgcolor = "grey700"
-        self.transcribe_btn.disabled = True
-        source = self.audio_source_radio.value
-        source_label = "システム音" if source == "system" else "マイク"
-        self.status_text.value = f"{source_label}をリアルタイム録音・文字起こし中..."
-        self.result_area.value = ""
-        self.page.update()
-
-        # Start Recording & Processing
-        force_gpu = self.config_mgr.get_force_gpu()
-        
-        # Initial load to check for safety trigger
-        self.transcriber.load_model(model_name, force_gpu=force_gpu)
-        if self.transcriber.last_warning:
-            self.gpu_warning_text.value = f"⚠️ {self.transcriber.last_warning}"
-        else:
-            self.gpu_warning_text.value = ""
-        self.page.update()
-
-        # Initialize manager if needed
-        self.live_mgr = LiveTranscriptionManager(
-            transcriber=self.transcriber,
-            model_name=model_name,
-            force_gpu=force_gpu,
-            on_text_added=self.on_live_text_added,
-            source=source
-        )
-        self.live_mgr.start()
-
-    def stop_live_recording(self):
-        if not self.live_mgr:
-            return
-
-        self.status_text.value = "録音を終了し、最後のチャンクを処理中..."
-        self.live_record_btn.disabled = True
-        self.page.update()
-
-        def _stop_worker():
-            full_text = self.live_mgr.stop()
-            self.transcript_text = full_text
-            self.result_area.value = full_text
-            self.status_text.value = "ライブ文字起こし完了"
-            self.live_record_btn.text = "録音文字起こし開始"
-            self.live_record_btn.icon = "mic"
-            self.live_record_btn.style.bgcolor = "red700"
-            self.live_record_btn.disabled = False
-            self.transcribe_btn.disabled = False
-            self.page.update()
-
-        threading.Thread(target=_stop_worker, daemon=True).start()
-
-    def on_live_text_added(self, text):
-        # Callback from background thread
-        if self.result_area.value == "文字起こしテキストがありません":
-            self.result_area.value = ""
-        
-        self.result_area.value += text + " "
         self.page.update()
