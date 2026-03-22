@@ -46,11 +46,35 @@ jobs:
         # Note: ubuntu-latest will fail on soundcard/ffmpeg native features,
         # but pure logic tests should pass. We use a mock-heavy approach in CI.
         run: |
-          pytest --junitxml=reports/junit-${{ matrix.os }}-${{ matrix.python-version }}.xml
+          pytest --junitxml=reports/junit-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml:reports/coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
 
-      - name: Upload Test Results
+      - name: Upload Test and Coverage Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
-          path: reports/*.xml
+          name: results-${{ matrix.os }}-${{ matrix.python-version }}
+          path: reports/*
+
+  performance-audit:
+    name: "Performance Audit (Win/3.10)"
+    needs: lint-and-test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e .[dev]
+      - name: Run Performance Benchmark
+        run: |
+          python tests/performance/benchmark_transcription.py > performance_report.txt
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: performance_report.txt
