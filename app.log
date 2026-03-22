@@ -2747,3 +2747,73 @@ ValueError: The binary mode of fromstring is removed, use frombuffer instead
 2026-03-05 16:27:49,712 [INFO] [LiveTranscriptionWorker] src.live_processor: Transcribed chunk: だからこれはいわゆるトランプさんが例えば完全にアメリカが勝利宣言できるような状況に持っていったと何か...
 2026-03-05 16:27:49,713 [INFO] [LiveTranscriptionWorker] src.live_processor: Live transcription worker loop finished.
 2026-03-05 16:27:49,715 [INFO] [Thread-10 (_stop_worker)] src.live_processor: Live transcription stopped. Summary: 93 chunks processed, 0 errors, Duration: 951.9s
+2026-03-21 16:18:39,022 [INFO] [MainThread] root: --- APP START at 2026-03-21 16:18:39 ---
+2026-03-21 16:18:39,022 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-21 16:18:39,023 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-21 16:18:49,197 [INFO] [MainThread] root: Starting main process...
+2026-03-21 16:18:49,198 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-21 16:18:49,201 [INFO] [MainThread] flet: Starting up TCP server on localhost:56485
+2026-03-21 16:18:49,205 [INFO] [MainThread] flet: Flet app has started...
+2026-03-21 16:18:49,207 [INFO] [MainThread] flet: App URL: tcp://localhost:56485
+2026-03-21 16:18:49,207 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-21 16:18:49,208 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-21 16:18:49,208 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-21 16:18:49,684 [INFO] [MainThread] flet: App session started
+2026-03-21 16:18:49,684 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-21 16:18:49,685 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-21 16:18:49,758 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-21 16:18:49,825 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-21 16:18:49,827 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-21 16:18:49,829 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI...
+2026-03-21 16:18:49,832 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-21 16:18:59,792 [INFO] [ThreadPoolExecutor-0_0] src.config_manager: Whisper model changed: turbo -> large-v3
+2026-03-22 10:40:59,321 [INFO] [MainThread] root: --- APP START at 2026-03-22 10:40:59 ---
+2026-03-22 10:40:59,321 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-22 10:40:59,322 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-22 10:41:08,776 [INFO] [MainThread] root: Starting main process...
+2026-03-22 10:41:08,778 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-22 10:41:08,780 [INFO] [MainThread] flet: Starting up TCP server on localhost:57960
+2026-03-22 10:41:08,784 [INFO] [MainThread] flet: Flet app has started...
+2026-03-22 10:41:08,787 [INFO] [MainThread] flet: App URL: tcp://localhost:57960
+2026-03-22 10:41:08,787 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-22 10:41:08,788 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-22 10:41:08,788 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-22 10:41:09,282 [INFO] [MainThread] flet: App session started
+2026-03-22 10:41:09,284 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-22 10:41:09,284 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-22 10:41:09,362 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-22 10:41:09,424 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-22 10:41:09,424 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-22 10:41:09,428 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI...
+2026-03-22 10:41:09,430 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-22 11:39:08,641 [INFO] [MainThread] root: --- APP START at 2026-03-22 11:39:08 ---
+2026-03-22 11:39:08,641 [INFO] [MainThread] root: Logger Initialized (Level: INFO, Handler: RotatingFileHandler)
+2026-03-22 11:39:08,641 [INFO] [MainThread] root: --- Python Startup: Logger Initialized ---
+2026-03-22 11:39:09,442 [INFO] [MainThread] src.core.history_mgr: History database initialized.
+2026-03-22 11:39:14,068 [INFO] [MainThread] root: Starting main process...
+2026-03-22 11:39:14,070 [INFO] [MainThread] flet: Assets path configured: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\assets
+2026-03-22 11:39:14,072 [INFO] [MainThread] flet: Starting up TCP server on localhost:50989
+2026-03-22 11:39:14,073 [INFO] [MainThread] flet: Flet app has started...
+2026-03-22 11:39:14,079 [INFO] [MainThread] flet: App URL: tcp://localhost:50989
+2026-03-22 11:39:14,079 [INFO] [MainThread] flet_desktop: Starting Flet View app...
+2026-03-22 11:39:14,080 [INFO] [MainThread] flet_desktop: Looking for Flet executable at: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-22 11:39:14,081 [INFO] [MainThread] flet_desktop: Flet View found in: C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Lib\site-packages\flet_desktop\app\flet\flet.exe
+2026-03-22 11:39:14,728 [INFO] [MainThread] flet: App session started
+2026-03-22 11:39:14,729 [INFO] [ThreadPoolExecutor-0_0] root: main: Entered flet main function.
+2026-03-22 11:39:14,729 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initializing backend components...
+2026-03-22 11:39:14,799 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Initialized WhisperTranscriber on device: cuda
+2026-03-22 11:39:14,853 [INFO] [ThreadPoolExecutor-0_0] src.transcriber: Hardware detected - RAM: 15.7GB, VRAM: 4.0GB
+2026-03-22 11:39:14,853 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Hardware detected: {'vram': 4.0, 'ram': 15.7}
+2026-03-22 11:39:14,857 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Building UI...
+2026-03-22 11:39:14,860 [INFO] [ThreadPoolExecutor-0_0] src.app: FletApp: Initialization complete.
+2026-03-22 11:39:17,199 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Navigation changed to index: 2
+2026-03-22 11:39:17,201 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Updating main window/page...
+2026-03-22 11:39:18,263 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Navigation changed to index: 1
+2026-03-22 11:39:18,266 [INFO] [Thread-3 (_fetch_worker)] src.llm.factory: LLMFactory: Creating client for ollama_local (API Key: ****, Base URL: http://localhost:11434)
+2026-03-22 11:39:18,267 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Updating main window/page...
+2026-03-22 11:39:19,375 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Navigation changed to index: 0
+2026-03-22 11:39:19,376 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Updating main window/page...
+2026-03-22 11:39:20,518 [INFO] [Thread-3 (_fetch_worker)] httpx: HTTP Request: GET http://localhost:11434/api/tags "HTTP/1.1 200 OK"
+2026-03-22 11:39:20,671 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Navigation changed to index: 1
+2026-03-22 11:39:20,674 [INFO] [Thread-4 (_fetch_worker)] src.llm.factory: LLMFactory: Creating client for ollama_local (API Key: ****, Base URL: http://localhost:11434)
+2026-03-22 11:39:20,674 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window: Updating main window/page...

@@ -1,12 +1,16 @@
 import logging
+import os
 import threading
+from datetime import datetime
 
 from src.config_manager import ConfigManager
+from src.core.history_mgr import history_mgr
 from src.core.state import state
 from src.live_processor import LiveTranscriptionManager
 from src.transcriber import WhisperTranscriber
 
 logger = logging.getLogger(__name__)
+
 
 class TranscriptionController:
     def __init__(self, config_mgr: ConfigManager, transcriber: WhisperTranscriber):
@@ -17,7 +21,7 @@ class TranscriptionController:
     def start_file_transcription(self, file_path: str, model_name: str):
         if not file_path:
             return
-        
+
         state.set("is_processing", True)
         state.set("status_text", "文字起こし中... (初回モデルDL時は時間がかかります)")
         state.set("progress_visible", True)
@@ -26,12 +30,12 @@ class TranscriptionController:
             try:
                 force_gpu = self.config_mgr.get_force_gpu()
                 self.transcriber.load_model(model_name, force_gpu=force_gpu)
-                
+
                 if self.transcriber.last_warning:
                     state.set("gpu_warning", f"⚠️ {self.transcriber.last_warning}")
                 else:
                     state.set("gpu_warning", "")
-                
+
                 result = self.transcriber.transcribe(file_path, model_name=model_name, force_gpu=force_gpu)
                 state.set("transcript_text", result)
                 state.set("status_text", "文字起こし完了")
@@ -57,20 +61,27 @@ class TranscriptionController:
         state.set("transcript_text", "")
 
         force_gpu = self.config_mgr.get_force_gpu()
-        
+
         try:
             self.transcriber.load_model(model_name, force_gpu=force_gpu)
             if self.transcriber.last_warning:
                 state.set("gpu_warning", f"⚠️ {self.transcriber.last_warning}")
             else:
                 state.set("gpu_warning", "")
-            
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            mp3_dir = os.path.join(os.getcwd(), "recordings")
+            os.makedirs(mp3_dir, exist_ok=True)
+            mp3_path = os.path.join(mp3_dir, f"meeting_{timestamp}.mp3")
+            state.set("current_mp3_path", mp3_path)
+
             self.live_mgr = LiveTranscriptionManager(
                 transcriber=self.transcriber,
                 model_name=model_name,
                 force_gpu=force_gpu,
                 on_text_added=self._on_live_text_added,
-                source=source
+                source=source,
+                mp3_path=mp3_path,
             )
             self.live_mgr.start()
         except Exception as e:
@@ -83,12 +94,21 @@ class TranscriptionController:
             return
 
         state.set("status_text", "録音を終了し、最後のチャンクを処理中...")
-        state.set("is_recording", False) # UI should reflect stopping phase
+        state.set("is_recording", False)  # UI should reflect stopping phase
 
         def _stop_worker():
             full_text = self.live_mgr.stop()
+            mp3_path = self.live_mgr.mp3_path
+
+            # Save to history
+            timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            meeting_id = history_mgr.add_meeting(
+                title=f"会議録音 ({timestamp_str})", transcript=full_text, audio_path=mp3_path, model_info=self.live_mgr.model_name
+            )
+            state.set("current_meeting_id", meeting_id)
+
             state.set("transcript_text", full_text)
-            state.set("status_text", "ライブ文字起こし完了")
+            state.set("status_text", "ライブ文字起こし完了（履歴に保存されました）")
             self.live_mgr = None
 
         threading.Thread(target=_stop_worker, daemon=True).start()

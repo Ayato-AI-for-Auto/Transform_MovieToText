@@ -21,7 +21,7 @@ class GeminiLLMClient(BaseLLMClient):
             start_time = time.time()
             models = self.client.models.list()
             duration = time.time() - start_time
-            
+
             filtered_models = []
             for m in models:
                 if any(x in m.name.lower() for x in ["gemini", "gemma"]):

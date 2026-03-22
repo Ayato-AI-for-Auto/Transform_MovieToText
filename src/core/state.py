@@ -3,11 +3,13 @@ from typing import Any, Callable, Dict, List
 
 logger = logging.getLogger(__name__)
 
+
 class AppState:
     """
     Global state management for the application.
     Implements a simple observer pattern for state changes.
     """
+
     def __init__(self):
         self._state: Dict[str, Any] = {
             "selected_file_path": "",
@@ -47,6 +49,7 @@ class AppState:
                     callback(value)
                 except Exception as e:
                     logger.error(f"Error in state listener for {key}: {e}")
+
 
 # Global singleton instance
 state = AppState()

@@ -7,6 +7,7 @@ os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning, module="huggingface_hub")
 try:
     from requests.exceptions import RequestsDependencyWarning
+
     warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
 except ImportError:
     pass
@@ -16,16 +17,19 @@ import logging
 import flet as ft
 
 from src.config_manager import ConfigManager
+from src.controllers.history_ctrl import HistoryController
 from src.controllers.minutes_ctrl import MinutesController
 from src.controllers.transcription_ctrl import TranscriptionController
 from src.core.state import state
 from src.transcriber import WhisperTranscriber
 from src.ui.main_window import MainWindow
+from src.ui.views.history_view import HistoryView
 from src.ui.views.minutes_view import MinutesView
 from src.ui.views.settings_view import SettingsView
 from src.ui.views.transcription_view import TranscriptionView
 
 logger = logging.getLogger(__name__)
+
 
 class FletApp:
     def __init__(self, page: ft.Page):
@@ -40,7 +44,7 @@ class FletApp:
         logger.info("FletApp: Initializing backend components...")
         self.config_mgr = ConfigManager()
         self.transcriber = WhisperTranscriber()
-        
+
         # Detect hardware
         self.hw_info = self.transcriber.get_hardware_info()
         logger.info(f"FletApp: Hardware detected: {self.hw_info}")
@@ -48,24 +52,23 @@ class FletApp:
         # Initialize Controllers
         self.trans_ctrl = TranscriptionController(self.config_mgr, self.transcriber)
         self.minutes_ctrl = MinutesController(self.config_mgr)
+        self.history_ctrl = HistoryController()
 
         # Setup File Pickers
         self.file_picker = ft.FilePicker(on_result=self._on_file_result)
         self.save_picker = ft.FilePicker(on_result=self._on_save_result)
-        self.page.overlay.extend([self.file_picker, self.save_picker])
+        self.folder_picker = ft.FilePicker()  # HistoryView will use this
+        self.page.overlay.extend([self.file_picker, self.save_picker, self.folder_picker])
 
         # Initialize Views
         self.transcription_view = TranscriptionView(self.trans_ctrl, self.file_picker, self.save_picker)
         self.minutes_view = MinutesView(self.minutes_ctrl, self.save_picker)
         self.settings_view = SettingsView(self.config_mgr, self.hw_info, self.transcriber.MODEL_REQUIREMENTS)
+        self.history_view = HistoryView(self.history_ctrl, self.folder_picker)
 
         # Build Main UI
         logger.info("FletApp: Building UI...")
-        self.main_window = MainWindow(
-            self.transcription_view,
-            self.minutes_view,
-            self.settings_view
-        )
+        self.main_window = MainWindow(self.transcription_view, self.minutes_view, self.settings_view, self.history_view)
         self.page.add(self.main_window)
 
         # Initial View Setup

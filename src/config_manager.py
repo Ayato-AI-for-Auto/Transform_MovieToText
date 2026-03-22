@@ -49,12 +49,12 @@ class ConfigManager:
                 logger.info("Removing legacy 'openai_custom' provider from config.")
                 self.config["providers"].pop("openai_custom")
                 changed = True
-            
+
             # Ensure ollama_local exists
             if "ollama_local" not in self.config["providers"]:
                 self.config["providers"]["ollama_local"] = default_providers["ollama_local"]
                 changed = True
-            
+
             # Ensure ollama_cloud exists and fix legacy host if it was local
             if "ollama_cloud" not in self.config["providers"]:
                 self.config["providers"]["ollama_cloud"] = default_providers["ollama_cloud"]
@@ -97,13 +97,13 @@ class ConfigManager:
     def set_provider_config(self, provider_name, provider_config):
         if "providers" not in self.config:
             self.config["providers"] = {}
-        
+
         # Mask API key in log if present
         log_config = provider_config.copy()
         if "api_key" in log_config and log_config["api_key"]:
             key = log_config["api_key"]
             log_config["api_key"] = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "****"
-            
+
         logger.info(f"Updating config for provider {provider_name}: {log_config}")
         self.config["providers"][provider_name] = provider_config
         self.save_config()

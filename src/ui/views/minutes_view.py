@@ -51,23 +51,28 @@ class MinutesView(ft.Column):
             read_only=False,
             text_size=14,
             bgcolor="grey900",
-            on_change=self._on_minutes_change
+            on_change=self._on_minutes_change,
         )
 
         # Build Layout
         self.controls = [
             ft.Text("AI議事録生成", size=24, weight="bold"),
-            ft.Row([
-                self.llm_provider_dropdown,
-                self.llm_model_dropdown,
-                ft.IconButton("refresh", on_click=self._on_refresh_models),
-                self.generate_btn,
-            ]),
+            ft.Row(
+                [
+                    self.llm_provider_dropdown,
+                    self.llm_model_dropdown,
+                    ft.IconButton("refresh", on_click=self._on_refresh_models),
+                    self.generate_btn,
+                ]
+            ),
             ft.Text("※ 文字起こしが完了している場合、最新のテキストが使用されます。"),
             self.minutes_area,
-            ft.Row([
-                ft.ElevatedButton("議事録を保存", icon="save", on_click=self._on_save_click),
-            ], alignment="end"),
+            ft.Row(
+                [
+                    ft.ElevatedButton("議事録を保存", icon="save", on_click=self._on_save_click),
+                ],
+                alignment="end",
+            ),
         ]
 
         # Subscribe to state changes
@@ -103,14 +108,14 @@ class MinutesView(ft.Column):
         def _fetch_worker():
             try:
                 models = self.controller.get_available_models(provider)
-                
+
                 self.llm_model_dropdown.options = [ft.dropdown.Option(m) for m in models]
                 if models:
                     last_model = self.controller.config_mgr.get_last_model(provider)
                     self.llm_model_dropdown.value = last_model if last_model in models else models[0]
                 else:
                     self.llm_model_dropdown.value = None
-                
+
                 state.set("llm_model", self.llm_model_dropdown.value)
                 self.llm_model_dropdown.disabled = False
                 if self.page:

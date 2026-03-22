@@ -33,3 +33,11 @@ ENV/
 # OS
 Thumbs.db
 Desktop.ini
+
+# App specific
+*.log
+*.db
+temp_chunks/
+recordings/
+ruff_errors.txt
+report_*.txt

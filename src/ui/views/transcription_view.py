@@ -15,39 +15,31 @@ class TranscriptionView(ft.Column):
 
         # Initialize UI Components
         self.path_text = ft.Text("ファイルが選択されていません", color="grey500")
-        
+
         # Whisper model dropdown (initial value from state)
-        self.whisper_model_dropdown = ft.Dropdown(
-            label="Whisperモデル",
-            width=250,
-            on_change=self._on_model_change
-        )
-        
-        self.force_gpu_checkbox = ft.Checkbox(
-            label="GPUを強制使用する",
-            on_change=self._on_force_gpu_change
-        )
+        self.whisper_model_dropdown = ft.Dropdown(label="Whisperモデル", width=250, on_change=self._on_model_change)
+
+        self.force_gpu_checkbox = ft.Checkbox(label="GPUを強制使用する", on_change=self._on_force_gpu_change)
 
         self.audio_source_radio = ft.RadioGroup(
-            content=ft.Row([
-                ft.Radio(value="system", label="システム音 (Stereo Mix)"),
-                ft.Radio(value="microphone", label="マイク (Default Mic)"),
-            ]),
-            on_change=self._on_source_change
+            content=ft.Row(
+                [
+                    ft.Radio(value="system", label="システム音 (Stereo Mix)"),
+                    ft.Radio(value="microphone", label="マイク (Default Mic)"),
+                ]
+            ),
+            on_change=self._on_source_change,
         )
 
         self.transcribe_btn = ft.ElevatedButton(
             "動画ファイルを選択して開始",
             icon="play_arrow",
             style=ft.ButtonStyle(color="white", bgcolor="green700"),
-            on_click=self._on_transcribe_click
+            on_click=self._on_transcribe_click,
         )
 
         self.live_record_btn = ft.ElevatedButton(
-            "録音文字起こし開始",
-            icon="mic",
-            style=ft.ButtonStyle(color="white", bgcolor="red700"),
-            on_click=self._on_live_click
+            "録音文字起こし開始", icon="mic", style=ft.ButtonStyle(color="white", bgcolor="red700"), on_click=self._on_live_click
         )
 
         self.status_text = ft.Text("待機中", color="grey400")
@@ -62,32 +54,39 @@ class TranscriptionView(ft.Column):
             expand=True,
             read_only=False,
             text_size=14,
-            on_change=self._on_result_change
+            on_change=self._on_result_change,
         )
 
         # Build Layout
         self.controls = [
             ft.Text("文字起こし (Whisper)", size=24, weight="bold"),
-            ft.Row([
-                ft.ElevatedButton(
-                    "動画ファイルを選択",
-                    icon="folder_open",
-                    on_click=lambda _: self.file_picker.pick_files(),
-                ),
-                self.path_text,
-            ]),
-            ft.Column([
-                ft.Row([self.whisper_model_dropdown, self.force_gpu_checkbox]),
-                ft.Row([ft.Text("録音ソース: ", weight="bold"), self.audio_source_radio]),
-                ft.Row([self.transcribe_btn, self.live_record_btn]),
-                self.status_text,
-                self.gpu_warning_text,
-                self.progress_bar,
-            ]),
+            ft.Row(
+                [
+                    ft.ElevatedButton(
+                        "動画ファイルを選択",
+                        icon="folder_open",
+                        on_click=lambda _: self.file_picker.pick_files(),
+                    ),
+                    self.path_text,
+                ]
+            ),
+            ft.Column(
+                [
+                    ft.Row([self.whisper_model_dropdown, self.force_gpu_checkbox]),
+                    ft.Row([ft.Text("録音ソース: ", weight="bold"), self.audio_source_radio]),
+                    ft.Row([self.transcribe_btn, self.live_record_btn]),
+                    self.status_text,
+                    self.gpu_warning_text,
+                    self.progress_bar,
+                ]
+            ),
             self.result_area,
-            ft.Row([
-                ft.ElevatedButton("結果を保存", icon="save", on_click=self._on_save_click),
-            ], alignment="end"),
+            ft.Row(
+                [
+                    ft.ElevatedButton("結果を保存", icon="save", on_click=self._on_save_click),
+                ],
+                alignment="end",
+            ),
         ]
 
         # Subscribe to state changes
@@ -171,7 +170,7 @@ class TranscriptionView(ft.Column):
         self.save_picker.save_file(file_name=f"【文字起こし】{base_name}.txt")
 
     def _on_result_change(self, e):
-        state.set("transcript_text", e.control.value, notify=False) # Don't re-notify self
+        state.set("transcript_text", e.control.value, notify=False)  # Don't re-notify self
 
     def init_view(self, model_options):
         """Called once to set initial values from config."""

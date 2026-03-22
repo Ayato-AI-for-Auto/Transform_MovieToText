@@ -8,25 +8,28 @@ from src.transcriber import WhisperTranscriber
 
 logger = logging.getLogger(__name__)
 
+
 class LiveTranscriptionManager:
     """
     Orchestrates live loopback recording and background transcription.
     Handles the lifecycle of audio chunks as numpy arrays.
-    
+
     Updated to remove WAV/BytesIO overhead, processing numpy arrays directly.
     """
-    def __init__(self, transcriber: WhisperTranscriber, model_name="base", force_gpu=False, on_text_added=None, source="system"):
+
+    def __init__(self, transcriber: WhisperTranscriber, model_name="base", force_gpu=False, on_text_added=None, source="system", mp3_path=None):
         self.transcriber = transcriber
         self.model_name = model_name
         self.force_gpu = force_gpu
-        self.on_text_added = on_text_added # Callback function(text)
+        self.on_text_added = on_text_added  # Callback function(text)
+        self.mp3_path = mp3_path
         # Reduced segment_time for better responsiveness
-        self.recorder = create_recorder(segment_time=10, overlap=3, source=source)
-        
+        self.recorder = create_recorder(segment_time=10, overlap=3, source=source, mp3_path=self.mp3_path)
+
         self.stop_event = threading.Event()
         self.worker_thread = None
         self.full_transcript = ""
-        
+
         # Statistics
         self.chunks_processed = 0
         self.total_errors = 0
@@ -39,9 +42,9 @@ class LiveTranscriptionManager:
         self.chunks_processed = 0
         self.total_errors = 0
         self.start_time = time.time()
-        
+
         self.recorder.start()
-        
+
         self.worker_thread = threading.Thread(target=self._process_chunks_loop, daemon=True, name="LiveTranscriptionWorker")
         self.worker_thread.start()
         logger.info("Live transcription manager started.")
@@ -50,16 +53,13 @@ class LiveTranscriptionManager:
         """Stops recording and waits for processing to finish."""
         self.recorder.stop()
         self.stop_event.set()
-        
+
         if self.worker_thread:
             self.worker_thread.join(timeout=10)
-        
+
         duration = time.time() - self.start_time
         logger.info(
-            f"Live transcription stopped. "
-            f"Summary: {self.chunks_processed} chunks processed, "
-            f"{self.total_errors} errors, "
-            f"Duration: {duration:.1f}s"
+            f"Live transcription stopped. Summary: {self.chunks_processed} chunks processed, {self.total_errors} errors, Duration: {duration:.1f}s"
         )
         return self.full_transcript
 
@@ -69,17 +69,17 @@ class LiveTranscriptionManager:
             try:
                 # Wait for next chunk with timeout to check stop_event
                 audio_data = self.recorder.chunk_queue.get(timeout=1)
-                if audio_data is None: 
+                if audio_data is None:
                     break
-                
+
                 self._handle_audio_data(audio_data)
                 self.recorder.chunk_queue.task_done()
-            except Exception: # timeout or other errors
+            except Exception:  # timeout or other errors
                 # If we are stopping and queue is empty, exit
                 if self.stop_event.is_set() and self.recorder.chunk_queue.empty():
                     break
                 continue
-        
+
         logger.info("Live transcription worker loop finished.")
 
     def _handle_audio_data(self, audio_data):
@@ -88,18 +88,14 @@ class LiveTranscriptionManager:
             # audio_data is a numpy float32 array
             duration = len(audio_data) / 16000
             logger.info(f"Processing in-memory numpy chunk (Source: {self.recorder.source}, Samples: {len(audio_data)}, Duration: {duration:.1f}s)")
-            
+
             if duration < 0.1:
                 logger.warning("Chunk too short, skipping.")
                 return
 
             # Pass numpy array directly to transcriber
-            text = self.transcriber.transcribe(
-                audio_data, 
-                model_name=self.model_name, 
-                force_gpu=self.force_gpu
-            )
-            
+            text = self.transcriber.transcribe(audio_data, model_name=self.model_name, force_gpu=self.force_gpu)
+
             if text:
                 logger.info(f"Transcribed chunk: {text[:50]}...")
                 self.full_transcript += text + " "
@@ -107,9 +103,9 @@ class LiveTranscriptionManager:
                     self.on_text_added(text)
             else:
                 logger.info("Transcription result: [EMPTY/SILENCE]")
-            
+
             self.chunks_processed += 1
-            
+
         except Exception as e:
             self.total_errors += 1
             logger.error(f"Error processing live audio chunk: {e}\n{traceback.format_exc()}")

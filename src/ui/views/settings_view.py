@@ -12,31 +12,24 @@ class SettingsView(ft.Column):
 
         # Initialize UI Components
         self.gemini_api_key = ft.TextField(
-            label="Gemini API Key", password=True, can_reveal_password=True, width=500,
-            on_change=self._on_settings_change
+            label="Gemini API Key", password=True, can_reveal_password=True, width=500, on_change=self._on_settings_change
         )
         self.ollama_local_url = ft.TextField(
-            label="Ollama Local Base URL", width=500, hint_text="http://localhost:11434",
-            on_change=self._on_settings_change
+            label="Ollama Local Base URL", width=500, hint_text="http://localhost:11434", on_change=self._on_settings_change
         )
         self.ollama_cloud_api_key = ft.TextField(
-            label="Ollama Cloud API Key", password=True, can_reveal_password=True, width=500,
-            on_change=self._on_settings_change
+            label="Ollama Cloud API Key", password=True, can_reveal_password=True, width=500, on_change=self._on_settings_change
         )
-        self.ollama_cloud_url = ft.TextField(
-            label="Ollama Cloud URL", width=500, hint_text="https://ollama.com",
-            on_change=self._on_settings_change
-        )
-        self.force_gpu_checkbox = ft.Checkbox(
-            label="GPUを強制使用する (VRAM不足警告を無視)",
-            on_change=self._on_force_gpu_change
-        )
+        self.ollama_cloud_url = ft.TextField(label="Ollama Cloud URL", width=500, hint_text="https://ollama.com", on_change=self._on_settings_change)
+        self.force_gpu_checkbox = ft.Checkbox(label="GPUを強制使用する (VRAM不足警告を無視)", on_change=self._on_force_gpu_change)
 
         # Hardware display
-        self.hw_rows = ft.Column([
-            ft.Row([ft.Icon("computer"), ft.Text(f"System RAM: {hw_info['ram']} GB")]),
-            ft.Row([ft.Icon("storage"), ft.Text(f"GPU VRAM: {hw_info['vram']} GB")]),
-        ])
+        self.hw_rows = ft.Column(
+            [
+                ft.Row([ft.Icon("computer"), ft.Text(f"System RAM: {hw_info['ram']} GB")]),
+                ft.Row([ft.Icon("storage"), ft.Text(f"GPU VRAM: {hw_info['vram']} GB")]),
+            ]
+        )
 
         # Model compatibility list
         self.comp_items = ft.Column(spacing=0)
@@ -66,12 +59,7 @@ class SettingsView(ft.Column):
         ]
 
     def _create_card(self, title: str, controls: list):
-        return ft.Card(
-            content=ft.Container(
-                content=ft.Column([ft.Text(title, weight="bold")] + controls),
-                padding=15
-            )
-        )
+        return ft.Card(content=ft.Container(content=ft.Column([ft.Text(title, weight="bold")] + controls), padding=15))
 
     def _build_compatibility_list(self):
         self.comp_items.controls.clear()
@@ -93,10 +81,7 @@ class SettingsView(ft.Column):
     def _on_settings_change(self, e):
         self.config_mgr.set_provider_config("gemini", {"api_key": self.gemini_api_key.value})
         self.config_mgr.set_provider_config("ollama_local", {"base_url": self.ollama_local_url.value})
-        self.config_mgr.set_provider_config("ollama_cloud", {
-            "api_key": self.ollama_cloud_api_key.value,
-            "base_url": self.ollama_cloud_url.value
-        })
+        self.config_mgr.set_provider_config("ollama_cloud", {"api_key": self.ollama_cloud_api_key.value, "base_url": self.ollama_cloud_url.value})
 
     def _on_force_gpu_change(self, e):
         self.config_mgr.set_force_gpu(e.control.value)
@@ -104,14 +89,14 @@ class SettingsView(ft.Column):
     def init_view(self):
         gemini_conf = self.config_mgr.get_provider_config("gemini")
         self.gemini_api_key.value = gemini_conf.get("api_key", "")
-        
+
         ollama_local_conf = self.config_mgr.get_provider_config("ollama_local")
         self.ollama_local_url.value = ollama_local_conf.get("base_url", "http://localhost:11434")
-        
+
         ollama_cloud_conf = self.config_mgr.get_provider_config("ollama_cloud")
         self.ollama_cloud_api_key.value = ollama_cloud_conf.get("api_key", "")
         self.ollama_cloud_url.value = ollama_cloud_conf.get("base_url", "https://ollama.com")
-        
+
         self.force_gpu_checkbox.value = self.config_mgr.get_force_gpu()
         if self.page:
             self.update()

@@ -76,7 +76,7 @@ class WhisperTranscriber:
     def get_model_device(self, model_name, force_gpu=False):
         """Determines the best device (cuda or cpu) for a specific model."""
         self.last_warning = ""
-        
+
         if not torch.cuda.is_available():
             return "cpu"
 
@@ -86,7 +86,7 @@ class WhisperTranscriber:
 
         req = self.MODEL_REQUIREMENTS.get(model_name, 1.0)
         vram = self.get_hardware_info()["vram"]
-        
+
         if vram >= req:
             return "cuda"
         else:
@@ -137,15 +137,15 @@ class WhisperTranscriber:
 
         logger.info(f"Starting faster-whisper transcription (Device: {self.model.model.device})")
         start_time = time.time()
-        
+
         try:
             # faster-whisper returns a generator of segments
             segments, info = self.model.transcribe(input_source, beam_size=5)
-            
+
             # Combine segments into a single string
             text_parts = [segment.text for segment in segments]
             full_text = "".join(text_parts).strip()
-            
+
             duration = time.time() - start_time
             logger.info(f"Transcription completed in {duration:.2f}s (Detected lang: {info.language})")
             return full_text

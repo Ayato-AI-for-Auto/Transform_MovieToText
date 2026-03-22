@@ -1,79 +1,52 @@
-import shutil
-import tempfile
-import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import numpy as np
-
-from src.recorder import AudioRecorder
+from src.recorder import AudioRecorder, FFmpegRecorder
 
 
-class TestRecorder(unittest.TestCase):
-    def setUp(self):
-        self.test_dir = Path(tempfile.mkdtemp())
-        self.recorder = AudioRecorder(output_dir=self.test_dir, segment_time=1, overlap=1)
+def test_ffmpeg_recorder_command():
+    with patch("subprocess.Popen") as mock_popen:
+        mock_process = MagicMock()
+        mock_popen.return_value = mock_process
 
-    def tearDown(self):
-        if self.test_dir.exists():
-            shutil.rmtree(self.test_dir)
+        recorder = FFmpegRecorder(mp3_path="test.mp3")
+        recorder.start()
 
-    @patch('soundcard.default_microphone')
-    def test_recorder_start_stop_mic(self, mock_mic):
-        mock_device = MagicMock()
-        mock_mic.return_value = mock_device
-        
-        self.recorder.source = "microphone"
-        self.recorder.start()
-        self.assertTrue(self.recorder.is_recording)
-        
-        self.recorder.stop()
-        self.assertFalse(self.recorder.is_recording)
+        # Wait a bit for thread to start and call popen
+        import time
 
-    @patch('soundcard.default_speaker')
-    def test_recorder_start_stop_system(self, mock_speaker):
-        mock_device = MagicMock()
-        mock_speaker.return_value = mock_device
-        
-        self.recorder.source = "system"
-        self.recorder.start()
-        self.assertTrue(self.recorder.is_recording)
-        
-        self.recorder.stop()
-        self.assertFalse(self.recorder.is_recording)
+        for _ in range(10):
+            if mock_popen.called:
+                break
+            time.sleep(0.1)
 
-    def test_push_chunk_logic(self):
-        # Manually fill buffer with numpy blocks (1 block = 1024 samples)
-        # 16000 samples/sec
-        data_block = np.zeros(1024, dtype=np.float32)
-        
-        with self.recorder.buffer_lock:
-            for _ in range(16): # ~1s
-                self.recorder.audio_buffer.append(data_block)
-            self.recorder.current_samples_count = 1024 * 16
-            
-        self.recorder._push_chunk()
-        
-        # Should have pushed data to chunk_queue
-        self.assertEqual(self.recorder.chunk_queue.qsize(), 1)
-        audio_data = self.recorder.chunk_queue.get()
-        self.assertTrue(isinstance(audio_data, np.ndarray))
-        self.assertEqual(len(audio_data), 1024 * 16)
-        
-        # Test eviction
-        # segment=1, overlap=1 -> max_buffer=2s = 32000 samples
-        with self.recorder.buffer_lock:
-            # Add a lot of data to trigger eviction
-            for _ in range(100): 
-                self.recorder.audio_buffer.append(data_block)
-                self.recorder.current_samples_count += 1024
-            
-            # Manually trigger eviction logic check (simulating loop)
-            while self.recorder.current_samples_count > self.recorder.max_buffer_samples:
-                rem = self.recorder.audio_buffer.popleft()
-                self.recorder.current_samples_count -= len(rem)
-        
-        self.assertLessEqual(self.recorder.current_samples_count, self.recorder.max_buffer_samples)
+        # Check if FFmpeg was called with the right dual-output flags
+        assert mock_popen.called
+        args, kwargs = mock_popen.call_args
+        command = args[0]
 
-if __name__ == '__main__':
-    unittest.main()
+        assert "ffmpeg" in command
+        assert "test.mp3" in command
+        assert "-f" in command
+        assert "f32le" in command  # For pipe output
+
+        recorder.stop()
+        mock_process.terminate.assert_called()
+
+
+def test_audio_recorder_mp3_logic():
+    with patch("soundcard.default_microphone") as mock_mic, patch("subprocess.Popen") as mock_popen, patch("threading.Thread"):
+        mock_mic.return_value.name = "TestMic"
+        mock_process = MagicMock()
+        mock_popen.return_value = mock_process
+
+        recorder = AudioRecorder(mp3_path="test_mic.mp3")
+        recorder.start()
+
+        # AudioRecorder should start a background FFmpeg process for MP3
+        mock_popen.assert_called()
+        command = mock_popen.call_args[0][0]
+        assert "test_mic.mp3" in command
+        assert "audio=TestMic" in command
+
+        recorder.stop()
+        mock_process.terminate.assert_called()
