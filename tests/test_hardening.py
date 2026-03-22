@@ -13,8 +13,8 @@ def test_history_mgr_db_locked():
     if os.path.exists(db_path):
         try:
             os.remove(db_path)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Cleanup warning (test DB): {e}")
 
     conn = sqlite3.connect(db_path)
     try:
@@ -81,8 +81,8 @@ def test_history_mgr_scaling():
     if os.path.exists(db_path):
         try:
             os.remove(db_path)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Cleanup warning (test DB): {e}")
 
     mgr = HistoryManager(db_path=db_path)
     for i in range(100):
