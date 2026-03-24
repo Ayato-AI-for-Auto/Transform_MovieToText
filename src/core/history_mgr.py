@@ -129,7 +129,16 @@ class HistoryManager:
             )
             conn.commit()
             meeting_id = cursor.lastrowid
-            logger.info(f"Meeting record created/added (ID: {meeting_id}, Project: {project_name})")
+
+            # Explicitly sync FTS because external content triggers can be finicky in some environments
+            conn.execute(
+                "INSERT INTO meetings_fts(rowid, title, transcript, project_name, category, minutes_model) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (meeting_id, title, transcript, project_name, category, "")
+            )
+            conn.commit()
+
+            logger.info(f"Meeting record created/added and FTS synced (ID: {meeting_id}, Project: {project_name})")
             return meeting_id
         except sqlite3.OperationalError as e:
             logger.error(f"Database is locked or busy (add_meeting): {e}")

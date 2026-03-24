@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 
@@ -9,11 +9,16 @@ from src.live_processor import LiveTranscriptionManager
 class TestLiveProcessor(unittest.TestCase):
     def setUp(self):
         self.mock_transcriber = MagicMock()
-        self.manager = LiveTranscriptionManager(transcriber=self.mock_transcriber, on_text_added=MagicMock())
+        self.mock_recorder = MagicMock()
+        import queue
+        self.mock_recorder.chunk_queue = queue.Queue()
+        
+        with patch("src.live_processor.create_recorder", return_value=self.mock_recorder):
+            self.manager = LiveTranscriptionManager(transcriber=self.mock_transcriber, on_text_added=MagicMock())
 
     def test_handle_audio_data_numpy(self):
-        # Create a dummy numpy float32 chunk
-        audio_data = np.zeros(16000, dtype=np.float32)
+        # Create a dummy chunk with random noise to pass silence suppression
+        audio_data = np.random.uniform(-0.1, 0.1, 16000).astype(np.float32)
 
         self.mock_transcriber.transcribe.return_value = "Hello numpy world"
 
@@ -31,9 +36,9 @@ class TestLiveProcessor(unittest.TestCase):
         self.manager.on_text_added.assert_called_with("Hello numpy world")
 
     def test_worker_loop_consumes_queue(self):
-        # Push 2 chunks to recorder's queue
-        chunk1 = np.zeros(8000, dtype=np.float32)
-        chunk2 = np.ones(8000, dtype=np.float32)
+        # Push 2 chunks to recorder's queue with enough signal
+        chunk1 = np.random.uniform(-0.1, 0.1, 8000).astype(np.float32)
+        chunk2 = np.random.uniform(-0.1, 0.1, 8000).astype(np.float32)
 
         self.manager.recorder.chunk_queue.put(chunk1)
         self.manager.recorder.chunk_queue.put(chunk2)

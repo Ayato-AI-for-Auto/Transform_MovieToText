@@ -34,20 +34,19 @@ def test_ffmpeg_recorder_command():
         mock_process.terminate.assert_called()
 
 
-def test_audio_recorder_mp3_logic():
-    with patch("soundcard.default_microphone") as mock_mic, patch("subprocess.Popen") as mock_popen, patch("threading.Thread"):
-        mock_mic.return_value.name = "TestMic"
-        mock_process = MagicMock()
-        mock_popen.return_value = mock_process
+def test_audio_recorder_start_stop():
+    with patch("pyaudiowpatch.PyAudio") as mock_pa:
+        mock_pa.return_value.get_default_input_device_info.return_value = {"name": "TestMic"}
+        mock_stream = MagicMock()
+        mock_pa.return_value.open.return_value = mock_stream
 
         recorder = AudioRecorder(mp3_path="test_mic.mp3")
         recorder.start()
 
-        # AudioRecorder should start a background FFmpeg process for MP3
-        mock_popen.assert_called()
-        command = mock_popen.call_args[0][0]
-        assert "test_mic.mp3" in command
-        assert "audio=TestMic" in command
+        # AudioRecorder should initialize PyAudio
+        mock_pa.assert_called()
 
         recorder.stop()
-        mock_process.terminate.assert_called()
+        mock_stream.stop_stream.assert_called()
+        mock_stream.close.assert_called()
+        mock_pa.return_value.terminate.assert_called()

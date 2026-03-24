@@ -26,7 +26,7 @@ class OllamaLocalClient(BaseLLMClient):
             logger.error(f"Failed to list local Ollama models: {e}")
             return []
 
-    def generate_minutes(self, transcript: str, model_name: str) -> str:
+    def generate_minutes(self, transcript: str, model_name: str, visual_contexts: list = None) -> str:
         prompt = (
             "以下の文字起こしテキストを元に、構造化された議事録をMarkdown形式で作成してください。\n"
             "項目は「会議の概要」「決定事項」「ネクストアクション」を含めて、適切なヘッダーやリスト（# や -）を使用してください。\n\n"
@@ -38,6 +38,22 @@ class OllamaLocalClient(BaseLLMClient):
         except Exception as e:
             logger.error(f"Ollama Local generation error: {e}")
             raise
+
+    def extract_category(self, transcript: str, model_name: str) -> str:
+        """Extracts a short category/label (1-3 keywords) from the transcript."""
+        prompt = (
+            "以下の文字起こしテキストから、その内容を最もよく表す1〜3個の日本語キーワード、または"
+            "短いカテゴリー名（例：AI技術, プロジェクト進捗, 顧客ヒアリング）を抽出してください。\n"
+            "出力はキーワードのみ（カンマ区切り）とし、余計な説明は一切含めないでください。\n\n"
+            f"--- テキスト ---\n{transcript}"
+        )
+        try:
+            response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
+            category = response["message"]["content"].strip().replace("\n", "")
+            return category
+        except Exception as e:
+            logger.error(f"Ollama category extraction error: {e}")
+            return "未分類"
 
     def generate(self, prompt, model_name, system_prompt=None):
         """Legacy/Internal helper for direct generation."""
@@ -72,7 +88,7 @@ class OllamaCloudClient(BaseLLMClient):
             logger.warning(f"Failed to fetch models from Ollama Cloud: {e}")
             return ["gpt-oss:120b"]
 
-    def generate_minutes(self, transcript: str, model_name: str) -> str:
+    def generate_minutes(self, transcript: str, model_name: str, visual_contexts: list = None) -> str:
         prompt = (
             "以下の文字起こしテキストを元に、構造化された議事録をMarkdown形式で作成してください。\n"
             "項目は「会議の概要」「決定事項」「ネクストアクション」を含めて、適切なヘッダーやリスト（# や -）を使用してください。\n\n"
@@ -84,6 +100,22 @@ class OllamaCloudClient(BaseLLMClient):
         except Exception as e:
             logger.error(f"Ollama Cloud generation error: {e}")
             raise
+
+    def extract_category(self, transcript: str, model_name: str) -> str:
+        """Extracts a short category/label (1-3 keywords) from the transcript."""
+        prompt = (
+            "以下の文字起こしテキストから、その内容を最もよく表す1〜3個の日本語キーワード、または"
+            "短いカテゴリー名（例：AI技術, プロジェクト進捗, 顧客ヒアリング）を抽出してください。\n"
+            "出力はキーワードのみ（カンマ区切り）とし、余計な説明は一切含めないでください。\n\n"
+            f"--- テキスト ---\n{transcript}"
+        )
+        try:
+            response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
+            category = response["message"]["content"].strip().replace("\n", "")
+            return category
+        except Exception as e:
+            logger.error(f"Ollama category extraction error: {e}")
+            return "未分類"
 
     def generate(self, prompt, model_name, system_prompt=None):
         """Legacy/Internal helper for direct generation."""
