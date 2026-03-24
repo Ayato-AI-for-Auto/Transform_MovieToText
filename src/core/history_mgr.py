@@ -123,7 +123,8 @@ class HistoryManager:
         conn = sqlite3.connect(self.db_path, timeout=self.timeout)
         try:
             cursor = conn.execute(
-                "INSERT INTO meetings (title, transcript, audio_path, model_info, project_name, category, minutes_model) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO meetings (title, transcript, audio_path, model_info, project_name, category, minutes_model) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (title, transcript, audio_path, model_info, project_name, category, ""),
             )
             conn.commit()

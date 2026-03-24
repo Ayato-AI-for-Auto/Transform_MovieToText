@@ -35,7 +35,8 @@ def benchmark_whisper_performance():
 
     print(f"Model Load (base) - Duration: {load_duration:.2f}s")
     print(
-        f"Post-Load - RAM: {ram_after_load:.2f}MB (+{ram_after_load - ram_baseline:.2f}MB), VRAM: {vram_after_load:.2f}MB (+{vram_after_load - vram_baseline:.2f}MB)"
+        f"Post-Load - RAM: {ram_after_load:.2f}MB (+{ram_after_load - ram_baseline:.2f}MB), "
+        f"VRAM: {vram_after_load:.2f}MB (+{vram_after_load - vram_baseline:.2f}MB)"
     )
 
     # 3. Transcription Benchmark
