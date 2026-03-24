@@ -19,29 +19,64 @@ class TranscriptionController:
         self.config_mgr = config_mgr
         self.transcriber = transcriber
         self.live_mgr = None
+        self._live_start_time = None
+
+    def get_project_list(self):
+        """Returns unique project names from database."""
+        return history_mgr.get_projects()
 
     def start_file_transcription(self, file_path: str, model_name: str):
-        # ... (no change here)
+        logger.info(f"Initiating file transcription for: {file_path} (Model: {model_name})")
         if not file_path:
+            logger.warning("No file path provided for transcription.")
             return
 
         state.set("is_processing", True)
-        state.set("status_text", "文字起こし中... (初回モデルDL時は時間がかかります)")
+        state.set("status_text", "文字起こし準備中...")
         state.set("progress_visible", True)
+        state.set("transcription_progress", 0.0)
 
         def _worker():
+            logger.info(f"[_worker] Start. Path={file_path}, Model={model_name}")
             try:
                 force_gpu = self.config_mgr.get_force_gpu()
+                logger.info(f"[_worker] Loading model: {model_name} (GPU={force_gpu})")
                 self.transcriber.load_model(model_name, force_gpu=force_gpu)
+                logger.info("[_worker] Model loaded successfully.")
 
                 if self.transcriber.last_warning:
                     state.set("gpu_warning", f"⚠️ {self.transcriber.last_warning}")
                 else:
                     state.set("gpu_warning", "")
 
-                result = self.transcriber.transcribe(file_path, model_name=model_name, force_gpu=force_gpu, language="ja")
+                def progress_callback(progress):
+                    state.set("transcription_progress", progress)
+
+                logger.info("[_worker] Starting core transcription engine...")
+                result = self.transcriber.transcribe(
+                    file_path, model_name=model_name, force_gpu=force_gpu, language="ja", progress_callback=progress_callback
+                )
+                logger.info(f"[_worker] Transcription engine returned result (Length: {len(result)})")
+
                 state.set("transcript_text", result)
-                state.set("status_text", "文字起こし完了")
+                state.set("status_text", "文字起こし完了 (履歴に自動保存しました)")
+
+                # Auto-save file transcription to history
+                from src.core.utils import sanitize_filename
+
+                base_name = os.path.basename(file_path)
+                project_raw = state.get("project_name", "その他")
+                project_name = sanitize_filename(project_raw)
+                category = state.get("category", "未分類")
+
+                history_mgr.add_meeting(
+                    title=f"ファイル文字起こし: {base_name}",
+                    transcript=result,
+                    audio_path=file_path,
+                    model_info=model_name,
+                    project_name=project_name,
+                    category=category,
+                )
             except Exception as e:
                 logger.error(f"Transcription error: {e}", exc_info=True)
                 state.set("status_text", f"エラー: {e}")
@@ -49,7 +84,14 @@ class TranscriptionController:
                 state.set("is_processing", False)
                 state.set("progress_visible", False)
 
-        threading.Thread(target=_worker, daemon=True).start()
+        try:
+            thread = threading.Thread(target=_worker, daemon=True)
+            thread.start()
+            logger.info(f"Transcription thread launched: {thread.name}")
+        except Exception as e:
+            logger.error(f"Failed to launch transcription thread: {e}")
+            state.set("is_processing", False)
+            state.set("status_text", f"スレッド起動エラー: {e}")
 
     def toggle_live_recording(self, model_name: str, source: str):
         if state.get("is_recording"):
@@ -89,6 +131,9 @@ class TranscriptionController:
                 title=f"会議録音 ({timestamp_ui})", transcript="", audio_path="", model_info=model_name, project_name=project_name, category=category
             )
             state.set("current_meeting_id", meeting_id)
+            import time
+
+            self._live_start_time = time.time()
 
             # 2. Setup audio path
             from src.core.constants import DEFAULT_RECORDS_DIR
@@ -155,17 +200,32 @@ class TranscriptionController:
                     logger.error(f"Failed to auto-extract category: {e}")
                     category = "未分類"
 
-            # 3. Finalize record in DB
-            history_mgr.update_meeting(
-                meeting_id,
-                transcript=full_text,
-                audio_path=mp3_path,
-                category=category,  # Update with auto-extracted category
-            )
+            # 3. Finalize record in DB or Clean up if too short/empty
+            import time
+
+            duration = time.time() - (self._live_start_time or time.time())
+
+            if duration >= 30 and full_text.strip():
+                history_mgr.update_meeting(
+                    meeting_id,
+                    transcript=full_text,
+                    audio_path=mp3_path,
+                    category=category,
+                )
+                state.set("status_text", f"ライブ文字起こし完了（大分類: {category} / 履歴に保存済み）")
+            else:
+                logger.info(f"Recording discarded: duration={duration:.1f}s, length={len(full_text.strip())} chars (criteria: 30s AND 1+ char)")
+                # Delete the placeholder if it exists and criteria failed
+                if meeting_id:
+                    try:
+                        history_mgr.delete_meeting(meeting_id)
+                    except Exception as e:
+                        logger.warning(f"Failed to cleanup meeting record: {e}")
+                state.set("status_text", "ライブ文字起こし終了（短時間または無音のため履歴に保存しませんでした）")
 
             state.set("transcript_text", full_text)
-            state.set("status_text", f"ライブ文字起こし完了（大分類: {category}）")
             self.live_mgr = None
+            self._live_start_time = None
 
         threading.Thread(target=_stop_worker, daemon=True).start()
 

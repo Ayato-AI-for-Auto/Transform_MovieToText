@@ -78,7 +78,7 @@ class WhisperTranscriber:
         req = self.MODEL_REQUIREMENTS.get(model_name, 10.0)  # Default to 10GB if unknown
         return hw["vram"] >= req
 
-    def transcribe(self, path_or_io, model_name="base", force_gpu=False, language="ja", vad_filter=True, **kwargs):
+    def transcribe(self, path_or_io, model_name="base", force_gpu=False, language="ja", vad_filter=True, progress_callback=None, **kwargs):
         """
         Transcribes the file or BytesIO at the given path/object.
         Ensures the correct model is loaded.
@@ -118,15 +118,34 @@ class WhisperTranscriber:
                 **kwargs,
             )
 
-            # Convert segments to list to trigger actual transcription and check VAD
-            segments_list = list(segments)
+            # Convert segments iteratively to support progress updates
+            total_duration = info.duration
+            result_segments = []
+            segment_count = 0
+
+            logger.info(f"Processing segments... (Total duration: {total_duration:.2f}s)")
+            for segment in segments:
+                segment_count += 1
+                result_segments.append(segment.text)
+
+                # Enhanced Terminal Logging: Show progress and snippet
+                if total_duration > 0:
+                    pct = (segment.end / total_duration) * 100
+                    logger.info(f"[{pct:5.1f}%] {segment.start:6.1f}s -> {segment.end:6.1f}s | {segment.text.strip()}")
+                else:
+                    logger.info(f"Segment {segment_count}: {segment.text.strip()}")
+
+                if progress_callback and total_duration > 0:
+                    progress = min(segment.end / total_duration, 1.0)
+                    progress_callback(progress)
+
+            result_text = "".join(result_segments).strip()
+            logger.info(f"Processed {segment_count} segments. Result length: {len(result_text)} chars.")
 
             # Log VAD info if available
             # info.duration is the original audio duration
             if hasattr(info, "duration_after_vad"):
                 logger.info(f"VAD filter: {info.duration:.2f}s -> {info.duration_after_vad:.2f}s")
-
-            result_text = "".join([s.text for s in segments_list]).strip()
 
             duration = time.time() - start_time
             logger.info(f"Transcription completed in {duration:.2f}s (Detected lang: {info.language}, Prob: {info.language_probability:.2f})")

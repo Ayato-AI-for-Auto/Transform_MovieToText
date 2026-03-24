@@ -47,6 +47,11 @@ class MainWindow(ft.Row):
             self.content_container,
         ]
 
+    def switch_tab(self, index: int):
+        """Programmatically switch tabs."""
+        self.nav_rail.selected_index = index
+        self._on_nav_change(ft.ControlEvent(target="", name="change", data=str(index), control=self.nav_rail, page=self.page))
+
     def _on_nav_change(self, e):
         idx = e.control.selected_index
         logger.info(f"Navigation changed to index: {idx}")

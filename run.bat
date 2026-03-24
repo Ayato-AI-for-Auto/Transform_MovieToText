@@ -58,9 +58,6 @@ if %errorlevel% neq 0 (
 echo [INFO] Setup complete!
 echo [%date% %time%] Setup SUCCESS >> launcher.log
 
-:: [Debug Mode] Uncomment the line below to enable detailed logs
-:: set APP_DEBUG=1
-
 :launch_app
 echo [INFO] Launching application...
 echo [%date% %time%] Launching python main.py... >> launcher.log

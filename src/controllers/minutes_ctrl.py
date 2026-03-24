@@ -43,7 +43,8 @@ class MinutesController:
                 # Update history if we have a current meeting ID
                 meeting_id = state.get("current_meeting_id")
                 if meeting_id:
-                    history_mgr.update_minutes(meeting_id, res)
+                    history_mgr.update_minutes(meeting_id, res, model_name=model)
+                    state.set("status_text", f"議事録生成完了 (モデル: {model} / 履歴に保存済み)")
 
                 # Save last used model
                 self.config_mgr.set_last_model(model)
@@ -54,6 +55,13 @@ class MinutesController:
                 state.set("is_processing", False)
 
         threading.Thread(target=_worker, daemon=True).start()
+
+    def update_minutes_in_db(self, meeting_id: int, minutes: str):
+        """Manually update minutes in DB."""
+        if meeting_id and minutes:
+            history_mgr.update_minutes(meeting_id, minutes)
+            return True
+        return False
 
     def get_available_models(self, provider: str):
         """Helper to fetch models for a provider."""

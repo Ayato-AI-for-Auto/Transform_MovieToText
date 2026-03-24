@@ -29,6 +29,7 @@ class HistoryManager:
                     title TEXT,
                     transcript TEXT,
                     minutes TEXT,
+                    minutes_model TEXT,
                     audio_path TEXT,
                     model_info TEXT,
                     project_name TEXT,
@@ -48,13 +49,17 @@ class HistoryManager:
                 logger.info("Migrating database: Adding category column to meetings table.")
                 conn.execute("ALTER TABLE meetings ADD COLUMN category TEXT")
 
+            if "minutes_model" not in columns:
+                logger.info("Migrating database: Adding minutes_model column to meetings table.")
+                conn.execute("ALTER TABLE meetings ADD COLUMN minutes_model TEXT")
+
             # FTS5 Virtual Table for full-text search
             # Check if FTS5 needs recreation (it doesn't support ALTER TABLE)
             cursor = conn.execute("PRAGMA table_info(meetings_fts)")
             fts_columns = [row[1] for row in cursor.fetchall()]
 
-            if "project_name" not in fts_columns or "category" not in fts_columns:
-                logger.info("Migrating database: Recreating meetings_fts table to include new columns.")
+            if "project_name" not in fts_columns or "category" not in fts_columns or "minutes_model" not in fts_columns:
+                logger.info("Migrating database: Recreating meetings_fts table to include missing columns.")
                 conn.execute("DROP TABLE IF EXISTS meetings_fts")
                 conn.execute("DROP TRIGGER IF EXISTS meetings_ai")
                 conn.execute("DROP TRIGGER IF EXISTS meetings_ad")
@@ -62,32 +67,35 @@ class HistoryManager:
 
                 conn.execute("""
                     CREATE VIRTUAL TABLE meetings_fts USING fts5(
-                        title, transcript, project_name, category, content='meetings', content_rowid='id'
+                        title, transcript, project_name, category, minutes_model, content='meetings', content_rowid='id'
                     )
                 """)
                 # Re-populate FTS from the now-migrated main table
                 conn.execute(
-                    "INSERT INTO meetings_fts(rowid, title, transcript, project_name, category) "
-                    "SELECT id, title, transcript, project_name, category FROM meetings"
+                    "INSERT INTO meetings_fts(rowid, title, transcript, project_name, category, minutes_model) "
+                    "SELECT id, title, transcript, project_name, category, minutes_model FROM meetings"
                 )
 
             # Triggers (Re-created anyway if FTS was recreated, but CREATE IF NOT EXISTS handles the rest)
             conn.execute(
-                "CREATE TRIGGER IF NOT EXISTS meetings_ai AFTER INSERT ON meetings BEGIN"
-                "  INSERT INTO meetings_fts(rowid, title, transcript, project_name, category) "
-                "  VALUES (new.id, new.title, new.transcript, new.project_name, new.category); END;"
+                "CREATE TRIGGER IF NOT EXISTS meetings_ai AFTER INSERT ON meetings BEGIN "
+                "  INSERT INTO meetings_fts(rowid, title, transcript, project_name, category, minutes_model) "
+                "  VALUES (new.id, new.title, new.transcript, new.project_name, new.category, new.minutes_model); "
+                "END;"
             )
             conn.execute(
-                "CREATE TRIGGER IF NOT EXISTS meetings_ad AFTER DELETE ON meetings BEGIN"
-                "  INSERT INTO meetings_fts(meetings_fts, rowid, title, transcript, project_name, category) "
-                "  VALUES('delete', old.id, old.title, old.transcript, old.project_name, old.category); END;"
+                "CREATE TRIGGER IF NOT EXISTS meetings_ad AFTER DELETE ON meetings BEGIN "
+                "  INSERT INTO meetings_fts(meetings_fts, rowid, title, transcript, project_name, category, minutes_model) "
+                "  VALUES('delete', old.id, old.title, old.transcript, old.project_name, old.category, old.minutes_model); "
+                "END;"
             )
             conn.execute(
-                "CREATE TRIGGER IF NOT EXISTS meetings_au AFTER UPDATE ON meetings BEGIN"
-                "  INSERT INTO meetings_fts(meetings_fts, rowid, title, transcript, project_name, category) "
-                "  VALUES('delete', old.id, old.title, old.transcript, old.project_name, old.category);"
-                "  INSERT INTO meetings_fts(rowid, title, transcript, project_name, category) "
-                "  VALUES (new.id, new.title, new.transcript, new.project_name, new.category); END;"
+                "CREATE TRIGGER IF NOT EXISTS meetings_au AFTER UPDATE ON meetings BEGIN "
+                "  INSERT INTO meetings_fts(meetings_fts, rowid, title, transcript, project_name, category, minutes_model) "
+                "  VALUES('delete', old.id, old.title, old.transcript, old.project_name, old.category, old.minutes_model); "
+                "  INSERT INTO meetings_fts(rowid, title, transcript, project_name, category, minutes_model) "
+                "  VALUES (new.id, new.title, new.transcript, new.project_name, new.category, new.minutes_model); "
+                "END;"
             )
 
             # Visual context table for screenshots/images
@@ -115,8 +123,8 @@ class HistoryManager:
         conn = sqlite3.connect(self.db_path, timeout=self.timeout)
         try:
             cursor = conn.execute(
-                "INSERT INTO meetings (title, transcript, audio_path, model_info, project_name, category) VALUES (?, ?, ?, ?, ?, ?)",
-                (title, transcript, audio_path, model_info, project_name, category),
+                "INSERT INTO meetings (title, transcript, audio_path, model_info, project_name, category, minutes_model) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (title, transcript, audio_path, model_info, project_name, category, ""),
             )
             conn.commit()
             meeting_id = cursor.lastrowid
@@ -124,10 +132,10 @@ class HistoryManager:
             return meeting_id
         except sqlite3.OperationalError as e:
             logger.error(f"Database is locked or busy (add_meeting): {e}")
-            return None
+            raise
         except Exception as e:
             logger.error(f"Failed to add meeting record: {e}")
-            return None
+            raise
         finally:
             conn.close()
 
@@ -145,20 +153,26 @@ class HistoryManager:
             logger.info(f"Updated meeting record ID: {meeting_id} ({list(kwargs.keys())})")
         except Exception as e:
             logger.error(f"Failed to update meeting {meeting_id}: {e}")
+            raise
         finally:
             conn.close()
 
-    def update_minutes(self, meeting_id, minutes):
-        """Updates the minutes for a specific meeting."""
+    def update_minutes(self, meeting_id, minutes, model_name=None):
+        """Updates the minutes for a specific meeting (with optional model info)."""
         conn = sqlite3.connect(self.db_path, timeout=self.timeout)
         try:
-            conn.execute("UPDATE meetings SET minutes = ? WHERE id = ?", (minutes, meeting_id))
+            if model_name:
+                conn.execute("UPDATE meetings SET minutes = ?, minutes_model = ? WHERE id = ?", (minutes, model_name, meeting_id))
+            else:
+                conn.execute("UPDATE meetings SET minutes = ? WHERE id = ?", (minutes, meeting_id))
             conn.commit()
-            logger.info(f"Updated minutes for meeting ID: {meeting_id}")
+            logger.info(f"Updated minutes for meeting ID: {meeting_id} (Model: {model_name})")
         except sqlite3.OperationalError as e:
             logger.error(f"Database is locked or busy (update_minutes): {e}")
+            raise  # Re-raise to let caller know
         except Exception as e:
             logger.error(f"Failed to update minutes: {e}")
+            raise
         finally:
             conn.close()
 
@@ -232,6 +246,7 @@ class HistoryManager:
             logger.debug(f"Visual context added for meeting {meeting_id} at {timestamp_sec}s")
         except Exception as e:
             logger.error(f"Failed to add visual context: {e}")
+            raise
         finally:
             conn.close()
 
@@ -262,6 +277,19 @@ class HistoryManager:
         except Exception as e:
             logger.error(f"Failed to fetch projects: {e}")
             return []
+        finally:
+            conn.close()
+
+    def delete_meeting(self, meeting_id):
+        """Deletes a meeting and its associated visual contexts."""
+        conn = sqlite3.connect(self.db_path, timeout=self.timeout)
+        try:
+            conn.execute("DELETE FROM meetings WHERE id = ?", (meeting_id,))
+            conn.commit()
+            logger.info(f"Deleted meeting record ID: {meeting_id}")
+        except Exception as e:
+            logger.error(f"Failed to delete meeting {meeting_id}: {e}")
+            raise
         finally:
             conn.close()
 

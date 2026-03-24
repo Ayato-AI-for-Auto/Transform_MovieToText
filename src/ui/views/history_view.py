@@ -97,7 +97,12 @@ class HistoryView(ft.Column):
                                     ft.Text(f"日時: {timestamp}", size=12),
                                     ft.Row(
                                         [
-                                            ft.Badge(content=ft.Text(meeting["project_name"] or "未分類", size=10), bgcolor="blue700")
+                                            ft.Container(
+                                                content=ft.Text(meeting["project_name"] or "未分類", size=10, color="white"),
+                                                bgcolor="blue700",
+                                                padding=ft.padding.symmetric(horizontal=8, vertical=2),
+                                                border_radius=10,
+                                            )
                                             if meeting.get("project_name")
                                             else ft.Container(),
                                             ft.Text(f" {meeting['category'] or ''}", size=10, italic=True),
@@ -116,6 +121,11 @@ class HistoryView(ft.Column):
                                     on_click=lambda _: self._start_export(meeting_id),
                                     visible=bool(audio_path),
                                 ),
+                                ft.TextButton(
+                                    "議事録を生成",
+                                    icon=ft.Icons.STARS,
+                                    on_click=lambda _: self._generate_minutes(meeting),
+                                ),
                             ],
                             alignment="end",
                         ),
@@ -129,6 +139,7 @@ class HistoryView(ft.Column):
 
     def _show_details(self, meeting):
         # Update app state to show this meeting's content in the transcription/minutes tabs
+        state.set("current_meeting_id", meeting["id"])
         state.set("transcript_text", meeting["transcript"])
         state.set("minutes_text", meeting["minutes"] or "（未生成）")
 
@@ -137,6 +148,16 @@ class HistoryView(ft.Column):
             self.page.snack_bar = ft.SnackBar(ft.Text(f"「{meeting['title']}」の内容を各タブにロードしました"))
             self.page.snack_bar.open = True
             self.page.update()
+
+    def _generate_minutes(self, meeting):
+        self._show_details(meeting)
+        # Find MainWindow and switch tab
+        # Based on src/app.py, HistoryView is part of MainWindow
+        if hasattr(self.parent, "switch_tab"):
+            self.parent.switch_tab(1)  # 1 is AI Minutes tab
+        elif hasattr(self.page, "main_window"):
+            # Fallback if parent is not main_window directly
+            self.page.main_window.switch_tab(1)
 
     def _start_export(self, meeting_id):
         self.selected_meeting_id = meeting_id

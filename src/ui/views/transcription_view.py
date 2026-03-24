@@ -32,8 +32,16 @@ class TranscriptionView(ft.Column):
             on_change=self._on_source_change,
         )
 
+        # Project selection
+        self.project_dropdown = ft.Dropdown(
+            label="プロジェクト選択 (履歴から選ぶ)",
+            hint_text="既存のプロジェクトを選択",
+            width=300,
+            on_change=self._on_project_sel_change,
+        )
+
         self.project_name_field = ft.TextField(
-            label="プロジェクト名 (空欄で「その他」)", hint_text="例: AI研究プロジェクト", width=300, on_change=self._on_project_change
+            label="プロジェクト名 (新規作成/その他)", hint_text="例: AI研究プロジェクト", width=300, on_change=self._on_project_change
         )
 
         self.category_field = ft.TextField(
@@ -53,7 +61,8 @@ class TranscriptionView(ft.Column):
 
         self.status_text = ft.Text("待機中", color="grey400")
         self.gpu_warning_text = ft.Text("", color="orange700", weight="bold", size=12)
-        self.progress_bar = ft.ProgressBar(width=400, color="blue", visible=False)
+        self.progress_bar = ft.ProgressBar(width=400, color="blue", visible=False, value=0)
+        self.progress_text = ft.Text("0%", size=12, color="blue", visible=False)
 
         self.result_area = ft.TextField(
             label="文字起こし結果",
@@ -83,11 +92,11 @@ class TranscriptionView(ft.Column):
                 [
                     ft.Row([self.whisper_model_dropdown, self.force_gpu_checkbox, self.visual_capture_checkbox]),
                     ft.Row([ft.Text("録音ソース: ", weight="bold"), self.audio_source_radio]),
-                    ft.Row([self.project_name_field, self.category_field]),
+                    ft.Row([self.project_dropdown, self.project_name_field, self.category_field]),
                     ft.Row([self.transcribe_btn, self.live_record_btn]),
                     self.status_text,
                     self.gpu_warning_text,
-                    self.progress_bar,
+                    ft.Row([self.progress_bar, self.progress_text], spacing=10),
                 ]
             ),
             self.result_area,
@@ -105,7 +114,8 @@ class TranscriptionView(ft.Column):
         state.subscribe("is_recording", self._update_recording_ui)
         state.subscribe("is_processing", self._update_processing_ui)
         state.subscribe("gpu_warning", self._update_gpu_warning)
-        state.subscribe("progress_visible", self._update_progress)
+        state.subscribe("progress_visible", self._update_progress_visibility)
+        state.subscribe("transcription_progress", self._update_progress_value)
         state.subscribe("selected_file_path", self._update_path)
 
     def _update_result(self, val):
@@ -142,8 +152,19 @@ class TranscriptionView(ft.Column):
         if self.page:
             self.update()
 
-    def _update_progress(self, val):
+    def _update_progress_visibility(self, val):
         self.progress_bar.visible = val
+        self.progress_text.visible = val
+        if not val:
+            self.progress_bar.value = 0
+            self.progress_text.value = "0%"
+        if self.page:
+            self.update()
+
+    def _update_progress_value(self, val):
+        # val is 0.0 to 1.0
+        self.progress_bar.value = val
+        self.progress_text.value = f"{int(val * 100)}%"
         if self.page:
             self.update()
 
@@ -164,6 +185,22 @@ class TranscriptionView(ft.Column):
         state.set("audio_source", e.control.value)
         self.controller.config_mgr.set_audio_source(e.control.value)
 
+    def _on_project_sel_change(self, e):
+        val = e.control.value
+        if val == "__new__":
+            self.project_name_field.value = ""
+            self.project_name_field.disabled = False
+            self.project_name_field.visible = True
+            state.set("project_name", "")
+        else:
+            self.project_name_field.value = val
+            self.project_name_field.disabled = True
+            self.project_name_field.visible = False
+            state.set("project_name", val)
+
+        if self.page:
+            self.update()
+
     def _on_project_change(self, e):
         state.set("project_name", e.control.value)
 
@@ -175,9 +212,26 @@ class TranscriptionView(ft.Column):
         self.controller.config_mgr.set_visual_capture_enabled(e.control.value)
 
     def _on_transcribe_click(self, e):
-        path = state.get("selected_file_path")
-        model = state.get("whisper_model")
-        self.controller.start_file_transcription(path, model)
+        try:
+            path = state.get("selected_file_path")
+            model = state.get("whisper_model")
+            from src.controllers.transcription_ctrl import logger as ctrl_logger
+
+            ctrl_logger.info(f"UI: Transcribe button clicked. Path: {path}, Model: {model}")
+
+            if not path:
+                ctrl_logger.warning("UI: No file path selected.")
+                self.status_text.value = "ファイルを選択してください"
+                self.update()
+                return
+
+            self.controller.start_file_transcription(path, model)
+        except Exception as ex:
+            from src.controllers.transcription_ctrl import logger as ctrl_logger
+
+            ctrl_logger.error(f"UI: Error in _on_transcribe_click: {ex}", exc_info=True)
+            self.status_text.value = f"UIエラー: {ex}"
+            self.update()
 
     def _on_live_click(self, e):
         model = state.get("whisper_model")
@@ -199,10 +253,27 @@ class TranscriptionView(ft.Column):
         self.force_gpu_checkbox.value = self.controller.config_mgr.get_force_gpu()
         self.visual_capture_checkbox.value = self.controller.config_mgr.get_visual_capture_enabled()
         self.audio_source_radio.value = self.controller.config_mgr.get_audio_source()
+
+        # Refresh project list
+        projects = self.controller.get_project_list()
+        options = [ft.dropdown.Option(key="__new__", text="新規プロジェクト作成...")]
+
+        # Add projects from history, but skip "その他" to avoid duplication with manual entry
+        for p in projects:
+            if p != "その他":
+                options.append(ft.dropdown.Option(p))
+
+        # Always ensure "その他" is at the bottom
+        options.append(ft.dropdown.Option("その他"))
+        self.project_dropdown.options = options
+        self.project_dropdown.value = "__new__"  # Default to new
+
         # Set initial state
         state.set("whisper_model", self.whisper_model_dropdown.value, notify=False)
         state.set("force_gpu", self.force_gpu_checkbox.value, notify=False)
         state.set("visual_capture_enabled", self.visual_capture_checkbox.value, notify=False)
         state.set("audio_source", self.audio_source_radio.value, notify=False)
+        state.set("project_name", "", notify=False)  # Empty for new project initially
+
         if self.page:
             self.update()

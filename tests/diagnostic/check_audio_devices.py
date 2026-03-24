@@ -1,5 +1,5 @@
 import subprocess
-import re
+
 
 def main():
     print("--- FFmpeg Audio Device Diagnostic ---")
@@ -27,9 +27,9 @@ def main():
                     audio_lines.append(line)
                     # Also get the next line for Alternative name
                     idx = lines.index(line)
-                    if idx + 1 < len(lines) and "Alternative name" in lines[idx+1]:
-                        audio_lines.append(lines[idx+1])
-            
+                    if idx + 1 < len(lines) and "Alternative name" in lines[idx + 1]:
+                        audio_lines.append(lines[idx + 1])
+
             if audio_lines:
                 print(f"--- Decoded with {enc} ---")
                 for al in audio_lines:
@@ -46,6 +46,7 @@ def main():
     print("3. Click the 'Recording' tab.")
     print("4. Right-click in the empty space -> 'Show Disabled Devices'.")
     print("5. Right-click 'Stereo Mix' and select 'Enable'.")
+
 
 if __name__ == "__main__":
     main()

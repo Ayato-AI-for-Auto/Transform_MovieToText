@@ -42,6 +42,8 @@ class MinutesView(ft.Column):
             on_click=self._on_generate_click,
         )
 
+        self.target_meeting_text = ft.Text("対象の会議: (未選択/文字起こし完了直後のデータ)", size=14, color="blue300", italic=True)
+
         self.minutes_area = ft.TextField(
             label="生成された議事録",
             multiline=True,
@@ -69,9 +71,12 @@ class MinutesView(ft.Column):
             self.minutes_area,
             ft.Row(
                 [
+                    self.target_meeting_text,
+                    ft.ElevatedButton("履歴を更新", icon="update", on_click=self._on_db_update_click),
                     ft.ElevatedButton("議事録を保存", icon="save", on_click=self._on_save_click),
                 ],
                 alignment="end",
+                spacing=10,
             ),
         ]
 
@@ -139,6 +144,22 @@ class MinutesView(ft.Column):
         base_name = os.path.splitext(os.path.basename(path))[0] if path else "minutes"
         self.save_picker.save_file(file_name=f"【議事録】{base_name}.md")
 
+    def _on_db_update_click(self, e):
+        meeting_id = state.get("current_meeting_id")
+        minutes = state.get("minutes_text")
+        if not meeting_id:
+            if self.page:
+                self.page.snack_bar = ft.SnackBar(ft.Text("対象の会議IDが見つかりません。履歴から選択してください。"))
+                self.page.snack_bar.open = True
+                self.page.update()
+            return
+
+        success = self.controller.update_minutes_in_db(meeting_id, minutes)
+        if success and self.page:
+            self.page.snack_bar = ft.SnackBar(ft.Text("履歴データベースを更新しました。"))
+            self.page.snack_bar.open = True
+            self.page.update()
+
     def _on_minutes_change(self, e):
         state.set("minutes_text", e.control.value, notify=False)
 
@@ -148,5 +169,15 @@ class MinutesView(ft.Column):
         self.llm_provider_dropdown.value = active_provider
         state.set("llm_provider", active_provider, notify=False)
         self._refresh_models()
+
+        # Update target meeting title
+        meeting_id = state.get("current_meeting_id")
+        if meeting_id:
+            # We don't have a get_meeting_by_id in Ctrl yet, but we can assume State has enough info or just fetch briefly
+            # For now, let's just use what's in state if available, or a generic placeholder
+            self.target_meeting_text.value = f"対象の会議: ID #{meeting_id}"
+        else:
+            self.target_meeting_text.value = "対象の会議: (未選択/文字起こし直後のデータを使用)"
+
         if self.page:
             self.update()
