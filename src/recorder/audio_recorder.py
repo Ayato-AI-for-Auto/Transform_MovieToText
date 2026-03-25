@@ -1,10 +1,18 @@
 import logging
+import sys
 import threading
 import time
 from pathlib import Path
 
 import numpy as np
-import pyaudiowpatch as pyaudio
+
+try:
+    if sys.platform == "win32":
+        import pyaudiowpatch as pyaudio
+    else:
+        import pyaudio
+except ImportError:
+    pyaudio = None
 
 from .base import _BaseRecorder
 

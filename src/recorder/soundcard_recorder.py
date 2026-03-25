@@ -1,11 +1,19 @@
 import contextlib
 import logging
 import subprocess
+import sys
 import threading
 import time
 
 import numpy as np
-import pyaudiowpatch as pyaudio
+
+try:
+    if sys.platform == "win32":
+        import pyaudiowpatch as pyaudio
+    else:
+        import pyaudio
+except ImportError:
+    pyaudio = None
 import torch
 import torchaudio
 
