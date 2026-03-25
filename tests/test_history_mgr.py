@@ -1,6 +1,10 @@
+import logging
+
 import pytest
 
 from src.core.history_mgr import HistoryManager
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -21,13 +25,13 @@ def test_add_and_get_meeting(temp_db):
         project_name="AI Research",
         category="AI, Development",
     )
-    print(f"DEBUG: Created meeting ID: {meeting_id}")
+    logger.debug(f"DEBUG: Created meeting ID: {meeting_id}")
     assert meeting_id > 0
 
     meetings = temp_db.get_all_meetings()
     assert len(meetings) == 1
     m = meetings[0]
-    print(f"DEBUG: Retrieved meeting: {m}")
+    logger.debug(f"DEBUG: Retrieved meeting: {m}")
     assert m["title"] == "Test Meeting"
     assert m["project_name"] == "AI Research"
     assert m["category"] == "AI, Development"

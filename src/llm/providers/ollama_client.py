@@ -88,7 +88,6 @@ class OllamaLocalClient(BaseLLMClient):
             logger.error(f"Ollama title generation error: {e}")
             return "タイトルなし"
 
-
     def generate(self, prompt, model_name, system_prompt=None):
         """Legacy/Internal helper for direct generation."""
         messages = []
@@ -175,7 +174,6 @@ class OllamaCloudClient(BaseLLMClient):
         except Exception as e:
             logger.error(f"Ollama cloud title generation error: {e}")
             return "タイトルなし"
-
 
     def generate(self, prompt, model_name, system_prompt=None):
         """Legacy/Internal helper for direct generation."""

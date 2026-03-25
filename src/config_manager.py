@@ -135,6 +135,7 @@ class ConfigManager:
     def get_embedding_provider(self):
         """Returns the current embedding provider: 'google' or 'local'."""
         from .core.constants import DEFAULT_EMBEDDING_PROVIDER
+
         return self.config.get("embedding_provider", DEFAULT_EMBEDDING_PROVIDER)
 
     def set_embedding_provider(self, provider):
@@ -148,6 +149,7 @@ class ConfigManager:
     def get_embedding_model(self):
         """Returns the current embedding model name."""
         from .core.constants import DEFAULT_EMBEDDING_MODEL
+
         return self.config.get("embedding_model", DEFAULT_EMBEDDING_MODEL)
 
     def set_embedding_model(self, model_name):

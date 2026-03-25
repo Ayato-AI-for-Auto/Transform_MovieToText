@@ -11,6 +11,7 @@ class HistoryController:
     """
     Controller for meeting history.
     """
+
     def __init__(self):
         pass
 

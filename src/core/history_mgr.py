@@ -5,9 +5,12 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class HistoryError(Exception):
     """Base exception for History Manager."""
+
     pass
+
 
 class HistoryManager:
     """
@@ -30,6 +33,7 @@ class HistoryManager:
     def _init_db(self):
         """Initializes the database schema and migration logic."""
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             try:
                 # 1. Main table creation
@@ -51,7 +55,7 @@ class HistoryManager:
                 # 2. Schema Migration
                 cursor = conn.execute("PRAGMA table_info(meetings)")
                 columns = [row[1] for row in cursor.fetchall()]
-                
+
                 migration_needed = False
                 for col in ["project_name", "category", "minutes_model"]:
                     if col not in columns:
@@ -73,7 +77,7 @@ class HistoryManager:
                             tokenize='unicode61'
                         )
                     """)
-                    
+
                     # Seed FTS index from existing data
                     conn.execute(
                         "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) "
@@ -108,7 +112,7 @@ class HistoryManager:
                         FOREIGN KEY(meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
                     )
                 """)
-                
+
                 conn.commit()
                 logger.debug("Database initialization successful.")
             except sqlite3.Error as e:
@@ -118,23 +122,23 @@ class HistoryManager:
     def add_meeting(self, title: str, transcript: str, audio_path: str, model_info: str = "", project_name: str = "", category: str = "") -> int:
         """Adds a new meeting. Manually updates FTS."""
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             try:
                 # 1. Insert into base table
                 cursor = conn.execute(
                     "INSERT INTO meetings (title, transcript, audio_path, model_info, project_name, category, minutes_model) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (title, transcript, audio_path, model_info, project_name, category, "")
+                    (title, transcript, audio_path, model_info, project_name, category, ""),
                 )
                 meeting_id = cursor.lastrowid
-                
+
                 # 2. Sync to FTS table (Manual sync)
                 conn.execute(
-                    "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (meeting_id, title, transcript, "", project_name, category, "")
+                    "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (meeting_id, title, transcript, "", project_name, category, ""),
                 )
-                
+
                 conn.commit()
                 return meeting_id
             except sqlite3.Error as e:
@@ -147,22 +151,29 @@ class HistoryManager:
             return
 
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             try:
                 # 1. Update base table
-                cols = ", ".join([f"{k} = ?" for k in kwargs.keys()])
+                cols = ", ".join([f"{k} = ?" for k in kwargs])
                 vals = list(kwargs.values())
                 vals.append(meeting_id)
                 conn.execute(f"UPDATE meetings SET {cols} WHERE id = ?", tuple(vals))
-                
+
                 # 2. Re-sync FTS row (Delete then Insert is the safest way to update standalone FTS)
                 row = conn.execute("SELECT * FROM meetings WHERE id = ?", (meeting_id,)).fetchone()
                 if row:
                     conn.execute("DELETE FROM meetings_fts WHERE rowid = ?", (meeting_id,))
-                    conn.execute("INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) "
-                                 "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                                 (meeting_id, row['title'], row['transcript'], row['minutes'], row['project_name'], row['category'], row['minutes_model']))
-                
+                    conn.execute(
+                        "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (meeting_id, row["title"], row["transcript"], row["minutes"], row["project_name"], row["category"], row["minutes_model"]),
+                    )
+                    logger.debug(
+                        "Synchronized FTS5: meeting_id=%d title=%s minutes_model=%s",
+                        meeting_id, row['title'], row['minutes_model']
+                    )
+
                 conn.commit()
             except sqlite3.Error as e:
                 logger.error(f"Error updating meeting {meeting_id}: {e}")
@@ -178,6 +189,7 @@ class HistoryManager:
     def delete_meeting(self, meeting_id: int):
         """Deletes a meeting from history and FTS index."""
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             try:
                 conn.execute("DELETE FROM meetings_fts WHERE rowid = ?", (meeting_id,))
@@ -189,6 +201,7 @@ class HistoryManager:
 
     def get_meeting(self, meeting_id: int) -> dict[str, Any] | None:
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             cursor = conn.execute("SELECT * FROM meetings WHERE id = ?", (meeting_id,))
             row = cursor.fetchone()
@@ -196,6 +209,7 @@ class HistoryManager:
 
     def get_all_meetings(self) -> list[dict[str, Any]]:
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             cursor = conn.execute("SELECT * FROM meetings ORDER BY timestamp DESC")
             return [dict(row) for row in cursor.fetchall()]
@@ -203,11 +217,13 @@ class HistoryManager:
     def search_meetings(self, query: str) -> list[dict[str, Any]]:
         """Performs optimized search using FTS5."""
         from src.core.utils import sanitize_fts_query
+
         safe_query = sanitize_fts_query(query)
         if not safe_query:
             return []
 
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             sql = "SELECT * FROM meetings WHERE id IN (SELECT rowid FROM meetings_fts WHERE meetings_fts MATCH ?) ORDER BY timestamp DESC"
             try:
@@ -219,6 +235,7 @@ class HistoryManager:
 
     def get_projects(self) -> list[str]:
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             cursor = conn.execute("SELECT DISTINCT project_name FROM meetings WHERE project_name IS NOT NULL AND project_name != ''")
             return [row[0] for row in cursor.fetchall()]
@@ -229,15 +246,19 @@ class HistoryManager:
         """Persists an embedding for a specific meeting and model."""
         import json
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             try:
                 # Store as JSON string or binary (JSON is safer for interchange, binary more compact)
                 # For SQLite industrial strength, we'll use JSON for now to ensure portability
                 vector_data = json.dumps(vector)
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT OR REPLACE INTO meeting_embeddings (meeting_id, model_name, embedding)
                     VALUES (?, ?, ?)
-                """, (meeting_id, model_name, vector_data))
+                """,
+                    (meeting_id, model_name, vector_data),
+                )
                 conn.commit()
             except sqlite3.Error as e:
                 logger.error(f"Failed to save embedding for meeting {meeting_id}: {e}")
@@ -247,11 +268,9 @@ class HistoryManager:
         """Retrieves a cached embedding for a specific model."""
         import json
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
-            cursor = conn.execute(
-                "SELECT embedding FROM meeting_embeddings WHERE meeting_id = ? AND model_name = ?",
-                (meeting_id, model_name)
-            )
+            cursor = conn.execute("SELECT embedding FROM meeting_embeddings WHERE meeting_id = ? AND model_name = ?", (meeting_id, model_name))
             row = cursor.fetchone()
             if row:
                 return json.loads(row[0])
@@ -260,9 +279,11 @@ class HistoryManager:
     def delete_embeddings(self, meeting_id: int):
         """Manually deletes all embeddings for a meeting (though ON DELETE CASCADE handles this)."""
         from contextlib import closing
+
         with closing(self._get_connection()) as conn:
             conn.execute("DELETE FROM meeting_embeddings WHERE meeting_id = ?", (meeting_id,))
             conn.commit()
+
 
 # Singleton instance
 history_mgr = HistoryManager()

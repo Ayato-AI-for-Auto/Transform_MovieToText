@@ -6,21 +6,17 @@ from src.llm.factory import LLMFactory
 
 logger = logging.getLogger(__name__)
 
+
 class MinutesService:
     """
     Handles business logic for generating meeting minutes and summaries.
     Decoupled from UI state.
     """
+
     def __init__(self, config_mgr: ConfigManager):
         self.config_mgr = config_mgr
 
-    def generate_minutes_sync(
-        self, 
-        transcript: str, 
-        provider: str, 
-        model: str, 
-        meeting_id: int | None = None
-    ) -> str:
+    def generate_minutes_sync(self, transcript: str, provider: str, model: str, meeting_id: int | None = None) -> str:
         """
         Synchronously generates minutes and updates history if meeting_id is provided.
         """
@@ -29,11 +25,7 @@ class MinutesService:
 
         # 1. Initialize client
         conf = self.config_mgr.get_provider_config(provider)
-        client = LLMFactory.create_client(
-            provider_name=provider, 
-            api_key=conf.get("api_key"), 
-            base_url=conf.get("base_url")
-        )
+        client = LLMFactory.create_client(provider_name=provider, api_key=conf.get("api_key"), base_url=conf.get("base_url"))
 
         # 2. Fetch Visual Context if available
         visual_contexts = []
@@ -57,7 +49,7 @@ class MinutesService:
                 history_mgr.update_minutes(meeting_id, res, model_name=model)
             except Exception as e:
                 logger.error(f"Failed to update history with minutes: {e}")
-        
+
         self.config_mgr.set_last_model(model)
         return res
 
@@ -65,11 +57,7 @@ class MinutesService:
         """Fetches available models for a given provider."""
         try:
             conf = self.config_mgr.get_provider_config(provider)
-            client = LLMFactory.create_client(
-                provider_name=provider, 
-                api_key=conf.get("api_key"), 
-                base_url=conf.get("base_url")
-            )
+            client = LLMFactory.create_client(provider_name=provider, api_key=conf.get("api_key"), base_url=conf.get("base_url"))
             return client.get_available_models()
         except Exception as e:
             logger.error(f"Failed to fetch models for {provider}: {e}")

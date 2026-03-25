@@ -37,7 +37,7 @@ def test_whisper_invalid_model_handling():
 
     transcriber = WhisperTranscriber()
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):  # Whisper usually raises RuntimeError for missing models
         transcriber.load_model("totally-invalid-model-name")
 
 

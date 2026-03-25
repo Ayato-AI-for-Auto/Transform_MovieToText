@@ -9,12 +9,14 @@ from src.transcriber import WhisperTranscriber
 
 logger = logging.getLogger(__name__)
 
+
 class TranscriptionController:
     """
     Controller for transcription UI.
     Delegates business logic to TranscriptionService.
     Handles Flet's state updates.
     """
+
     def __init__(self, config_mgr: ConfigManager, transcriber: WhisperTranscriber):
         self.config_mgr = config_mgr
         self.service = TranscriptionService(config_mgr, transcriber)
@@ -33,16 +35,12 @@ class TranscriptionController:
 
         def _worker():
             try:
+
                 def progress_callback(progress):
                     state.set("transcription_progress", progress)
 
-                result = self.service.transcribe_file_sync(
-                    file_path, 
-                    model_name, 
-                    language=language,
-                    progress_callback=progress_callback
-                )
-                
+                result = self.service.transcribe_file_sync(file_path, model_name, language=language, progress_callback=progress_callback)
+
                 state.set("transcript_text", result)
                 state.set("status_text", "文字起こし完了 (履歴に自動保存しました)")
             except Exception as e:
@@ -71,17 +69,13 @@ class TranscriptionController:
         category = state.get("category", "")
 
         try:
+
             def _on_text_added(text):
                 current = state.get("transcript_text", "")
                 state.set("transcript_text", current + text + " ")
 
             meeting_id = self.service.start_live_recording(
-                model_name=model_name,
-                source=source,
-                language=language,
-                project_name=project_name,
-                category=category,
-                on_text_added=_on_text_added
+                model_name=model_name, source=source, language=language, project_name=project_name, category=category, on_text_added=_on_text_added
             )
             state.set("current_meeting_id", meeting_id)
         except Exception as e:

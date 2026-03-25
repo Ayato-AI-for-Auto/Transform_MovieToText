@@ -13,6 +13,7 @@ def mock_fastembed():
         mock_class.return_value = mock_instance
         yield mock_instance
 
+
 def test_fastembed_embed_text(mock_fastembed):
     # Setup mock return value (iterator of numpy arrays)
     # FastEmbed's .embed() usually returns something like [np.array([0.1, 0.2])]
@@ -25,12 +26,10 @@ def test_fastembed_embed_text(mock_fastembed):
     assert embedding == [0.1, 0.2, 0.3]
     mock_fastembed.embed.assert_called_once_with(["hello world"])
 
+
 def test_fastembed_embed_batch(mock_fastembed):
     # Setup mock for batch
-    mock_fastembed.embed.return_value = iter([
-        np.array([1.0, 0.0]),
-        np.array([0.0, 1.0])
-    ])
+    mock_fastembed.embed.return_value = iter([np.array([1.0, 0.0]), np.array([0.0, 1.0])])
 
     provider = FastEmbedProvider()
     texts = ["A", "B"]

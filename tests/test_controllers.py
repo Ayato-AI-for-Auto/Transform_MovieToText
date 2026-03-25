@@ -33,31 +33,34 @@ def test_transcription_auto_save_heuristic_discard(mock_deps):
 
         state.set("current_meeting_id", 999)
 
-        with patch.object(history_mgr, "delete_meeting") as mock_delete, patch.object(history_mgr, "update_meeting") as mock_update:
+        with (
+            patch.object(history_mgr, "delete_meeting") as mock_delete,
+            patch.object(history_mgr, "update_meeting") as mock_update,
+            patch("src.llm.factory.LLMFactory.create_client") as mock_llm_factory,
+        ):
             # We block the threading part and run the worker logic sync for testing
             # In transcription_ctrl.py, stop_live_recording starts a thread with _stop_worker
             # We use the internal _stop_worker logic directly here
 
-            # Mock LLM for category extraction to avoid external calls
-            with patch("src.llm.factory.LLMFactory.create_client") as mock_llm_factory:
-                mock_llm = mock_llm_factory.return_value
-                mock_llm.extract_category.return_value = "Test"
+            mock_llm = mock_llm_factory.return_value
+            mock_llm.extract_category.return_value = "Test"
+            mock_llm.generate_title.return_value = "AI meeting"
 
-                # Manually trigger the core logic inside the worker
-                # (Usually we'd refactor the worker out to a method if it was complex,
-                # but for now we'll mimic the decision logic)
+            # Manually trigger the core logic inside the worker
+            # (Usually we'd refactor the worker out to a method if it was complex,
+            # but for now we'll mimic the decision logic)
 
-                duration = time.time() - ctrl._live_start_time
-                full_text = "Short text"
-                meeting_id = 999
+            duration = time.time() - ctrl._live_start_time
+            full_text = "Short text"
+            meeting_id = 999
 
-                if duration >= 30 and full_text.strip():
-                    history_mgr.update_meeting(meeting_id, transcript=full_text, audio_path="test.mp3")
-                else:
-                    history_mgr.delete_meeting(meeting_id)
+            if duration >= 30 and full_text.strip():
+                history_mgr.update_meeting(meeting_id, transcript=full_text, audio_path="test.mp3")
+            else:
+                history_mgr.delete_meeting(meeting_id)
 
-                mock_delete.assert_called_once_with(999)
-                mock_update.assert_not_called()
+            mock_delete.assert_called_once_with(999)
+            mock_update.assert_not_called()
 
 
 def test_transcription_auto_save_heuristic_persist(mock_deps):
@@ -107,6 +110,6 @@ def test_minutes_controller_persistence_with_model(mock_deps):
             assert mock_update.called
             args, kwargs = mock_update.call_args
             # Use loose matching to avoid signature mismatch during refactoring
-            assert 111 in args or kwargs.get('meeting_id') == 111
-            assert "Detailed summary" in args or kwargs.get('minutes') == "Detailed summary"
+            assert 111 in args or kwargs.get("meeting_id") == 111
+            assert "Detailed summary" in args or kwargs.get("minutes") == "Detailed summary"
             assert kwargs.get("model_name") == "gemini-1.5-pro"
