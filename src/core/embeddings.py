@@ -1,4 +1,5 @@
 import logging
+from typing import Any, AnyStr, TypeVar, Optional, Union
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
@@ -50,9 +51,20 @@ class FastEmbedProvider(BaseEmbeddingProvider):
 
 class EmbeddingFactory:
     @staticmethod
-    def create_provider(provider_type: str, **kwargs) -> BaseEmbeddingProvider:
+    def create_provider(provider_type: str, use_cache: bool = False, **kwargs) -> Any:
+        # Create base provider
         if provider_type == "google":
-            return GoogleEmbeddingProvider(api_key=kwargs.get("api_key"))
-        if provider_type == "local":
-            return FastEmbedProvider(model_name=kwargs.get("model_name", "BAAI/bge-small-en-v1.5"))
-        raise ValueError(f"Unknown embedding provider: {provider_type}")
+            provider = GoogleEmbeddingProvider(api_key=kwargs.get("api_key"))
+            model_name = provider.model
+        elif provider_type == "local":
+            model_name = kwargs.get("model_name", "BAAI/bge-small-en-v1.5")
+            provider = FastEmbedProvider(model_name=model_name)
+        else:
+            raise ValueError(f"Unknown embedding provider: {provider_type}")
+            
+        # Wrap with cache delegate if requested
+        if use_cache:
+            from src.core.embedding_cache import EmbeddingCacheDelegate
+            return EmbeddingCacheDelegate(provider, model_name)
+            
+        return provider

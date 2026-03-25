@@ -13132,3 +13132,23 @@ TypeError: Badge.__init__() got an unexpected keyword argument 'content'
 2026-03-25 10:36:52,870 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:74): Updating main window/page...
 2026-03-25 10:36:53,824 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:57): Navigation changed to index: 3
 2026-03-25 10:36:53,829 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:74): Updating main window/page...
+2026-03-25 10:41:33,698 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:57): Navigation changed to index: 0
+2026-03-25 10:41:33,705 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:74): Updating main window/page...
+2026-03-25 10:41:34,631 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:57): Navigation changed to index: 1
+2026-03-25 10:41:34,752 [INFO] [Thread-2 (_fetch_worker)] src.llm.factory (factory.py:16): LLMFactory: Creating client for gemini (API Key: AIza...ccmw, Base URL: None)
+2026-03-25 10:41:34,752 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:74): Updating main window/page...
+2026-03-25 10:41:34,800 [INFO] [Thread-2 (_fetch_worker)] src.llm.providers.gemini_client (gemini_client.py:17): GeminiLLMClient initialized.
+2026-03-25 10:41:34,802 [INFO] [Thread-2 (_fetch_worker)] src.llm.providers.gemini_client (gemini_client.py:22): Fetching available Gemini models...
+2026-03-25 10:41:34,921 [INFO] [Thread-2 (_fetch_worker)] httpx (_client.py:1025): HTTP Request: GET https://generativelanguage.googleapis.com/v1beta/models "HTTP/1.1 200 OK"
+2026-03-25 10:41:34,930 [INFO] [Thread-2 (_fetch_worker)] src.llm.providers.gemini_client (gemini_client.py:36): Successfully fetched 29 models in 0.13s.
+2026-03-25 10:41:37,062 [INFO] [ThreadPoolExecutor-0_0] src.config_manager (config_manager.py:49): Active provider changed: gemini -> ollama_local
+2026-03-25 10:41:37,094 [INFO] [Thread-3 (_fetch_worker)] src.llm.factory (factory.py:16): LLMFactory: Creating client for ollama_local (API Key: ****, Base URL: http://localhost:11434)
+2026-03-25 10:41:39,454 [INFO] [Thread-3 (_fetch_worker)] httpx (_client.py:1025): HTTP Request: GET http://localhost:11434/api/tags "HTTP/1.1 200 OK"
+2026-03-25 10:41:39,625 [INFO] [Thread-4 (_fetch_worker)] src.llm.factory (factory.py:16): LLMFactory: Creating client for ollama_local (API Key: ****, Base URL: http://localhost:11434)
+2026-03-25 10:41:41,699 [INFO] [Thread-4 (_fetch_worker)] httpx (_client.py:1025): HTTP Request: GET http://localhost:11434/api/tags "HTTP/1.1 200 OK"
+2026-03-25 10:41:48,921 [INFO] [ThreadPoolExecutor-0_0] src.config_manager (config_manager.py:49): Active provider changed: ollama_local -> ollama_cloud
+2026-03-25 10:41:48,924 [INFO] [Thread-5 (_fetch_worker)] src.llm.factory (factory.py:16): LLMFactory: Creating client for ollama_cloud (API Key: d31d...Jyc8, Base URL: https://ollama.com)
+2026-03-25 10:41:49,652 [INFO] [Thread-5 (_fetch_worker)] httpx (_client.py:1025): HTTP Request: GET https://ollama.com/api/tags "HTTP/1.1 200 OK"
+2026-03-25 10:42:00,782 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:57): Navigation changed to index: 3
+2026-03-25 10:42:00,788 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:74): Updating main window/page...
+2026-03-25 10:42:06,729 [INFO] [ThreadPoolExecutor-0_0] src.config_manager (config_manager.py:145): Embedding provider changed: local -> google

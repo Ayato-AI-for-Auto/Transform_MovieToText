@@ -12,12 +12,13 @@
             "base_url": "http://localhost:11434"
         }
     },
-    "active_provider": "gemini",
+    "active_provider": "ollama_cloud",
     "audio_source": "system",
     "force_gpu": true,
     "last_models": {
         "ollama_local": "minimax-m2:cloud",
         "gemini": "gemini-3.1-flash-lite-preview"
     },
-    "visual_capture_enabled": false
+    "visual_capture_enabled": false,
+    "embedding_provider": "google"
 }

@@ -96,6 +96,18 @@ class HistoryManager:
                         FOREIGN KEY(meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
                     )
                 """)
+
+                # 6. Multi-model Embeddings (v3.2)
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS meeting_embeddings (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        meeting_id INTEGER,
+                        model_name TEXT,
+                        embedding BLOB,
+                        UNIQUE(meeting_id, model_name),
+                        FOREIGN KEY(meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
+                    )
+                """)
                 
                 conn.commit()
                 logger.debug("Database initialization successful.")
@@ -210,6 +222,40 @@ class HistoryManager:
         with closing(self._get_connection()) as conn:
             cursor = conn.execute("SELECT DISTINCT project_name FROM meetings WHERE project_name IS NOT NULL AND project_name != ''")
             return [row[0] for row in cursor.fetchall()]
+
+    # --- Embedding Persistence (v3.2) ---
+
+    def save_embedding(self, meeting_id: int, model_name: str, vector: list[float]):
+        """Persists an embedding for a specific meeting and model."""
+        import json
+        from contextlib import closing
+        with closing(self._get_connection()) as conn:
+            try:
+                # Store as JSON string or binary (JSON is safer for interchange, binary more compact)
+                # For SQLite industrial strength, we'll use JSON for now to ensure portability
+                vector_data = json.dumps(vector)
+                conn.execute("""
+                    INSERT OR REPLACE INTO meeting_embeddings (meeting_id, model_name, embedding)
+                    VALUES (?, ?, ?)
+                """, (meeting_id, model_name, vector_data))
+                conn.commit()
+            except sqlite3.Error as e:
+                logger.error(f"Failed to save embedding for meeting {meeting_id}: {e}")
+                raise HistoryError(f"Embedding storage failed: {e}") from e
+
+    def get_embedding(self, meeting_id: int, model_name: str) -> list[float] | None:
+        """Retrieves a cached embedding for a specific model."""
+        import json
+        from contextlib import closing
+        with closing(self._get_connection()) as conn:
+            cursor = conn.execute(
+                "SELECT embedding FROM meeting_embeddings WHERE meeting_id = ? AND model_name = ?",
+                (meeting_id, model_name)
+            )
+            row = cursor.fetchone()
+            if row:
+                return json.loads(row[0])
+            return None
 
 # Singleton instance
 history_mgr = HistoryManager()
