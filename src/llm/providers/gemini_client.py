@@ -37,7 +37,7 @@ class GeminiLLMClient(BaseLLMClient):
             return result
         except Exception as e:
             logger.error(f"Failed to fetch Gemini models: {e}")
-            raise Exception(f"Failed to fetch models: {str(e)}")
+            raise RuntimeError(f"Failed to fetch models: {str(e)}") from e
 
     def generate_minutes(self, transcript: str, model_name: str, visual_contexts: list = None) -> str:
         """Generates meeting minutes using Gemini, with optional multimodal context."""
@@ -84,7 +84,7 @@ class GeminiLLMClient(BaseLLMClient):
             return response.text
         except Exception as e:
             logger.error(f"Gemini generation failed: {e}")
-            raise Exception(f"Failed to generate minutes: {str(e)}")
+            raise RuntimeError(f"Failed to generate minutes: {str(e)}") from e
 
     def extract_category(self, transcript: str, model_name: str) -> str:
         """Extracts a short category/label (1-3 keywords) from the transcript."""
@@ -111,3 +111,24 @@ class GeminiLLMClient(BaseLLMClient):
         except Exception as e:
             logger.error(f"Gemini category extraction failed: {e}")
             return "未分類"  # Fallback
+
+    def generate_title(self, transcript: str, model_name: str) -> str:
+        """Generates a concise meeting title using Gemini."""
+        logger.info(f"Generating title using Gemini model: {model_name}...")
+        prompt = (
+            "以下の文字起こしテキストの内容を要約し、非常に簡潔で分かりやすい「会議のタイトル」を1つ生成してください。\n"
+            "タイトルは20文字以内とし、余計な説明や記号、前置き（例：「タイトルは〜」）は一切含めないでください。タイトルのみを出力してください。\n\n"
+            f"--- テキスト ---\n{transcript}"
+        )
+        try:
+            response = self.client.models.generate_content(
+                model=model_name,
+                contents=[prompt],
+                config=types.GenerateContentConfig(temperature=0.5),
+            )
+            title = response.text.strip().replace("\n", "").replace("#", "")
+            logger.info(f"Generated title: {title}")
+            return title
+        except Exception as e:
+            logger.error(f"Gemini title generation failed: {e}")
+            return "タイトルなし"

@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Callable, Dict, List
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ class AppState:
     """
 
     def __init__(self):
-        self._state: Dict[str, Any] = {
+        self._state: dict[str, Any] = {
             "is_processing": False,
             "status_text": "準備完了",
             "transcript_text": "",
@@ -30,8 +31,9 @@ class AppState:
             "llm_provider": "gemini",
             "llm_model": None,
             "force_gpu": False,
+            "transcription_language": None,
         }
-        self._listeners: Dict[str, List[Callable[[Any], None]]] = {}
+        self._listeners: dict[str, list[Callable[[Any], None]]] = {}
 
     def get(self, key: str, default: Any = None) -> Any:
         return self._state.get(key, default)

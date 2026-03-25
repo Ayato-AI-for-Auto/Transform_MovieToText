@@ -85,7 +85,7 @@ class HistoryView(ft.Column):
         has_minutes = bool(meeting["minutes"])
         audio_path = meeting["audio_path"]
 
-        card = ft.Card(
+        return ft.Card(
             content=ft.Container(
                 content=ft.Column(
                     [
@@ -135,7 +135,6 @@ class HistoryView(ft.Column):
                 padding=10,
             )
         )
-        return card
 
     def _show_details(self, meeting):
         # Update app state to show this meeting's content in the transcription/minutes tabs

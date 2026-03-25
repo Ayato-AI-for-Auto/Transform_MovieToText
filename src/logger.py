@@ -4,37 +4,12 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 
-
-class ColorFormatter(logging.Formatter):
-    """Custom formatter to add colors to terminal output."""
-
-    # ANSI escape sequences for colors
-    GREY = "\x1b[38;20m"
-    YELLOW = "\x1b[33;20m"
-    RED = "\x1b[31;20m"
-    BOLD_RED = "\x1b[31;1m"
-    CYAN = "\x1b[36;20m"
-    RESET = "\x1b[0m"
-
-    FORMAT = "%(asctime)s [%(levelname)s] [%(threadName)s] %(name)s (%(filename)s:%(lineno)d): %(message)s"
-
-    FORMATS = {
-        logging.DEBUG: CYAN + FORMAT + RESET,
-        logging.INFO: GREY + FORMAT + RESET,
-        logging.WARNING: YELLOW + FORMAT + RESET,
-        logging.ERROR: RED + FORMAT + RESET,
-        logging.CRITICAL: BOLD_RED + FORMAT + RESET,
-    }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
+import colorlog
 
 
 def setup_logger():
     """
-    Sets up a robust rotating file logger and colorized terminal output.
+    Sets up a robust rotating file logger and professional colorized terminal output.
     This should be called as early as possible.
     """
     log_file = "app.log"
@@ -47,17 +22,31 @@ def setup_logger():
 
     try:
         # Standard format for file logging (No colors)
-        file_formatter = logging.Formatter("%(asctime)s [%(levelname)s] [%(threadName)s] %(name)s (%(filename)s:%(lineno)d): %(message)s")
+        log_format = "%(asctime)s [%(levelname)s] [%(threadName)s] %(name)s (%(filename)s:%(lineno)d): %(message)s"
+        file_formatter = logging.Formatter(log_format)
 
         # File Handler (Rotating)
         file_handler = RotatingFileHandler(log_file, maxBytes=max_size, backupCount=backup_count, encoding="utf-8")
         file_handler.setFormatter(file_formatter)
 
-        # Stream Handler (Console) - Using Custom Color Formatter
+        # Stream Handler (Console) - Using colorlog for professional output
         stream_handler = logging.StreamHandler(sys.stdout)
-        # Only use colors if we are in a terminal that supports it
+
         if sys.stdout.isatty():
-            stream_handler.setFormatter(ColorFormatter())
+            # Color configuration for professional terminal output
+            color_formatter = colorlog.ColoredFormatter(
+                "%(log_color)s" + log_format,
+                log_colors={
+                    "DEBUG": "cyan",
+                    "INFO": "green",
+                    "WARNING": "yellow",
+                    "ERROR": "red",
+                    "CRITICAL": "bold_red",
+                },
+                secondary_log_colors={},
+                style="%",
+            )
+            stream_handler.setFormatter(color_formatter)
         else:
             stream_handler.setFormatter(file_formatter)
 
@@ -74,7 +63,7 @@ def setup_logger():
 
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logging.info(f"--- 🚀 APP START at {now} ---")
-        logging.info("Traceability: Module names and line numbers are now included in all logs.")
+        logging.info("Professional logging initialized: colorlog library is now managing terminal output.")
 
     except Exception as e:
         # Fallback for lock contention or permission issues
@@ -85,7 +74,7 @@ def setup_logger():
 if __name__ == "__main__":
     setup_logger()
     logging.debug("This is a debug message (Cyan)")
-    logging.info("This is an info message (Grey)")
+    logging.info("This is an info message (Green)")
     logging.warning("This is a warning message (Yellow)")
     logging.error("This is an error message (Red)")
     logging.critical("This is a critical message (Bold Red)")

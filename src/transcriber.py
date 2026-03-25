@@ -78,7 +78,7 @@ class WhisperTranscriber:
         req = self.MODEL_REQUIREMENTS.get(model_name, 10.0)  # Default to 10GB if unknown
         return hw["vram"] >= req
 
-    def transcribe(self, path_or_io, model_name="base", force_gpu=False, language="ja", vad_filter=True, progress_callback=None, **kwargs):
+    def transcribe(self, path_or_io, model_name="base", force_gpu=False, language=None, vad_filter=True, progress_callback=None, **kwargs):
         """
         Transcribes the file or BytesIO at the given path/object.
         Ensures the correct model is loaded.
@@ -113,7 +113,7 @@ class WhisperTranscriber:
                 language=language,
                 initial_prompt=initial_prompt,
                 vad_filter=vad_filter,
-                vad_parameters=dict(threshold=0.3, min_silence_duration_ms=1000, speech_pad_ms=200),
+                vad_parameters={"threshold": 0.3, "min_silence_duration_ms": 1000, "speech_pad_ms": 200},
                 condition_on_previous_text=False,  # CRUCIAL: Prevents repetitive looping hallucinations
                 **kwargs,
             )

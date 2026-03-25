@@ -17,13 +17,12 @@ class LLMFactory:
 
         if provider_name == "gemini":
             return GeminiLLMClient(api_key=api_key)
-        elif provider_name == "ollama_local":
+        if provider_name == "ollama_local":
             return OllamaLocalClient(base_url=base_url)
-        elif provider_name == "ollama_cloud":
+        if provider_name == "ollama_cloud":
             return OllamaCloudClient(api_key=api_key, base_url=base_url)
-        else:
-            logger.error(f"Unsupported LLM provider: {provider_name}")
-            raise ValueError(f"Unknown LLM provider: {provider_name}")
+        logger.error(f"Unsupported LLM provider: {provider_name}")
+        raise ValueError(f"Unknown LLM provider: {provider_name}")
 
 
 def get_llm_client(provider_name, api_key, base_url=None):

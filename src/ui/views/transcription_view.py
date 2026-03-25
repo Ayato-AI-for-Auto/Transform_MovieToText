@@ -22,6 +22,17 @@ class TranscriptionView(ft.Column):
         self.force_gpu_checkbox = ft.Checkbox(label="GPUを強制使用する", on_change=self._on_force_gpu_change)
         self.visual_capture_checkbox = ft.Checkbox(label="映像も記録する", value=True, on_change=self._on_visual_capture_change)
 
+        self.language_dropdown = ft.Dropdown(
+            label="文字起こし言語",
+            width=200,
+            options=[
+                ft.dropdown.Option(key="auto", text="自動検知 (Auto)"),
+                ft.dropdown.Option(key="ja", text="日本語 (Japanese)"),
+                ft.dropdown.Option(key="en", text="英語 (English)"),
+            ],
+            on_change=self._on_language_change,
+        )
+
         self.audio_source_radio = ft.RadioGroup(
             content=ft.Row(
                 [
@@ -90,7 +101,7 @@ class TranscriptionView(ft.Column):
             ),
             ft.Column(
                 [
-                    ft.Row([self.whisper_model_dropdown, self.force_gpu_checkbox, self.visual_capture_checkbox]),
+                    ft.Row([self.whisper_model_dropdown, self.language_dropdown, self.force_gpu_checkbox, self.visual_capture_checkbox]),
                     ft.Row([ft.Text("録音ソース: ", weight="bold"), self.audio_source_radio]),
                     ft.Row([self.project_dropdown, self.project_name_field, self.category_field]),
                     ft.Row([self.transcribe_btn, self.live_record_btn]),
@@ -181,6 +192,12 @@ class TranscriptionView(ft.Column):
         state.set("force_gpu", e.control.value)
         self.controller.config_mgr.set_force_gpu(e.control.value)
 
+    def _on_language_change(self, e):
+        val = e.control.value
+        # Map "auto" to None for the backend
+        lang_code = None if val == "auto" else val
+        state.set("transcription_language", lang_code)
+
     def _on_source_change(self, e):
         state.set("audio_source", e.control.value)
         self.controller.config_mgr.set_audio_source(e.control.value)
@@ -225,7 +242,8 @@ class TranscriptionView(ft.Column):
                 self.update()
                 return
 
-            self.controller.start_file_transcription(path, model)
+            language = state.get("transcription_language")
+            self.controller.start_file_transcription(path, model, language=language)
         except Exception as ex:
             from src.controllers.transcription_ctrl import logger as ctrl_logger
 
@@ -253,6 +271,7 @@ class TranscriptionView(ft.Column):
         self.force_gpu_checkbox.value = self.controller.config_mgr.get_force_gpu()
         self.visual_capture_checkbox.value = self.controller.config_mgr.get_visual_capture_enabled()
         self.audio_source_radio.value = self.controller.config_mgr.get_audio_source()
+        self.language_dropdown.value = "auto"  # Default to auto
 
         # Refresh project list
         projects = self.controller.get_project_list()
@@ -273,6 +292,7 @@ class TranscriptionView(ft.Column):
         state.set("force_gpu", self.force_gpu_checkbox.value, notify=False)
         state.set("visual_capture_enabled", self.visual_capture_checkbox.value, notify=False)
         state.set("audio_source", self.audio_source_radio.value, notify=False)
+        state.set("transcription_language", None, notify=False)
         state.set("project_name", "", notify=False)  # Empty for new project initially
 
         if self.page:

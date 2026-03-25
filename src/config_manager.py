@@ -20,7 +20,7 @@ class ConfigManager:
     def load_config(self):
         if os.path.exists(self.config_path):
             try:
-                with open(self.config_path, "r", encoding="utf-8") as f:
+                with open(self.config_path, encoding="utf-8") as f:
                     return json.load(f)
             except Exception as e:
                 logger.error(f"Error loading config: {e}")
@@ -130,4 +130,30 @@ class ConfigManager:
         if old != enabled:
             self.config["visual_capture_enabled"] = enabled
             logger.info(f"Visual capture setting changed: {old} -> {enabled}")
+            self.save_config()
+
+    def get_embedding_provider(self):
+        """Returns the current embedding provider: 'google' or 'local'."""
+        from .core.constants import DEFAULT_EMBEDDING_PROVIDER
+        return self.config.get("embedding_provider", DEFAULT_EMBEDDING_PROVIDER)
+
+    def set_embedding_provider(self, provider):
+        """Sets the embedding provider: 'google' or 'local'."""
+        old = self.get_embedding_provider()
+        if old != provider:
+            self.config["embedding_provider"] = provider
+            logger.info(f"Embedding provider changed: {old} -> {provider}")
+            self.save_config()
+
+    def get_embedding_model(self):
+        """Returns the current embedding model name."""
+        from .core.constants import DEFAULT_EMBEDDING_MODEL
+        return self.config.get("embedding_model", DEFAULT_EMBEDDING_MODEL)
+
+    def set_embedding_model(self, model_name):
+        """Sets the embedding model name."""
+        old = self.get_embedding_model()
+        if old != model_name:
+            self.config["embedding_model"] = model_name
+            logger.info(f"Embedding model changed: {old} -> {model_name}")
             self.save_config()

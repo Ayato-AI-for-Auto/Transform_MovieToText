@@ -24,6 +24,7 @@ dependencies = [
     "python-dotenv",
     "pyautogui",
     "opencv-python",
+    "fastembed",
 ]
 
 [project.optional-dependencies]
@@ -39,7 +40,7 @@ line-length = 150
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"] # Basic errors, formatting, and imports
+select = ["E", "F", "I", "UP", "B", "A", "C4", "T20", "RET", "SIM"] # Enforce modern, bug-free, and simple code
 ignore = []
 
 [tool.ruff.lint.per-file-ignores]

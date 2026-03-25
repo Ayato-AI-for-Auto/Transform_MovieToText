@@ -17,3 +17,7 @@ DEFAULT_PROVIDERS = {
 }
 DEFAULT_ACTIVE_PROVIDER = "gemini"
 DEFAULT_WHISPER_MODEL = "base"
+
+# Embedding Defaults
+DEFAULT_EMBEDDING_PROVIDER = "local"  # Default to local for privacy
+DEFAULT_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"

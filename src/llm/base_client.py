@@ -29,3 +29,13 @@ class BaseLLMClient(ABC):
             model_name: The name of the LLM model to use.
         """
         pass
+
+    @abstractmethod
+    def generate_title(self, transcript: str, model_name: str) -> str:
+        """Generates a concise title (max 20-30 chars) from the transcript.
+
+        Args:
+            transcript: The transcribed text.
+            model_name: The name of the LLM model to use.
+        """
+        pass

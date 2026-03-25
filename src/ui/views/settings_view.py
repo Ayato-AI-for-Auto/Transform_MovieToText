@@ -23,6 +23,17 @@ class SettingsView(ft.Column):
         self.ollama_cloud_url = ft.TextField(label="Ollama Cloud URL", width=500, hint_text="https://ollama.com", on_change=self._on_settings_change)
         self.force_gpu_checkbox = ft.Checkbox(label="GPUを強制使用する (VRAM不足警告を無視)", on_change=self._on_force_gpu_change)
 
+        # Embedding Provider selection
+        self.embedding_provider_dropdown = ft.Dropdown(
+            label="Embeddingプロバイダー (将来の検索機能用)",
+            options=[
+                ft.dropdown.Option("local", "Local (FastEmbed - 効率的/プライバシー重視)"),
+                ft.dropdown.Option("google", "Google Gemini (高性能/オンライン必須)"),
+            ],
+            width=500,
+            on_change=self._on_embedding_provider_change,
+        )
+
         # Hardware display
         self.hw_rows = ft.Column(
             [
@@ -43,6 +54,9 @@ class SettingsView(ft.Column):
             self._create_card("Google Gemini", [self.gemini_api_key]),
             self._create_card("Ollama Local (ローカルまたはPattern 1)", [self.ollama_local_url]),
             self._create_card("Ollama Cloud (クラウドAPIを消費)", [self.ollama_cloud_api_key, self.ollama_cloud_url]),
+            ft.Divider(),
+            ft.Text("Embedding設定 (プライバシー/検索精度)", size=18, weight="w500"),
+            self.embedding_provider_dropdown,
             ft.Divider(),
             ft.Text("ハードウェア情報", size=18, weight="w500"),
             self.hw_rows,
@@ -86,6 +100,9 @@ class SettingsView(ft.Column):
     def _on_force_gpu_change(self, e):
         self.config_mgr.set_force_gpu(e.control.value)
 
+    def _on_embedding_provider_change(self, e):
+        self.config_mgr.set_embedding_provider(e.control.value)
+
     def init_view(self):
         gemini_conf = self.config_mgr.get_provider_config("gemini")
         self.gemini_api_key.value = gemini_conf.get("api_key", "")
@@ -98,5 +115,7 @@ class SettingsView(ft.Column):
         self.ollama_cloud_url.value = ollama_cloud_conf.get("base_url", "https://ollama.com")
 
         self.force_gpu_checkbox.value = self.config_mgr.get_force_gpu()
+        self.embedding_provider_dropdown.value = self.config_mgr.get_embedding_provider()
+
         if self.page:
             self.update()

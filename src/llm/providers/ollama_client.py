@@ -17,10 +17,30 @@ class OllamaLocalClient(BaseLLMClient):
     def get_available_models(self) -> list[str]:
         try:
             models_info = self.client.list()
-            if isinstance(models_info, dict) and "models" in models_info:
-                return sorted([m["name"] for m in models_info["models"] if "name" in m])
+            model_names = []
+
+            # 1. Handle ListResponse/Object shape (Standard for newer SDK)
             if hasattr(models_info, "models"):
-                return sorted([m.model for m in models_info.models])
+                for m in models_info.models:
+                    if hasattr(m, "model"):
+                        model_names.append(m.model)
+                    elif hasattr(m, "name"):
+                        model_names.append(m.name)
+                    elif isinstance(m, dict):
+                        model_names.append(m.get("model") or m.get("name"))
+
+            # 2. Handle Dictionary shape (Standard for older SDK or direct API)
+            elif isinstance(models_info, dict) and "models" in models_info:
+                for m in models_info["models"]:
+                    if isinstance(m, dict):
+                        name = m.get("name") or m.get("model")
+                        if name:
+                            model_names.append(name)
+
+            if model_names:
+                return sorted(set(model_names))
+
+            logger.warning(f"Ollama Local: No models found or unknown format: {type(models_info)}")
             return []
         except Exception as e:
             logger.error(f"Failed to list local Ollama models: {e}")
@@ -36,8 +56,8 @@ class OllamaLocalClient(BaseLLMClient):
             response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
             return response["message"]["content"]
         except Exception as e:
-            logger.error(f"Ollama Local generation error: {e}")
-            raise
+            logger.error(f"Ollama local generation failed: {e}")
+            raise RuntimeError(f"Failed to generate minutes: {str(e)}") from e
 
     def extract_category(self, transcript: str, model_name: str) -> str:
         """Extracts a short category/label (1-3 keywords) from the transcript."""
@@ -49,11 +69,25 @@ class OllamaLocalClient(BaseLLMClient):
         )
         try:
             response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
-            category = response["message"]["content"].strip().replace("\n", "")
-            return category
+            return response["message"]["content"].strip().replace("\n", "")
         except Exception as e:
             logger.error(f"Ollama category extraction error: {e}")
             return "未分類"
+
+    def generate_title(self, transcript: str, model_name: str) -> str:
+        """Generates a concise meeting title using Ollama."""
+        prompt = (
+            "以下の文字起こしテキストの内容を要約し、非常に簡潔で分かりやすい「会議のタイトル」を1つ生成してください。\n"
+            "タイトルは20文字以内とし、タイトルのみを出力してください。余計な説明は不要です。\n\n"
+            f"--- テキスト ---\n{transcript}"
+        )
+        try:
+            response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
+            return response["message"]["content"].strip().replace("\n", "").replace("#", "")
+        except Exception as e:
+            logger.error(f"Ollama title generation error: {e}")
+            return "タイトルなし"
+
 
     def generate(self, prompt, model_name, system_prompt=None):
         """Legacy/Internal helper for direct generation."""
@@ -81,8 +115,20 @@ class OllamaCloudClient(BaseLLMClient):
         # Cloud might have a fixed set if listing fails
         try:
             models_info = self.client.list()
-            if isinstance(models_info, dict) and "models" in models_info:
-                return sorted([m["name"] for m in models_info["models"] if "name" in m])
+            model_names = []
+
+            # Same robust check as local
+            if hasattr(models_info, "models"):
+                for m in models_info.models:
+                    model_names.append(getattr(m, "model", getattr(m, "name", None)))
+            elif isinstance(models_info, dict) and "models" in models_info:
+                for m in models_info["models"]:
+                    model_names.append(m.get("name") or m.get("model"))
+
+            model_names = [m for m in model_names if m]
+            if model_names:
+                return sorted(set(model_names))
+
             return ["gpt-oss:120b"]
         except Exception as e:
             logger.warning(f"Failed to fetch models from Ollama Cloud: {e}")
@@ -111,11 +157,25 @@ class OllamaCloudClient(BaseLLMClient):
         )
         try:
             response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
-            category = response["message"]["content"].strip().replace("\n", "")
-            return category
+            return response["message"]["content"].strip().replace("\n", "")
         except Exception as e:
             logger.error(f"Ollama category extraction error: {e}")
             return "未分類"
+
+    def generate_title(self, transcript: str, model_name: str) -> str:
+        """Generates a concise meeting title using Ollama Cloud."""
+        prompt = (
+            "以下の文字起こしテキストの内容を要約し、非常に簡潔で分かりやすい「会議のタイトル」を1つ生成してください。\n"
+            "タイトルは20文字以内とし、タイトルのみを出力してください。\n\n"
+            f"--- テキスト ---\n{transcript}"
+        )
+        try:
+            response = self.client.chat(model=model_name, messages=[{"role": "user", "content": prompt}])
+            return response["message"]["content"].strip().replace("\n", "").replace("#", "")
+        except Exception as e:
+            logger.error(f"Ollama cloud title generation error: {e}")
+            return "タイトルなし"
+
 
     def generate(self, prompt, model_name, system_prompt=None):
         """Legacy/Internal helper for direct generation."""

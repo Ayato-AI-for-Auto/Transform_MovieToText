@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import subprocess
 import threading
@@ -170,18 +171,16 @@ class SoundCardRecorder(_BaseRecorder):
                     self._stream.stop_stream()
                     self._stream.close()
                 except Exception:
-                    pass
+                    logger.debug("Stream close failed during cleanup (likely already closed)")
             if self._pa:
-                try:
+                with contextlib.suppress(Exception):
                     self._pa.terminate()
-                except Exception:
-                    pass
             if self.ffmpeg_proc:
                 try:
                     self.ffmpeg_proc.stdin.close()
                     self.ffmpeg_proc.wait(timeout=2)
                 except Exception:
-                    pass
+                    logger.debug("FFmpeg cleanup failed (likely already terminated)")
                 logger.info("FFmpeg MP3 encoder terminated.")
             logger.info("SoundCardRecorder loop finished.")
 
