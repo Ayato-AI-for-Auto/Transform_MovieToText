@@ -5,9 +5,8 @@ import threading
 import flet as ft
 
 from src.config_manager import ConfigManager
-from src.core.intent_router import IntentRouter, TransformationStrategy
+from src.core.intent_router import IntentRouter
 from src.core.transcription_service import TranscriptionService
-from src.core.utils import get_resource_path
 
 logger = logging.getLogger(__name__)
 
