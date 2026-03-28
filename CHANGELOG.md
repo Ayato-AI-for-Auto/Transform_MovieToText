@@ -1,0 +1,12 @@
+# [2.4.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.3.0...v2.4.0) (2026-03-28)
+
+
+### Bug Fixes
+
+* **ci:** explicitly include semantic-release plugins in npx call ([4354ed9](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/4354ed97955f78dcf02b0493295c4439eb8a9b01))
+* **ci:** install semantic-release and all plugins via npm before running ([3461326](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/3461326629450f67871af66918676ce5f8799578))
+
+
+### Features
+
+* integrate python-semantic-release for automated versioning and changelogs ([967241e](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/967241e01d638081ed2063968a81473949cbf41f))
