@@ -66,7 +66,7 @@ class WhisperTranscriber:
                     logger.error(f"WhisperTranscriber: Fallback failed: {retry_e}")
             
             logger.error(f"WhisperTranscriber: Failed to load model '{model_name}': {e}")
-            raise RuntimeError(f"Whisper model load error: {e}")
+            raise RuntimeError(f"Whisper model load error: {e}") from e
 
     def transcribe(
         self, audio_path: str, model_name: str, force_gpu: bool = False, language: str | None = None, progress_callback=None
