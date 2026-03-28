@@ -16,7 +16,7 @@ import logging
 
 import flet as ft
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.controllers.history_ctrl import HistoryController
 from src.controllers.minutes_ctrl import MinutesController
 from src.controllers.transcription_ctrl import TranscriptionController

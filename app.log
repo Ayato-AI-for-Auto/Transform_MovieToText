@@ -13152,3 +13152,9 @@ TypeError: Badge.__init__() got an unexpected keyword argument 'content'
 2026-03-25 10:42:00,782 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:57): Navigation changed to index: 3
 2026-03-25 10:42:00,788 [INFO] [ThreadPoolExecutor-0_0] src.ui.main_window (main_window.py:74): Updating main window/page...
 2026-03-25 10:42:06,729 [INFO] [ThreadPoolExecutor-0_0] src.config_manager (config_manager.py:145): Embedding provider changed: local -> google
+2026-03-28 18:21:21,286 [INFO] [MainThread] root (logger.py:65): --- 🚀 APP START at 2026-03-28 18:21:21 ---
+2026-03-28 18:21:21,287 [INFO] [MainThread] root (logger.py:66): Professional logging initialized: colorlog library is now managing terminal output.
+2026-03-28 18:21:21,287 [INFO] [MainThread] root (main.py:8): --- Python Startup: Logger Initialized ---
+2026-03-28 19:02:51,151 [INFO] [MainThread] root (logger.py:65): --- 🚀 APP START at 2026-03-28 19:02:51 ---
+2026-03-28 19:02:51,152 [INFO] [MainThread] root (logger.py:66): Professional logging initialized: colorlog library is now managing terminal output.
+2026-03-28 19:02:51,152 [INFO] [MainThread] root (main.py:8): --- Python Startup: Logger Initialized ---

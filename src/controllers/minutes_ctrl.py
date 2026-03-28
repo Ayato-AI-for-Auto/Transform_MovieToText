@@ -1,7 +1,7 @@
 import logging
 import threading
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.core.minutes_service import MinutesService
 from src.core.state import state
 

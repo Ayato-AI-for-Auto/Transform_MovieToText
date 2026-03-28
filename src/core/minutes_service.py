@@ -1,6 +1,6 @@
 import logging
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.core.history_mgr import history_mgr
 from src.llm.factory import LLMFactory
 

@@ -1,6 +1,6 @@
 import flet as ft
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 
 
 class SettingsView(ft.Column):

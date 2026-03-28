@@ -5,12 +5,12 @@ import time
 from collections.abc import Callable
 from datetime import datetime
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.core.history_mgr import history_mgr
-from src.live_processor import LiveTranscriptionManager
+from src.core.live_processor import LiveTranscriptionManager
+from src.core.whisper_transcriber import WhisperTranscriber
 from src.llm.factory import LLMFactory
 from src.recorder.visual_recorder import visual_recorder
-from src.transcriber import WhisperTranscriber
 
 logger = logging.getLogger(__name__)
 

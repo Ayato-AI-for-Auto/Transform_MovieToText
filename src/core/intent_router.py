@@ -2,7 +2,7 @@ import json
 import logging
 from enum import Enum
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.llm.factory import LLMFactory
 
 logger = logging.getLogger(__name__)

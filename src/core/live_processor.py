@@ -6,7 +6,7 @@ import traceback
 
 import numpy as np
 
-from src.recorder import create_recorder
+from src.core.recorder import create_recorder
 from src.transcriber import WhisperTranscriber
 
 logger = logging.getLogger(__name__)

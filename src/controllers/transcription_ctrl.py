@@ -1,7 +1,7 @@
 import logging
 import threading
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.core.history_mgr import history_mgr
 from src.core.state import state
 from src.core.transcription_service import TranscriptionService

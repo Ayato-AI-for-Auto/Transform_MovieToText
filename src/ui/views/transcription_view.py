@@ -4,7 +4,7 @@ import threading
 
 import flet as ft
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 from src.core.intent_router import IntentRouter
 from src.core.transcription_service import TranscriptionService
 
