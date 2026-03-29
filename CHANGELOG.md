@@ -1,3 +1,10 @@
+## [2.5.4](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.3...v2.5.4) (2026-03-29)
+
+
+### Bug Fixes
+
+* resolve ruff E402 by adding noqa: E402 ([e14adb7](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/e14adb7d3b73341c7ee04f17f0f2bf3e5377230a))
+
 ## [2.5.3](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.2...v2.5.3) (2026-03-29)
 
 
