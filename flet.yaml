@@ -1,0 +1,25 @@
+# Flet Project Configuration for Standalone Distribution
+
+# General information
+name: "Transform MovieToText"
+product: "Transform MovieToText"
+description: "Transcribe and summarize movies/audio using Whisper and Gemini."
+version: "2.0.0"
+
+# Package identifier (Reverse DNS format)
+package_name: "com.ayato.transformmovie2text"
+
+# Entry point for flet build
+main_module: "main"
+
+# Asset management (if any)
+assets_dir: "assets"
+
+# Build configurations
+windows:
+  product_name: "Transform MovieToText"
+  executable_name: "TransformMovieToText"
+
+macos:
+  product_name: "Transform MovieToText"
+  bundle_id: "com.ayato.transformmovie2text"
