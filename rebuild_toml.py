@@ -1,4 +1,6 @@
-[build-system]
+import os
+
+content = """[build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
@@ -62,3 +64,10 @@ dev = [
     "pytest-cov",
     "ruff",
 ]
+"""
+
+# Binary write to ensure NO BOM and exactly LF (no matter what the OS is)
+with open("pyproject.toml", "wb") as f:
+    f.write(content.strip().encode("utf-8") + b"\n")
+
+print("pyproject.toml has been rebuilt successfully with UTF-8 (No BOM) and LF.")

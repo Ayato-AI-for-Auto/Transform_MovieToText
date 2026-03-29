@@ -193,7 +193,6 @@ class HistoryView(ft.Column):
                     )
                 )
 
-
         def on_provider_change(e):
             new_provider = e.control.value
             sync_llm_models(self.page, self.config_mgr, new_provider, dd_model)

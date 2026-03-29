@@ -161,7 +161,6 @@ class ConfigManager:
             logger.info(f"Audio source changed: {old} -> {source}")
             self.save_config()
 
-
     def get_embedding_provider(self):
         """Returns the current embedding provider: 'google' or 'local'."""
         from .constants import DEFAULT_EMBEDDING_PROVIDER
