@@ -30,13 +30,18 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Add Flutter to path
+        shell: bash
+        run: |
+          echo "$FLUTTER_HOME/bin" >> $GITHUB_PATH
+
       - name: Install Flet SDK
         run: |
           pip install flet[all]
 
       - name: Build Windows App
         run: |
-          flet build windows --no-rich-output
+          uv run flet build windows --no-rich-output main.py
 
       - name: Zip Windows App
         shell: pwsh
@@ -73,13 +78,17 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Add Flutter to path
+        run: |
+          echo "$FLUTTER_HOME/bin" >> $GITHUB_PATH
+
       - name: Install Flet SDK
         run: |
           pip install flet[all]
 
       - name: Build macOS App
         run: |
-          flet build macos --no-rich-output
+          uv run flet build macos --no-rich-output main.py
 
       - name: Zip macOS App
         run: |
