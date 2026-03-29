@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.7...v2.6.0) (2026-03-29)
+
+
+### Features
+
+* upgrade desktop distribution to standalone flet build for Windows/macOS ([2aa03ef](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/2aa03efdc8a01944c1868d2b7f9938162fe89498))
+
 ## [2.5.7](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.6...v2.5.7) (2026-03-29)
 
 
