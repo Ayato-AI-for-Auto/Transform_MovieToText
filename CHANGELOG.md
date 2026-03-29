@@ -1,3 +1,10 @@
+## [2.5.5](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.4...v2.5.5) (2026-03-29)
+
+
+### Bug Fixes
+
+* resolve FilePicker TypeError by assigning on_result as attribute ([ad036e6](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/ad036e6002fb2398007b77e761eaf4ceaebcd253))
+
 ## [2.5.4](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.3...v2.5.4) (2026-03-29)
 
 
