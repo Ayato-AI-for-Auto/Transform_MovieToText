@@ -130,7 +130,7 @@ class TranscriptionView(ft.Column):
 
     # --- Event Handlers ---
 
-    def _on_file_picked(self, e: ft.FilePickerResultEvent):
+    def _on_file_picked(self, e):
         if not e.files:
             return
         file_path = e.files[0].path

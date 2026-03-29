@@ -401,7 +401,7 @@ class HistoryView(ft.Column):
         self.selected_meeting_id = meeting_id
         self.folder_picker.get_directory_path()
 
-    def _on_folder_result(self, e: ft.FilePickerResultEvent):
+    def _on_folder_result(self, e):
         if not e.path or not self.selected_meeting_id:
             return
 
