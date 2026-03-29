@@ -1,3 +1,10 @@
+## [2.5.3](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.2...v2.5.3) (2026-03-29)
+
+
+### Bug Fixes
+
+* remaining Flet 0.21+ compatibility issues in HistoryView and TranscriptionView ([2d54e4f](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/2d54e4f1a5f77ceeaddd62a8a583eb02d708215c))
+
 ## [2.5.2](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.1...v2.5.2) (2026-03-29)
 
 
