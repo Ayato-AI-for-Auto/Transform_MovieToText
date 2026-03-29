@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from src.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager
 
 
 def test_config_manager_save_load(tmp_path):
