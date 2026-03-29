@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def temp_db(tmp_path):
     db_file = tmp_path / "test_history.db"
-    mgr = HistoryManager(db_path=str(db_file))
-    return mgr
+    return HistoryManager(db_path=str(db_file))
 
 
 @pytest.fixture

@@ -4,8 +4,10 @@ import flet as ft
 
 from src.controllers.history_ctrl import HistoryController
 from src.core.config_manager import ConfigManager
+from src.core.constants import DEFAULT_LLM_MODELS, DEFAULT_PROVIDERS
 from src.core.transcription_service import TranscriptionService
 from src.core.whisper_transcriber import WhisperTranscriber
+from src.ui.ui_utils import sync_llm_models
 
 logger = logging.getLogger(__name__)
 
@@ -191,8 +193,6 @@ class HistoryView(ft.Column):
                     )
                 )
 
-        from src.core.constants import DEFAULT_PROVIDERS
-        from src.ui.ui_utils import sync_llm_models
 
         def on_provider_change(e):
             new_provider = e.control.value
@@ -201,7 +201,7 @@ class HistoryView(ft.Column):
         dd_provider = ft.Dropdown(
             label="プロバイダー",
             width=150,
-            options=[ft.dropdown.Option(k) for k in DEFAULT_PROVIDERS.keys()],
+            options=[ft.dropdown.Option(k) for k in DEFAULT_PROVIDERS],
             value=self.config_mgr.get_active_provider(),
             on_change=on_provider_change,
             text_size=12,
@@ -225,9 +225,8 @@ class HistoryView(ft.Column):
         try:
             # We use a placeholder and trigger an update immediately
             initial_models = DEFAULT_LLM_MODELS.get(initial_provider, ["loading..."])
-            # In a real app, we might want to cache these, but for now, we'll start with defaults
-            # and let the user change the provider to trigger a fresh fetch.
-        except:
+        except Exception as ex:
+            logger.error(f"Failed to get initial models: {ex}")
             initial_models = ["default"]
 
         dd_model = ft.Dropdown(

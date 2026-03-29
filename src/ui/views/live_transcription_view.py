@@ -35,7 +35,7 @@ class LiveTranscriptionView(ft.Column):
             on_change=self._on_whisper_change,
         )
 
-        provider_options = [ft.dropdown.Option(k) for k in DEFAULT_PROVIDERS.keys()]
+        provider_options = [ft.dropdown.Option(k) for k in DEFAULT_PROVIDERS]
         self.dd_provider = ft.Dropdown(
             label="AIプロバイダー",
             width=180,

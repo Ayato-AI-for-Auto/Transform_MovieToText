@@ -27,7 +27,7 @@ def test_sync_llm_models_initial_fetch():
     mock_client = MagicMock()
     mock_client.get_available_models.return_value = ["model1", "model2"]
 
-    with patch("src.llm.factory.LLMFactory.create_client", return_value=mock_client) as mock_create, patch("threading.Thread") as mock_thread:
+    with patch("src.llm.factory.LLMFactory.create_client", return_value=mock_client), patch("threading.Thread") as mock_thread:
         sync_llm_models(page, config_mgr, provider, dd_model)
 
         # Should have started a thread

@@ -119,11 +119,16 @@ class ConfigManager:
             self.save_config()
 
     def get_visual_capture_enabled(self):
+        """Returns whether screen/video capture is enabled."""
         return self.config.get("visual_capture_enabled", False)
 
     def set_visual_capture_enabled(self, enabled: bool):
-        self.config["visual_capture_enabled"] = enabled
-        self.save_config()
+        """Sets whether screen/video capture is enabled."""
+        old = self.get_visual_capture_enabled()
+        if old != enabled:
+            self.config["visual_capture_enabled"] = enabled
+            logger.info(f"Visual capture setting changed: {old} -> {enabled}")
+            self.save_config()
 
     def get_force_gpu(self):
         return self.config.get("force_gpu", False)
@@ -156,17 +161,6 @@ class ConfigManager:
             logger.info(f"Audio source changed: {old} -> {source}")
             self.save_config()
 
-    def get_visual_capture_enabled(self):
-        """Returns whether screen/video capture is enabled."""
-        return self.config.get("visual_capture_enabled", False)
-
-    def set_visual_capture_enabled(self, enabled: bool):
-        """Sets whether screen/video capture is enabled."""
-        old = self.get_visual_capture_enabled()
-        if old != enabled:
-            self.config["visual_capture_enabled"] = enabled
-            logger.info(f"Visual capture setting changed: {old} -> {enabled}")
-            self.save_config()
 
     def get_embedding_provider(self):
         """Returns the current embedding provider: 'google' or 'local'."""
