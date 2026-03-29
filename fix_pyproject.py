@@ -1,4 +1,3 @@
-import os
 
 content = """[build-system]
 requires = ["setuptools>=61.0"]

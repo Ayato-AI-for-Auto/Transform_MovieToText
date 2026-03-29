@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+
 from src.core.live_processor import LiveTranscriptionManager
 
 
