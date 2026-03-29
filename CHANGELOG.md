@@ -1,3 +1,10 @@
+## [2.5.7](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.6...v2.5.7) (2026-03-29)
+
+
+### Bug Fixes
+
+* update WhisperTranscriber import path in benchmark script ([3c1b70d](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/3c1b70d50bec042f08895fa05765ad494d027f7c))
+
 ## [2.5.6](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.5.5...v2.5.6) (2026-03-29)
 
 
