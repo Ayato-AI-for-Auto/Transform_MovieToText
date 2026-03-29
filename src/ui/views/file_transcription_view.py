@@ -159,7 +159,7 @@ class FileTranscriptionView(ft.Column):
     def _on_llm_change(self, e):
         self.config_mgr.set_last_model(self.dd_llm.value)
 
-    def _on_file_picked(self, e: ft.FilePickerResultEvent):
+    def _on_file_picked(self, e):
         if not e.files:
             return
         file_path = e.files[0].path
@@ -222,7 +222,7 @@ class FileTranscriptionView(ft.Column):
             self.progress_bar.visible = False
             self.update()
 
-    def _on_save_picked(self, e: ft.FilePickerResultEvent):
+    def _on_save_picked(self, e):
         if not e.path:
             return
         with open(e.path, "w", encoding="utf-8") as f:

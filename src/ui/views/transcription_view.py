@@ -234,7 +234,7 @@ class TranscriptionView(ft.Column):
         self.status_text.value = "✨ すべての処理が完了しました。"
         self.update()
 
-    def _on_save_picked(self, e: ft.FilePickerResultEvent):
+    def _on_save_picked(self, e):
         if not e.path:
             return
         try:

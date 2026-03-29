@@ -33,7 +33,7 @@ def test_database_lock_resilience(temp_db):
 
 def test_whisper_invalid_model_handling():
     """Tests if WhisperTranscriber raises clear errors for non-existent models."""
-    from src.transcriber import WhisperTranscriber
+    from src.core.whisper_transcriber import WhisperTranscriber
 
     transcriber = WhisperTranscriber()
 
@@ -43,7 +43,7 @@ def test_whisper_invalid_model_handling():
 
 def test_config_manager_file_corruption(tmp_path):
     """Tests how ConfigManager handles a corrupted config file."""
-    from src.config_manager import ConfigManager
+    from src.core.config_manager import ConfigManager
 
     config_file = tmp_path / "corrupted_config.json"
     with open(config_file, "w") as f:

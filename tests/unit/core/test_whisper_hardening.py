@@ -22,4 +22,4 @@ def test_whisper_load_model_fallback(mocker):
 
     assert mock_model_class.call_count == 2
     # Verify second call used the fallback compute_type
-    assert mock_model_class.call_args_list[1].kwargs["compute_type"] == "int8_float16"
+    assert mock_model_class.call_args_list[1].kwargs["compute_type"] == "int8"

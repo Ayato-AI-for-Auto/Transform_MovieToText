@@ -14,7 +14,7 @@ class TestLiveProcessor(unittest.TestCase):
 
         self.mock_recorder.chunk_queue = queue.Queue()
 
-        with patch("src.live_processor.create_recorder", return_value=self.mock_recorder):
+        with patch("src.core.live_processor.create_recorder", return_value=self.mock_recorder):
             self.manager = LiveTranscriptionManager(transcriber=self.mock_transcriber, on_text_added=MagicMock())
 
     def test_handle_audio_data_numpy(self):
