@@ -1,10 +1,9 @@
 # Transform Movie to Text (+ AI Minutes) v2.0.0
 
-動画ファイルやPC内部の音声から高精度に文字起こしし、複数のAIプロバイダー（Gemini / Ollama Local / Ollama Cloud）を活用して議事録を自動生成する **Windows向け** デスクトップアプリケーションです。
+動画ファイルやPC内部の音声から高精度に文字起こしし、複数のAIプロバイダー（Gemini / Ollama Local / Ollama Cloud）を活用して議事録を自動生成するデスクトップアプリケーションです。
 
-> **Note**: 本ツールは **Windows 環境** で開発・テストされています。
-> macOS / Linux では、システム音キャプチャ（DirectShow/WASAPI 等）や `run.bat` による自動環境構築など、OS固有の機能が動作しません。
-> 他OSでの動作は一切保証しておらず、サポートも行いません。
+> **Note**: 本ツールは Windows 環境をメインに開発・テストされています。
+> macOS でも動作しますが、システム音キャプチャなど一部の OS 固有機能が制限される場合があります。
 
 ## 主な機能 (Features)
 
@@ -39,11 +38,23 @@
 **B. マイク（対面会議や自分の声）を録音する場合:**
 「マイク」を選択すると、接続されているデフォルトのマイクを自動的に検出して使用します。特別な設定は不要ですが、Windowsのプライバシー設定でアプリからのマイクアクセスが許可されている必要があります。
 
-## 使い方 (How to Use)
+## 📦 インストールと実行方法
 
-### Thin Client インストール（推奨）
+### 1. デスクトップ版 (推奨・ビルド不要)
+Python のインストールすら不要です。GitHub の [Releases ページ](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/releases) から最新のバイナリをダウンロードし、展開して実行してください。
 
-環境構築は `run.bat` が全自動で行います。Pythonのインストールすら不要です。
+*   **Windows**: `TransformMovieToText-Windows.zip`
+*   **macOS**: `TransformMovieToText-macOS.zip`
+
+#### ⚠️ 初回起動時のセキュリティ警告について
+本ソフトは個人開発のプロトタイプ段階であるため、デジタル署名を行っていません。起動時に警告が表示されますが、以下の手順で実行可能です。
+
+*   **Windows**: 「Windows によって PC が保護されました」と表示されたら、**「詳細情報」** をクリックし、表示された **「実行」** ボタンを押してください。
+*   **macOS**: 「開発元を確認できないため開けません」と表示されたら、**「システム設定 ＞ プライバシーとセキュリティ」** を開き、下部にある **「このまま開く」** をクリックしてください。または、Finder でアプリを右クリックして **「開く」** を選択してください。
+
+### 2. Thin Client インストール (Windows専用)
+
+環境構築は `run.bat` が全自動で行います。
 
 1. [Releases ページ](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/releases) から最新の `TransformMovieToText-Windows-ThinClient.zip` をダウンロードします。
 2. ZIP を展開し、`run.bat` をダブルクリックします。
@@ -62,7 +73,7 @@ git clone https://github.com/Ayato-AI-for-Auto/Transform_MovieToText.git
 cd Transform_MovieToText
 
 ![Luxurious CI](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/actions/workflows/ci.yml/badge.svg)
-![Build Installer](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/actions/workflows/build-exe.yml/badge.svg)
+![Desktop Distribution](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/actions/workflows/desktop_distribution.yml/badge.svg)
 
 # uvを利用したローカルインストール
 uv pip install -e .
