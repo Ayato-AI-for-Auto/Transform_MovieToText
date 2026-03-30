@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.7.0...v2.7.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* resolve ruff linting errors in src and tests for CI compliance ([555c8a3](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/555c8a3b5b421ebd65f175596c86d95b3f27049a))
+
 # [2.7.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.6.0...v2.7.0) (2026-03-30)
 
 
