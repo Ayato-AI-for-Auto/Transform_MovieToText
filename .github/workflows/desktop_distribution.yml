@@ -35,13 +35,13 @@ jobs:
         run: |
           echo "$FLUTTER_HOME/bin" >> $GITHUB_PATH
 
-      - name: Install Flet SDK
+      - name: Install Flet SDK and Core Deps
         run: |
-          pip install flet[all]
+          pip install -r requirements_thin.txt
 
-      - name: Build Windows App
+      - name: Build Windows App (Thin)
         run: |
-          uv run flet build windows --no-rich-output main.py
+          uv run flet build windows --no-rich-output src/app.py
 
       - name: Zip Windows App
         shell: pwsh
@@ -82,13 +82,13 @@ jobs:
         run: |
           echo "$FLUTTER_HOME/bin" >> $GITHUB_PATH
 
-      - name: Install Flet SDK
+      - name: Install Flet SDK and Core Deps
         run: |
-          pip install flet[all]
+          pip install -r requirements_thin.txt
 
-      - name: Build macOS App
+      - name: Build macOS App (Thin)
         run: |
-          uv run flet build macos --no-rich-output main.py
+          uv run flet build macos --no-rich-output src/app.py
 
       - name: Zip macOS App
         run: |
