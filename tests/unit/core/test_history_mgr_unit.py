@@ -6,10 +6,8 @@ from src.core.history_mgr import HistoryManager
 
 @pytest.fixture
 def mock_history_mgr():
-    """Returns a HistoryManager instance with an in-memory database."""
-    mgr = HistoryManager(db_path=":memory:")
     # Ensure tables are created
-    return mgr
+    return HistoryManager(db_path=":memory:")
 
 def test_add_and_get_meeting(mock_history_mgr):
     """Tests adding a meeting and retrieving it by ID."""

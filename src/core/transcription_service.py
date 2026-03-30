@@ -4,6 +4,10 @@ import threading
 import time
 from collections.abc import Callable
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.core.live_processor import LiveTranscriptionManager
 
 from src.core.config_manager import ConfigManager
 from src.core.history_mgr import history_mgr

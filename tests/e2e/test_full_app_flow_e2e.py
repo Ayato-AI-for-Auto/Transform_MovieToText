@@ -43,10 +43,8 @@ def test_full_file_transcription_flow(mock_managers):
         # We mock os.path.exists to 'find' the dummy file
         with patch("os.path.exists", return_value=True), \
              patch("src.core.transcription_service.history_mgr", history_mgr), \
-             patch("src.core.transcription_service.WhisperTranscriber", return_value=transcriber):
-            
-            # We don't want to actually load audio from disk
-            with patch("src.core.whisper_transcriber.WhisperTranscriber.transcribe_file", return_value="Transcription result"):
+             patch("src.core.transcription_service.WhisperTranscriber", return_value=transcriber), \
+             patch("src.core.whisper_transcriber.WhisperTranscriber.transcribe_file", return_value="Transcription result"):
                 
                 result = service.transcribe_file_sync(
                     file_path="dummy_audio.mp3",

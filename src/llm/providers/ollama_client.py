@@ -75,7 +75,9 @@ class OllamaLocalClient(BaseLLMClient):
             if "model requires more system memory" in err_str:
                 logger.error(f"Ollama local RAM exhaustion: {err_str}")
                 raise RuntimeError(
-                    f"メモリ不足によりモデルを起動できませんでした。より軽量なバージョン（例: {model_name.split(':')[0]}:3.8b-mini-instruct-q4_K_M）を手動で 'ollama pull' して試してください。\n詳細: {err_str}"
+                    f"メモリ不足によりモデルを起動できませんでした。より軽量なバージョン"
+                    f"（例: {model_name.split(':')[0]}:3.8b-mini-instruct-q4_K_M）を"
+                    f"手動で 'ollama pull' して試してください。\n詳細: {err_str}"
                 ) from e
             logger.error(f"Ollama local generation failed: {e}")
             raise RuntimeError(f"Failed to generate minutes: {str(e)}") from e

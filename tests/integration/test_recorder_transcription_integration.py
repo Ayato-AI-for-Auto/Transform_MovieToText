@@ -26,10 +26,7 @@ def test_transcribe_numpy_integration(transcriber):
     # 3. Transcribe
     result = transcriber.transcribe_numpy(audio_data)
     
-    # Since it's silence, it might be empty string or generic noise text,
-    # but it should not crash and should return a string.
     assert isinstance(result, str)
-    print(f"Integration Test Result: '{result}'")
 
 def test_transcriber_model_switch(transcriber):
     """Tests that switching models correctly clears and reloads."""
