@@ -26,6 +26,6 @@ DEFAULT_LLM_MODELS = {
 DEFAULT_WHISPER_MODEL = "base"
 WHISPER_MODELS = ["tiny", "base", "small", "medium", "large-v2", "large-v3"]
 
-# Embedding Defaults
-DEFAULT_EMBEDDING_PROVIDER = "local"  # Default to local for privacy
+# Embedding Defaults (Privacy-First: FastEmbed is the non-negotiable default)
+DEFAULT_EMBEDDING_PROVIDER = "local"  
 DEFAULT_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"

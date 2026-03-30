@@ -37,12 +37,12 @@ class SettingsView(ft.Column):
             on_click=self._show_delete_confirmation,
         )
 
-        # Embedding Provider selection
+        # Embedding Provider selection (Local-first policy)
         self.embedding_provider_dropdown = ft.Dropdown(
-            label="Embeddingプロバイダー (将来の検索機能用)",
+            label="Embeddingプロバイダー (推奨: Local)",
             options=[
-                ft.dropdown.Option("local", "Local (FastEmbed - 効率的/プライバシー重視)"),
-                ft.dropdown.Option("google", "Google Gemini (高性能/オンライン必須)"),
+                ft.dropdown.Option("local", "Local (FastEmbed - 100%オフライン/プライバシー保護)"),
+                ft.dropdown.Option("google", "Google Gemini (高性能/要インターネット接続)"),
             ],
             width=500,
             on_change=self._on_embedding_provider_change,
@@ -73,7 +73,8 @@ class SettingsView(ft.Column):
             self._create_card("Ollama Local (ローカルまたはPattern 1)", [self.ollama_local_url]),
             self._create_card("Ollama Cloud (クラウドAPIを消費)", [self.ollama_cloud_api_key, self.ollama_cloud_url]),
             ft.Divider(),
-            ft.Text("Embedding設定 (プライバシー/検索精度)", size=18, weight="w500"),
+            ft.Text("Embedding設定 (デフォルト: ローカル)", size=18, weight="w500"),
+            ft.Text("ローカルEmbeddingを使用すると、検索用ベクトルも手元のPC内で生成されます。機密性を重視する場合はこちらを推奨します。", size=13, color="grey500"),
             self.embedding_provider_dropdown,
             ft.Divider(),
             ft.Text("ハードウェア情報", size=18, weight="w500"),
