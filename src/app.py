@@ -16,17 +16,10 @@ import logging
 
 import flet as ft
 
-from src.controllers.history_ctrl import HistoryController
-from src.controllers.minutes_ctrl import MinutesController
-from src.controllers.transcription_ctrl import TranscriptionController
 from src.core.config_manager import ConfigManager
 from src.core.state import state
-from src.core.whisper_transcriber import WhisperTranscriber
-from src.ui.main_window import MainWindow
-from src.ui.views.file_transcription_view import FileTranscriptionView
-from src.ui.views.history_view import HistoryView
-from src.ui.views.live_transcription_view import LiveTranscriptionView
-from src.ui.views.settings_view import SettingsView
+# src.core.whisper_transcriber is now lazy-loaded
+# src.ui and controllers are loaded only when environment is ready
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +36,18 @@ class FletApp:
 
         logger.info("FletApp: Initializing backend components...")
         self.config_mgr = ConfigManager()
+        
+        # Lazy load heavy components
+        from src.core.whisper_transcriber import WhisperTranscriber
+        from src.controllers.history_ctrl import HistoryController
+        from src.controllers.minutes_ctrl import MinutesController
+        from src.controllers.transcription_ctrl import TranscriptionController
+        from src.ui.main_window import MainWindow
+        from src.ui.views.file_transcription_view import FileTranscriptionView
+        from src.ui.views.history_view import HistoryView
+        from src.ui.views.live_transcription_view import LiveTranscriptionView
+        from src.ui.views.settings_view import SettingsView
+
         self.transcriber = WhisperTranscriber()
 
         # Detect hardware
@@ -105,7 +110,16 @@ class FletApp:
             except Exception as ex:
                 self._show_snack(f"保存失敗: {ex}")
 
-    def _show_snack(self, message):
-        self.page.snack_bar = ft.SnackBar(ft.Text(message))
-        self.page.snack_bar.open = True
-        self.page.update()
+def main(page: ft.Page):
+    from src.core.setup_wizard import is_env_ready, main as setup_main
+    
+    missing = is_env_ready()
+    if missing:
+        logger.warning(f"Missing dependencies: {missing}. Launching Setup Wizard.")
+        setup_main(page)
+    else:
+        FletApp(page)
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    ft.app(target=main)
