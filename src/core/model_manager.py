@@ -1,5 +1,9 @@
-import logging
 import contextlib
+import logging
+<<<<<<< HEAD
+import contextlib
+=======
+>>>>>>> fix/cleanup-final
 from typing import Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,10 @@ class ModelManager:
 
     def release_all(self):
         """Unlocks everything. Useful for app shutdown or low-power modes."""
+<<<<<<< HEAD
+=======
+
+>>>>>>> fix/cleanup-final
         for _name, client in self._clients.items():
             with contextlib.suppress(Exception):
                 client.unload()

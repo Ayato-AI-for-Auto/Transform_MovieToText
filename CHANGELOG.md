@@ -3,7 +3,11 @@
 
 ### Features
 
+<<<<<<< HEAD
 * migrate to Gemma 3 and stabilize transcription pipeline ([3a71ff7](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/3a71ff7e104d7c79055eb8e3e573f99579c67d23))
+=======
+* migrate to Gemma 3 and stabilize transcription pipeline ([3aa7723](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/3aa7723cdc869aff2f4bbbd86b4aa08e579fd843))
+>>>>>>> fix/cleanup-final
 
 # [2.8.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.7.1...v2.8.0) (2026-03-30)
 

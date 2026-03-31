@@ -12,6 +12,7 @@ def db_conn():
     return DatabaseConnection(":memory:")
 
 
+
 @pytest.fixture
 def meeting_repo(db_conn):
     repo = MeetingRepository(db_conn)

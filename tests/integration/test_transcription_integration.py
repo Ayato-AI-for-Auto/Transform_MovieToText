@@ -19,6 +19,7 @@ def test_env():
     mock_config.get_last_model.return_value = "fake-m"
 
     long_text = (
+<<<<<<< HEAD
         "This is a very long transcription result that definitely exceeds both the fifty "
         "character limit for titles and the one hundred character limit for AI category "
         "extraction. It is long enough to trigger all AI logic paths."
@@ -28,14 +29,26 @@ def test_env():
         "text": long_text,
         "segments": [{"start": 0.0, "end": 1.0, "text": "Something long."}]
     }
+=======
+        "This is a very long transcription result that definitely exceeds both the fifty character limit for titles "
+        "and the one hundred character limit for AI category extraction. It is long enough to trigger all AI logic paths. "
+        "EXTRA CONTENT FOR 200 PLUS CHARACTERS."
+    )
+    mock_transcriber = MagicMock(spec=WhisperTranscriber)
+    mock_transcriber.transcribe.return_value = {"text": long_text, "segments": [{"start": 0.0, "end": 1.0, "text": "Something long."}]}
+>>>>>>> fix/cleanup-final
 
     # Use real in-memory history
     history_mgr = HistoryManager(db_path=":memory:")
     service = TranscriptionService(mock_config, mock_transcriber, history_mgr=history_mgr)
 
     # Patch the singleton inside the service/controller to use our test instance
+<<<<<<< HEAD
     with patch("src.core.transcription_service._history_mgr", history_mgr), \
          patch("src.controllers.transcription_ctrl.history_mgr", history_mgr):
+=======
+    with patch("src.core.transcription_service._history_mgr", history_mgr), patch("src.controllers.transcription_ctrl.history_mgr", history_mgr):
+>>>>>>> fix/cleanup-final
         yield service, history_mgr, event_bus, long_text
 
 
@@ -63,6 +76,7 @@ def test_full_transcription_workflow_with_events(test_env, tmp_path):
 
     # Use LLMFactory.create_client as the patch target since it's imported into transcription_service
     with patch("src.core.transcription_service.LLMFactory.create_client", return_value=mock_llm):
+<<<<<<< HEAD
         result = service.transcribe_file_sync(
             file_path=str(fake_file),
             model_name="base",
@@ -70,6 +84,11 @@ def test_full_transcription_workflow_with_events(test_env, tmp_path):
         )
         # Wait for async logic if any (though sync call used here)
         time.sleep(1.0)
+=======
+        result = service.transcribe_file_sync(file_path=str(fake_file), model_name="base", project_name="Integrated")
+        # Wait inside patch scope
+        time.sleep(1.5)
+>>>>>>> fix/cleanup-final
 
         # 1. Verify Event Bus published
         assert len(events_received) == 1
@@ -80,3 +99,28 @@ def test_full_transcription_workflow_with_events(test_env, tmp_path):
         meeting = history.get_meeting(meeting_id)
         assert meeting["title"] == "Generated Title (video.mp4)"
         assert meeting["category"] == "Integrated"
+<<<<<<< HEAD
+=======
+
+
+def test_live_recording_integration_abort(test_env):
+    """Test that start_live_recording initializes the session correctly even if stopped quickly."""
+    service, history, bus, long_text = test_env
+
+    # Mock visual recorder to avoid threading issues in tests
+    with patch("src.recorder.visual_recorder.visual_recorder.start"), patch("src.core.live_processor.LiveTranscriptionManager.start"):
+        meeting_id = service.start_live_recording(model_name="m", source="System", project_name="IntegrationProject")
+
+        assert meeting_id is not None
+        assert service._current_meeting_id == meeting_id
+
+        # Finalize (abort early)
+        with patch("src.core.live_processor.LiveTranscriptionManager.stop", return_value=("", [])):
+            service.stop_live_recording()
+            # Stop logic is async in TranscriptionService, wait or join if needed
+            # In unit/integration tests, we might want to check the status after a small delay
+            time.sleep(0.1)
+
+            # Since it was empty/short, it should have been deleted
+            assert history.get_meeting(meeting_id) is None
+>>>>>>> fix/cleanup-final
