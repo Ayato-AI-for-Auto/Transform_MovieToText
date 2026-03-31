@@ -77,7 +77,7 @@ def test_update_minutes_rigorous(temp_db):
         ("Banana", 1),
         ("Apple", 1),
         ("Fruit", 0),  # Not in text
-        ("", 0),  # Empty query
+        ("", 2),  # Empty query now returns all meetings
     ],
 )
 def test_search_advanced(temp_db, query, expected_count):

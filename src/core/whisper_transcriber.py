@@ -2,8 +2,8 @@ import gc
 import logging
 import os
 import time
-
 import torch
+from faster_whisper import WhisperModel
 
 from src.core.model_manager import model_manager
 
@@ -42,8 +42,6 @@ class WhisperTranscriber:
         """
         # Request VRAM before loading
         model_manager.request_vram(WHISPER_CLIENT_NAME)
-
-        from faster_whisper import WhisperModel
 
         if self.current_model_name == model_name and self.model is not None:
             logger.debug(f"WhisperTranscriber: Model {model_name} already loaded.")
@@ -94,11 +92,21 @@ class WhisperTranscriber:
                     raise RuntimeError(
                         f"GPU稼働失敗: {e}. GPUメモリ不足、またはライブラリ不足です。モデルサイズを下げるか、CPUに切り替えてください。"
                     ) from retry_e
+            else:
+                # CPU Fallback (e.g. from float32/int8 to same if memory error occurs)
+                logger.error(f"WhisperTranscriber: CPU Load failed: {e}")
+                logger.info("WhisperTranscriber: Attempting CPU Fallback (int8)...")
+                try:
+                    self.unload()
+                    self.model = WhisperModel(model_name, device="cpu", compute_type="int8", download_root=self.cache_dir)
+                    self.current_model_name = model_name
+                    logger.info(f"WhisperTranscriber: SUCCESS on CPU Fallback after {time.time() - start_time:.2f}s")
+                    return
+                except Exception as retry_e:
+                    logger.error(f"WhisperTranscriber: CPU Load & Fallback failed: {retry_e}")
+                    raise 
 
             logger.error(f"WhisperTranscriber: General load failure for '{model_name}': {e}")
-            raise
-
-            logger.error(f"WhisperTranscriber: Failed to load model '{model_name}': {e}")
             raise
 
     def unload(self):
@@ -114,9 +122,9 @@ class WhisperTranscriber:
             torch.cuda.empty_cache()
             logger.info("WhisperTranscriber: Memory and CUDA cache cleared.")
 
-    def transcribe(self, audio_path: str, model_name: str, force_gpu: bool = False, language: str | None = None, progress_callback=None) -> str:
+    def transcribe(self, audio_path: str, model_name: str, force_gpu: bool = False, language: str | None = None, progress_callback=None) -> dict:
         """
-        Transcribes audio file to text.
+        Transcribes audio file to text, returning structured segments.
         """
         if self.model is None or self.current_model_name != model_name:
             self.load_model(model_name, force_gpu=force_gpu)
@@ -125,15 +133,56 @@ class WhisperTranscriber:
 
         segments, info = self.model.transcribe(audio_path, beam_size=5, language=language)
 
-        full_text = []
+        full_text_list = []
+        structured_segments = []
+        
         # Note: segments is a generator
         for segment in segments:
-            full_text.append(segment.text)
+            seg_data = {
+                "start": round(segment.start, 2),
+                "end": round(segment.end, 2),
+                "text": segment.text.strip()
+            }
+            structured_segments.append(seg_data)
+            full_text_list.append(segment.text)
+            
             if progress_callback:
-                # Approximate progress (since we don't know total duration easily here)
+                # Approximate progress
                 progress_callback(segment.end / info.duration if info.duration > 0 else 0)
 
-        return "".join(full_text).strip()
+        return {
+            "text": "".join(full_text_list).strip(),
+            "segments": structured_segments
+        }
+
+    def transcribe_numpy(self, audio_data, model_name: str | None = None, force_gpu: bool = False) -> dict:
+        """
+        Transcribes raw numpy audio data.
+        """
+        if model_name and (self.model is None or self.current_model_name != model_name):
+            self.load_model(model_name, force_gpu=force_gpu)
+            
+        if self.model is None:
+            # Default to loading base if nothing loaded
+            self.load_model("base", force_gpu=force_gpu)
+
+        segments, _ = self.model.transcribe(audio_data, beam_size=5)
+        
+        full_text_list = []
+        structured_segments = []
+        for segment in segments:
+            seg_data = {
+                "start": round(segment.start, 2),
+                "end": round(segment.end, 2),
+                "text": segment.text.strip()
+            }
+            structured_segments.append(seg_data)
+            full_text_list.append(segment.text)
+
+        return {
+            "text": "".join(full_text_list).strip(),
+            "segments": structured_segments
+        }
 
     def get_hardware_info(self) -> dict:
         """

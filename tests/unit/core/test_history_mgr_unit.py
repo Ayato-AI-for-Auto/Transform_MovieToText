@@ -31,7 +31,7 @@ def test_filtering_by_project(mock_history_mgr):
     mock_history_mgr.add_meeting("M1", "T1", "A1", "m", "P1", "c")
     mock_history_mgr.add_meeting("M2", "T2", "A2", "m", "P2", "c")
     
-    p1_meetings = mock_history_mgr.get_meetings_filtered(project_filter="P1")
+    p1_meetings = mock_history_mgr.get_meetings_filtered(project_names=["P1"])
     assert len(p1_meetings) == 1
     assert p1_meetings[0]["title"] == "M1"
 
@@ -40,15 +40,15 @@ def test_delete_project_and_migrate(mock_history_mgr):
     mock_history_mgr.add_meeting("M1", "T1", "A1", "m", "ToDelete", "c")
     
     # Verify it exists
-    assert len(mock_history_mgr.get_meetings_filtered(project_filter="ToDelete")) == 1
+    assert len(mock_history_mgr.get_meetings_filtered(project_names=["ToDelete"])) == 1
     
     # Delete and migrate
-    mock_history_mgr.delete_project_and_migrate("ToDelete")
+    mock_history_mgr.delete_project("ToDelete")
     
     # Should be gone from 'ToDelete'
-    assert len(mock_history_mgr.get_meetings_filtered(project_filter="ToDelete")) == 0
+    assert len(mock_history_mgr.get_meetings_filtered(project_names=["ToDelete"])) == 0
     
     # Should be moved to 'その他'
-    others = mock_history_mgr.get_meetings_filtered(project_filter="その他")
+    others = mock_history_mgr.get_meetings_filtered(project_names=["その他"])
     assert len(others) >= 1
     assert any(m["title"] == "M1" for m in others)

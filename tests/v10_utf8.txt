@@ -1,0 +1,94 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.17, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\saiha\My_Service\programing\Trancform_MovieToText
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.12.1, cov-7.1.0, mock-3.15.1
+collected 96 items
+
+tests\e2e\test_app_launch.py ..                                          [  2%]
+tests\e2e\test_full_app_flow_e2e.py F                                    [  3%]
+tests\integration\test_config_sync.py ..                                 [  5%]
+tests\integration\test_history_persistence.py ...                        [  8%]
+tests\integration\test_local_smart_flow.py .                             [  9%]
+tests\integration\test_recorder_transcription_integration.py ..          [ 11%]
+tests\integration\test_transcription_integration.py EE                   [ 13%]
+tests\system\test_complete_workflow.py .                                 [ 14%]
+tests\system\test_recording_flow.py FF                                   [ 16%]
+tests\test_error_resilience.py ...                                       [ 19%]
+tests\test_ollama_provider_pytest.py ...                                 [ 22%]
+tests\unit\core\test_advisor_logic.py .                                  [ 23%]
+tests\unit\core\test_config_manager.py ..                                [ 26%]
+tests\unit\core\test_event_bus.py ....                                   [ 30%]
+tests\unit\core\test_history_cockpit.py ....                             [ 34%]
+tests\unit\core\test_history_mgr.py ......                               [ 40%]
+tests\unit\core\test_history_mgr_rigorous.py .........                   [ 50%]
+tests\unit\core\test_history_mgr_unit.py ...                             [ 53%]
+tests\unit\core\test_live_processor.py ..                                [ 55%]
+tests\unit\core\test_recorder.py ..                                      [ 57%]
+tests\unit\core\test_repositories.py ......                              [ 63%]
+tests\unit\core\test_resource_advisor_unit.py ....                       [ 67%]
+tests\unit\core\test_transcription_service_unit.py F..                   [ 70%]
+tests\unit\core\test_whisper_hardening.py .                              [ 71%]
+tests\unit\llm\test_client_interface.py ....                             [ 76%]
+tests\unit\llm\test_gemini_client.py ..                                  [ 78%]
+tests\unit\llm\test_ollama_clients.py ..                                 [ 80%]
+tests\unit\test_chat_bot_view.py ....                                    [ 84%]
+tests\unit\test_factory_naming.py .                                      [ 85%]
+tests\unit\test_hybrid_search.py ..                                      [ 87%]
+tests\unit\test_local_smart_ctrl.py ..                                   [ 89%]
+tests\unit\test_resource_advisor.py ...                                  [ 92%]
+tests\unit\ui\test_controllers.py ...                                    [ 95%]
+tests\unit\ui\test_ui_utils.py ....                                      [100%]
+
+=================================== ERRORS ====================================
+_______ ERROR at setup of test_full_transcription_workflow_with_events ________
+tests\integration\test_transcription_integration.py:25: in test_env
+    mock_transcriber = MagicMock(spec=WhisperTranscriber)
+E   NameError: name 'MagicMock' is not defined
+___________ ERROR at setup of test_live_recording_integration_abort ___________
+tests\integration\test_transcription_integration.py:25: in test_env
+    mock_transcriber = MagicMock(spec=WhisperTranscriber)
+E   NameError: name 'MagicMock' is not defined
+================================== FAILURES ===================================
+______________________ test_full_file_transcription_flow ______________________
+tests\e2e\test_full_app_flow_e2e.py:61: in test_full_file_transcription_flow
+    assert result["transcript"] == "Transcription result"
+E   AssertionError: assert 'This is a su...I processing.' == 'Transcription result'
+E     
+E     - Transcription result
+E     + This is a sufficiently long transcription result that exceeds the fifty character limit for AI processing.
+----------------------------- Captured log setup ------------------------------
+ERROR    src.core.minutes_service:minutes_service.py:63 Failed to fetch models for ollama_local: not enough values to unpack (expected 3, got 0)
+_____________________ test_system_file_transcription_flow _____________________
+tests\system\test_recording_flow.py:75: in test_system_file_transcription_flow
+    assert meetings[0]["transcript"] == "System test transcription result."
+E   AssertionError: assert 'This is a su...I processing.' == 'System test ...ption result.'
+E     
+E     - System test transcription result.
+E     + This is a sufficiently long transcription result that exceeds the fifty character limit for AI processing.
+_______________________ test_system_live_recording_flow _______________________
+tests\system\test_recording_flow.py:123: in test_system_live_recording_flow
+    assert state.get("transcript_text") == "Final live text"
+E   AssertionError: assert 'This is a su...I processing.' == 'Final live text'
+E     
+E     - Final live text
+E     + This is a sufficiently long transcription result that exceeds the fifty character limit for AI processing.
+_______________________ test_transcribe_file_sync_logic _______________________
+tests\unit\core\test_transcription_service_unit.py:67: in test_transcribe_file_sync_logic
+    mock_publish.assert_any_call("transcription_finished", pytest.any_call)
+E   AttributeError: module 'pytest' has no attribute 'any_call'
+============================== warnings summary ===============================
+.venv\lib\site-packages\requests\__init__.py:113
+  C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.4) doesn't match a supported version!
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/e2e/test_full_app_flow_e2e.py::test_full_file_transcription_flow
+FAILED tests/system/test_recording_flow.py::test_system_file_transcription_flow
+FAILED tests/system/test_recording_flow.py::test_system_live_recording_flow
+FAILED tests/unit/core/test_transcription_service_unit.py::test_transcribe_file_sync_logic
+ERROR tests/integration/test_transcription_integration.py::test_full_transcription_workflow_with_events
+ERROR tests/integration/test_transcription_integration.py::test_live_recording_integration_abort
+============= 4 failed, 90 passed, 1 warning, 2 errors in 22.83s ==============

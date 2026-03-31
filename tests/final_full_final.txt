@@ -1,0 +1,259 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.17, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\saiha\My_Service\programing\Trancform_MovieToText
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.12.1, cov-7.1.0, mock-3.15.1
+collected 96 items
+
+tests\e2e\test_app_launch.py ..                                          [  2%]
+tests\e2e\test_full_app_flow_e2e.py F                                    [  3%]
+tests\integration\test_config_sync.py ..                                 [  5%]
+tests\integration\test_history_persistence.py ...                        [  8%]
+tests\integration\test_local_smart_flow.py .                             [  9%]
+tests\integration\test_recorder_transcription_integration.py ..          [ 11%]
+tests\integration\test_transcription_integration.py FF                   [ 13%]
+tests\system\test_complete_workflow.py F                                 [ 14%]
+tests\system\test_recording_flow.py FF                                   [ 16%]
+tests\test_error_resilience.py ...                                       [ 19%]
+tests\test_ollama_provider_pytest.py ...                                 [ 22%]
+tests\unit\core\test_advisor_logic.py .                                  [ 23%]
+tests\unit\core\test_config_manager.py ..                                [ 26%]
+tests\unit\core\test_event_bus.py ....                                   [ 30%]
+tests\unit\core\test_history_cockpit.py ....                             [ 34%]
+tests\unit\core\test_history_mgr.py ......                               [ 40%]
+tests\unit\core\test_history_mgr_rigorous.py ........F                   [ 50%]
+tests\unit\core\test_history_mgr_unit.py ...                             [ 53%]
+tests\unit\core\test_live_processor.py ..                                [ 55%]
+tests\unit\core\test_recorder.py ..                                      [ 57%]
+tests\unit\core\test_repositories.py ......                              [ 63%]
+tests\unit\core\test_resource_advisor_unit.py ....                       [ 67%]
+tests\unit\core\test_transcription_service_unit.py FF.                   [ 70%]
+tests\unit\core\test_whisper_hardening.py F                              [ 71%]
+tests\unit\llm\test_client_interface.py ....                             [ 76%]
+tests\unit\llm\test_gemini_client.py ..                                  [ 78%]
+tests\unit\llm\test_ollama_clients.py ..                                 [ 80%]
+tests\unit\test_chat_bot_view.py ....                                    [ 84%]
+tests\unit\test_factory_naming.py .                                      [ 85%]
+tests\unit\test_hybrid_search.py ..                                      [ 87%]
+tests\unit\test_local_smart_ctrl.py ..                                   [ 89%]
+tests\unit\test_resource_advisor.py ...                                  [ 92%]
+tests\unit\ui\test_controllers.py ...                                    [ 95%]
+tests\unit\ui\test_ui_utils.py ....                                      [100%]
+
+================================== FAILURES ===================================
+______________________ test_full_file_transcription_flow ______________________
+src\core\history_mgr.py:50: in add_meeting
+    return self.meetings.add(
+src\core\db\repositories.py:74: in add
+    segments_json = json.dumps(transcript_segments) if transcript_segments else None
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\json\__init__.py:231: in dumps
+    return _default_encoder.encode(obj)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\json\encoder.py:199: in encode
+    chunks = self.iterencode(o, _one_shot=True)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\json\encoder.py:257: in iterencode
+    return _iterencode(o, 0)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\json\encoder.py:179: in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+E   TypeError: Object of type MagicMock is not JSON serializable
+
+The above exception was the direct cause of the following exception:
+tests\e2e\test_full_app_flow_e2e.py:50: in test_full_file_transcription_flow
+    result = service.transcribe_file_sync(
+src\core\transcription_service.py:113: in transcribe_file_sync
+    meeting_id = history_mgr.add_meeting(
+src\core\history_mgr.py:61: in add_meeting
+    raise HistoryError(f"Meeting storage failed: {e}") from e
+E   src.core.history_mgr.HistoryError: Meeting storage failed: Object of type MagicMock is not JSON serializable
+----------------------------- Captured log setup ------------------------------
+ERROR    src.core.minutes_service:minutes_service.py:63 Failed to fetch models for ollama_local: not enough values to unpack (expected 3, got 0)
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.history_mgr:history_mgr.py:60 Error adding meeting: Object of type MagicMock is not JSON serializable
+________________ test_full_transcription_workflow_with_events _________________
+tests\integration\test_transcription_integration.py:66: in test_full_transcription_workflow_with_events
+    assert meeting["title"] == "Generated Title (video.mp4)"
+E   AssertionError: assert 'ファイル文字起こし: video.mp4' == 'Generated Title (video.mp4)'
+E     
+E     - Generated Title (video.mp4)
+E     + ファイル文字起こし: video.mp4
+____________________ test_live_recording_integration_abort ____________________
+tests\integration\test_transcription_integration.py:94: in test_live_recording_integration_abort
+    assert history.get_meeting(meeting_id) is None
+E   AssertionError: assert {'audio_path': '', 'category': '', 'id': 2, 'minutes': None, ...} is None
+E    +  where {'audio_path': '', 'category': '', 'id': 2, 'minutes': None, ...} = get_meeting(2)
+E    +    where get_meeting = <src.core.history_mgr.HistoryManager object at 0x000002735BC4A4D0>.get_meeting
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.history_mgr:history_mgr.py:93 Error deleting meeting 2: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 2424.
+ERROR    src.core.transcription_service:transcription_service.py:305 Error finalizing live recording: Deletion failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 2424.
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\history_mgr.py", line 90, in delete_meeting
+    self.meetings.delete(meeting_id)
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\db\repositories.py", line 132, in delete
+    with self.db.get_connection() as conn:
+  File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\contextlib.py", line 135, in __enter__
+    return next(self.gen)
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\db\connection.py", line 39, in get_connection
+    conn.execute("PRAGMA foreign_keys = ON")
+sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 2424.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\transcription_service.py", line 299, in _finalize_worker
+    history_mgr.delete_meeting(meeting_id)
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\history_mgr.py", line 94, in delete_meeting
+    raise HistoryError(f"Deletion failed: {e}") from e
+src.core.history_mgr.HistoryError: Deletion failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 2424.
+____________ TestSystemCompleteWorkflow.test_full_user_story_flow _____________
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1376: in patched
+    with self.decoration_helper(patched,
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\contextlib.py:135: in __enter__
+    return next(self.gen)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1358: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\contextlib.py:492: in enter_context
+    result = _cm_type.__enter__(cm)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1431: in __enter__
+    self.target = self.getter()
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1618: in <lambda>
+    getter = lambda: _importer(target)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1261: in _importer
+    thing = _dot_lookup(thing, comp, import_path)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1250: in _dot_lookup
+    __import__(import_path)
+E   ModuleNotFoundError: No module named 'src.llm.providers.ollama_client.OllamaLLMClient'; 'src.llm.providers.ollama_client' is not a package
+_____________________ test_system_file_transcription_flow _____________________
+tests\system\test_recording_flow.py:69: in test_system_file_transcription_flow
+    assert "処理完了" in state.get("status_text")
+E   AssertionError: assert '処理完了' in 'エラー: Meeting storage failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 22976.'
+E    +  where 'エラー: Meeting storage failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 22976.' = get('status_text')
+E    +    where get = <src.core.state.AppState object at 0x000002735A925C60>.get
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.history_mgr:history_mgr.py:60 Error adding meeting: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 22976.
+ERROR    src.controllers.transcription_ctrl:transcription_ctrl.py:81 File transcription failed: Meeting storage failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 22976.
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\history_mgr.py", line 50, in add_meeting
+    return self.meetings.add(
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\db\repositories.py", line 76, in add
+    with self.db.get_connection() as conn:
+  File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\contextlib.py", line 135, in __enter__
+    return next(self.gen)
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\db\connection.py", line 39, in get_connection
+    conn.execute("PRAGMA foreign_keys = ON")
+sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 22976.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\controllers\transcription_ctrl.py", line 75, in _worker
+    self.service.transcribe_file_sync(file_path, model_name, language=language)
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\transcription_service.py", line 113, in transcribe_file_sync
+    meeting_id = history_mgr.add_meeting(
+  File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\history_mgr.py", line 61, in add_meeting
+    raise HistoryError(f"Meeting storage failed: {e}") from e
+src.core.history_mgr.HistoryError: Meeting storage failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 22976.
+_______________________ test_system_live_recording_flow _______________________
+tests\system\test_recording_flow.py:123: in test_system_live_recording_flow
+    assert state.get("transcript_text") == "Final live text"
+E   AssertionError: assert '' == 'Final live text'
+E     
+E     - Final live text
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.history_mgr:history_mgr.py:93 Error deleting meeting 1: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 10620.
+__________________________ test_search_advanced[-0] ___________________________
+tests\unit\core\test_history_mgr_rigorous.py:96: in test_search_advanced
+    assert len(results) == expected_count
+E   AssertionError: assert 2 == 0
+E    +  where 2 = len([{'audio_path': '1', 'category': '', 'id': 1, 'minutes': None, ...}, {'audio_path': '2', 'category': '', 'id': 2, 'minutes': None, ...}])
+_______________________ test_transcribe_file_sync_logic _______________________
+tests\unit\core\test_transcription_service_unit.py:62: in test_transcribe_file_sync_logic
+    title_call = next(c for c in fake_llm.recorded_calls if c["method"] == "generate_title")
+E   StopIteration
+___________________ test_generate_minutes_for_meeting_unit ____________________
+tests\unit\core\test_transcription_service_unit.py:82: in test_generate_minutes_for_meeting_unit
+    assert meeting["minutes"] == minutes
+E   AssertionError: assert None == '偽の議事録: 決定事項 - テストを成功させる。'
+______________________ test_whisper_load_model_fallback _______________________
+tests\unit\core\test_whisper_hardening.py:21: in test_whisper_load_model_fallback
+    transcriber.load_model("tiny", force_gpu=False)
+src\core\whisper_transcriber.py:74: in load_model
+    self.model = WhisperModel(model_name, device=device, compute_type=compute_type, download_root=self.cache_dir)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1114: in __call__
+    return self._mock_call(*args, **kwargs)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1118: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py:1177: in _execute_mock_call
+    raise result
+E   Exception: mkl_malloc: memory allocation failed
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.whisper_transcriber:whisper_transcriber.py:96 WhisperTranscriber: General load failure for 'tiny': mkl_malloc: memory allocation failed
+============================== warnings summary ===============================
+.venv\lib\site-packages\requests\__init__.py:113
+  C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.4) doesn't match a supported version!
+    warnings.warn(
+
+tests/system/test_recording_flow.py::test_system_live_recording_flow
+  C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-9 (_finalize_worker)
+  
+  Traceback (most recent call last):
+    File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\history_mgr.py", line 90, in delete_meeting
+      self.meetings.delete(meeting_id)
+    File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\db\repositories.py", line 132, in delete
+      with self.db.get_connection() as conn:
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\contextlib.py", line 135, in __enter__
+      return next(self.gen)
+    File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\db\connection.py", line 39, in get_connection
+      conn.execute("PRAGMA foreign_keys = ON")
+  sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 10620.
+  
+  The above exception was the direct cause of the following exception:
+  
+  Traceback (most recent call last):
+    File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\transcription_service.py", line 299, in _finalize_worker
+      history_mgr.delete_meeting(meeting_id)
+    File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\history_mgr.py", line 94, in delete_meeting
+      raise HistoryError(f"Deletion failed: {e}") from e
+  src.core.history_mgr.HistoryError: Deletion failed: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 28508 and this is thread id 10620.
+  
+  During handling of the above exception, another exception occurred:
+  
+  Traceback (most recent call last):
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\threading.py", line 1016, in _bootstrap_inner
+      self.run()
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\threading.py", line 953, in run
+      self._target(*self._args, **self._kwargs)
+    File "C:\Users\saiha\My_Service\programing\Trancform_MovieToText\src\core\transcription_service.py", line 305, in _finalize_worker
+      logger.error(f"Error finalizing live recording: {e}", exc_info=True)
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\logging\__init__.py", line 1506, in error
+      self._log(ERROR, msg, args, **kwargs)
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\logging\__init__.py", line 1622, in _log
+      record = self.makeRecord(self.name, level, fn, lno, msg, args,
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\logging\__init__.py", line 1591, in makeRecord
+      rv = _logRecordFactory(name, level, fn, lno, msg, args, exc_info, func,
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\logging\__init__.py", line 288, in __init__
+      ct = time.time()
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py", line 1114, in __call__
+      return self._mock_call(*args, **kwargs)
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py", line 1118, in _mock_call
+      return self._execute_mock_call(*args, **kwargs)
+    File "C:\Users\saiha\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\unittest\mock.py", line 1175, in _execute_mock_call
+      result = next(effect)
+  StopIteration
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/e2e/test_full_app_flow_e2e.py::test_full_file_transcription_flow
+FAILED tests/integration/test_transcription_integration.py::test_full_transcription_workflow_with_events
+FAILED tests/integration/test_transcription_integration.py::test_live_recording_integration_abort
+FAILED tests/system/test_complete_workflow.py::TestSystemCompleteWorkflow::test_full_user_story_flow
+FAILED tests/system/test_recording_flow.py::test_system_file_transcription_flow
+FAILED tests/system/test_recording_flow.py::test_system_live_recording_flow
+FAILED tests/unit/core/test_history_mgr_rigorous.py::test_search_advanced[-0]
+FAILED tests/unit/core/test_transcription_service_unit.py::test_transcribe_file_sync_logic
+FAILED tests/unit/core/test_transcription_service_unit.py::test_generate_minutes_for_meeting_unit
+FAILED tests/unit/core/test_whisper_hardening.py::test_whisper_load_model_fallback
+================= 10 failed, 86 passed, 2 warnings in 36.48s ==================

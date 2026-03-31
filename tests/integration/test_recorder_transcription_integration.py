@@ -26,7 +26,9 @@ def test_transcribe_numpy_integration(transcriber):
     # 3. Transcribe
     result = transcriber.transcribe_numpy(audio_data)
     
-    assert isinstance(result, str)
+    assert isinstance(result, dict)
+    assert "text" in result
+    assert isinstance(result["text"], str)
 
 def test_transcriber_model_switch(transcriber):
     """Tests that switching models correctly clears and reloads."""

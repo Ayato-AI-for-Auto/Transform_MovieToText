@@ -19,9 +19,9 @@ DEFAULT_PROVIDERS = {
 }
 DEFAULT_ACTIVE_PROVIDER = "gemini"
 DEFAULT_LLM_MODELS = {
-    "gemini": ["gemini-1.5-flash", "gemini-1.5-pro"],
-    "ollama_local": ["llama3", "mistral", "gemma"],
-    "ollama_cloud": ["llama3", "mistral-large"],
+    "gemini": ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"],
+    "ollama_local": ["gemma3:1b", "gemma3:4b", "gemma3:12b", "llama3.2", "mistral-nemo", "phi4"],
+    "ollama_cloud": ["gemma3:4b", "gemma3:27b", "llama3.3", "mistral-large"],
 }
 DEFAULT_WHISPER_MODEL = "base"
 WHISPER_MODELS = ["tiny", "base", "small", "medium", "large-v2", "large-v3"]

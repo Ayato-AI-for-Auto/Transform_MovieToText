@@ -116,15 +116,20 @@ class QueryAnalyzer:
         # We strip out matched metadata from keywords
         keywords = []
         for word in words:
-            if len(word) > 2 and word not in found_projects and word not in found_categories:
+            # Avoid long sentence-like 'words' and already identified metadata
+            if 2 <= len(word) <= 15 and word not in found_projects and word not in found_categories:
                 keywords.append(word)
         
-        # If no keywords extracted, use the original query's core nouns
+        # If no keywords extracted, or they are too generic, try splitting by common Japanese particles/punctuations
         if not keywords:
-            keywords = [original_query]
+            # Simple split by punctuation as a fallback
+            parts = re.split(r'[、。！？\s]', original_query)
+            for p in parts:
+                if 2 <= len(p) <= 10:
+                    keywords.append(p)
 
         return {
             "projects": sorted(list(found_projects)),
             "categories": sorted(list(found_categories)),
-            "keywords": sorted(list(set(keywords))[:10]) # Limit to 10 keywords for query stability
+            "keywords": sorted(list(set(keywords))[:8]) # Reduced to 8 for better FTS precision
         }

@@ -21,7 +21,7 @@ class TestLiveProcessor(unittest.TestCase):
         # Create a dummy chunk with random noise to pass silence suppression
         audio_data = np.random.uniform(-0.1, 0.1, 16000).astype(np.float32)
 
-        self.mock_transcriber.transcribe.return_value = "Hello numpy world"
+        self.mock_transcriber.transcribe.return_value = {"text": "Hello numpy world", "segments": []}
 
         self.manager._handle_audio_data(audio_data)
 
@@ -44,7 +44,10 @@ class TestLiveProcessor(unittest.TestCase):
         self.manager.recorder.chunk_queue.put(chunk1)
         self.manager.recorder.chunk_queue.put(chunk2)
 
-        self.mock_transcriber.transcribe.side_effect = ["One", "Two"]
+        self.mock_transcriber.transcribe.side_effect = [
+            {"text": "One", "segments": []},
+            {"text": "Two", "segments": []}
+        ]
 
         # Set stop event so loop runs until queue is empty
         self.manager.stop_event.set()

@@ -12,7 +12,7 @@
             "base_url": "http://localhost:11434"
         }
     },
-    "active_provider": "ollama_local",
+    "active_provider": "ollama_cloud",
     "audio_source": "system",
     "force_gpu": true,
     "last_models": {

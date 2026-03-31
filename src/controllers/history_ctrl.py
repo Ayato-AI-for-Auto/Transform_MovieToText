@@ -23,7 +23,8 @@ class HistoryController:
 
     def get_filtered_meetings(self, project_name=None, search_query=None):
         """Advanced filtering with project name and keywords."""
-        return history_mgr.get_meetings_filtered(project_name=project_name, search_query=search_query)
+        project_names = [project_name] if project_name else None
+        return history_mgr.get_meetings_filtered(project_names=project_names, search_query=search_query)
 
     def reassign_project(self, old_name: str, new_name: str = "その他"):
         """Reassigns all meetings from one project to another (e.g. on deletion)."""

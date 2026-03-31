@@ -54,6 +54,7 @@ dependencies = [
     "opencv-python",
     "fastembed",
     "colorlog",
+    "python-event-bus",
 ]
 
 [project.optional-dependencies]

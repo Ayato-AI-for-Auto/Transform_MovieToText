@@ -13,6 +13,14 @@ from src.core.config_manager import ConfigManager
 from src.core.history_mgr import history_mgr
 from src.core.whisper_transcriber import WhisperTranscriber
 from src.llm.factory import LLMFactory
+from src.core.event_bus import (
+    event_bus,
+    EVENT_TRANSCRIPTION_PROGRESS,
+    EVENT_TRANSCRIPTION_FINISHED,
+    EVENT_TRANSCRIPTION_ERROR,
+    EVENT_STATUS_UPDATE,
+    EVENT_TRANSCRIPTION_SEGMENT
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,17 +58,27 @@ class TranscriptionService:
             raise FileNotFoundError(f"File not found: {file_path}")
 
         force_gpu = self.config_mgr.get_force_gpu()
-        logger.info(f"transcribe_file_sync: Loading model (GPU={force_gpu})...")
+        event_bus.publish(EVENT_STATUS_UPDATE, f"モデル読み込み中 (GPU={force_gpu})...")
         self.transcriber.load_model(model_name, force_gpu=force_gpu)
 
-        logger.info("transcribe_file_sync: Starting transcription...")
-        result = self.transcriber.transcribe(
-            file_path, model_name=model_name, force_gpu=force_gpu, language=language, progress_callback=progress_callback
+        event_bus.publish(EVENT_STATUS_UPDATE, "文字起こし実行中...")
+
+        def _internal_progress(progress):
+            event_bus.publish(EVENT_TRANSCRIPTION_PROGRESS, progress)
+            if progress_callback:
+                progress_callback(progress)
+
+        result_data = self.transcriber.transcribe(
+            file_path, model_name=model_name, force_gpu=force_gpu, language=language, progress_callback=_internal_progress
         )
+        full_text = result_data["text"]
+        segments = result_data["segments"]
+        
         logger.info("transcribe_file_sync: Transcription core finished.")
 
         visual_contexts = []
         if use_visual and file_path.lower().endswith((".mp4", ".mov", ".avi", ".mkv")):
+            event_bus.publish(EVENT_STATUS_UPDATE, "映像コンテキスト抽出中...")
             try:
                 visual_contexts = self.extract_visual_frames(file_path)
             except Exception as e:
@@ -77,31 +95,37 @@ class TranscriptionService:
         base_name = os.path.basename(file_path)
         final_file_path = os.path.join(records_dir, base_name)
 
-        # Copy file to project directory if it's not already there
         if os.path.abspath(file_path) != os.path.abspath(final_file_path):
             import shutil
-
             logger.info(f"transcribe_file_sync: Copying {file_path} to {final_file_path}")
             shutil.copy2(file_path, final_file_path)
 
-        # 1. Generate AI Title if possible
+        # 1. Generate AI Title
+        event_bus.publish(EVENT_STATUS_UPDATE, "タイトル自動生成中...")
         ai_title = ""
         try:
-            ai_title = self._generate_title_internal(result)
+            ai_title = self._generate_title_internal(full_text)
         except Exception as e:
             logger.warning(f"AI Title generation failed for file: {e}")
 
         final_title = f"{ai_title} ({base_name})" if ai_title else f"ファイル文字起こし: {base_name}"
 
         meeting_id = history_mgr.add_meeting(
-            title=final_title, transcript=result, audio_path=final_file_path, model_info=model_name, project_name=safe_project, category=category
+            title=final_title, 
+            transcript=full_text, 
+            transcript_segments=segments,
+            audio_path=final_file_path, 
+            model_info=model_name, 
+            project_name=safe_project, 
+            category=category
         )
 
-        # Save visual contexts if any
+        # Save visual contexts
         for ctx in visual_contexts:
             history_mgr.add_visual_context(meeting_id=meeting_id, timestamp_sec=ctx["timestamp_sec"], image_path=ctx["image_path"])
 
-        return {"transcript": result, "visual_contexts": visual_contexts, "meeting_id": meeting_id}
+        event_bus.publish(EVENT_TRANSCRIPTION_FINISHED, {"meeting_id": meeting_id, "text": full_text})
+        return {"transcript": full_text, "segments": segments, "visual_contexts": visual_contexts, "meeting_id": meeting_id}
 
     def extract_visual_frames(self, video_path: str, interval_sec: float = 10.0) -> list[dict]:
         """Extracts significant frames from a video file as visual context."""
@@ -147,6 +171,8 @@ class TranscriptionService:
     ) -> int:
         """Starts a live recording session. Returns meeting_id."""
         logger.info(f"start_live_recording: Request for {model_name} (project={project_name})")
+        event_bus.publish(EVENT_STATUS_UPDATE, "🔄 準備中... (機材の初期化とモデルのロード)")
+
         # 1. Start Model Loading in Background
         # We don't wait for this to finish to start the recorder.
         # This keeps the 'Stop' button responsive from the very first second.
@@ -200,6 +226,7 @@ class TranscriptionService:
             language=language,
         )
         self.live_mgr.start()
+        event_bus.publish(EVENT_STATUS_UPDATE, "🔴 録音中...")
 
         # Visual Recorder
         if self.config_mgr.get_visual_capture_enabled():
@@ -214,6 +241,7 @@ class TranscriptionService:
     def stop_live_recording(self, finalize_callback: Callable[[str, str], None] | None = None):
         """Stops live recording and finalizes results in background."""
         logger.info("stop_live_recording: Stop command received.")
+        event_bus.publish(EVENT_STATUS_UPDATE, "⏹️ 停止中... (最終処理と保存を実行中)")
         # Always set the cancel flag FIRST, regardless of live_mgr state.
         # This handles the race condition where stop is called during model loading.
         self._cancel_event.set()
@@ -237,8 +265,8 @@ class TranscriptionService:
             full_text = ""
             category = ""
             try:
-                full_text = self.live_mgr.stop()
-                logger.info(f"_finalize_worker: live_mgr stopped. Text length: {len(full_text)}")
+                full_text, all_segments = self.live_mgr.stop()
+                logger.info(f"_finalize_worker: live_mgr stopped. Text length: {len(full_text)}, Segments: {len(all_segments)}")
                 meeting_id = self._current_meeting_id
                 mp3_path = self._current_mp3_path
                 duration = time.time() - (self._live_start_time or time.time())
@@ -261,7 +289,14 @@ class TranscriptionService:
                     timestamp_ui = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     final_title = f"{ai_title} ({timestamp_ui})" if ai_title else f"会議録音 ({timestamp_ui})"
 
-                    history_mgr.update_meeting(meeting_id, title=final_title, transcript=full_text, audio_path=mp3_path, category=category)
+                    history_mgr.update_meeting(
+                        meeting_id, 
+                        title=final_title, 
+                        transcript=full_text, 
+                        transcript_segments=all_segments,
+                        audio_path=mp3_path, 
+                        category=category
+                    )
                 else:
                     logger.info(f"Recording discarded (duration={duration:.1f}s)")
                     if meeting_id:
@@ -269,6 +304,9 @@ class TranscriptionService:
 
                 if finalize_callback:
                     finalize_callback(full_text, category)
+                
+                # Publish finish event so UI knows processing is done
+                event_bus.publish(EVENT_TRANSCRIPTION_FINISHED, {"text": full_text})
 
             except Exception as e:
                 logger.error(f"Error finalizing live recording: {e}", exc_info=True)

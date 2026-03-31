@@ -41,8 +41,8 @@ class SettingsView(ft.Column):
         # Hardware display
         self.hw_rows = ft.Column(
             [
-                ft.Row([ft.Icon(ft.Icons.COMPUTER), ft.Icon(ft.Icons.MEMORY), ft.Text(f"System RAM: {hw_info['ram']} GB")]),
-                ft.Row([ft.Icon(ft.Icons.STORAGE), ft.Icon(ft.Icons.DEVELOPER_BOARD), ft.Text(f"GPU VRAM: {hw_info['vram']} GB")]),
+                ft.Row([ft.Icon(ft.Icons.COMPUTER), ft.Icon(ft.Icons.MEMORY), ft.Text(f"System RAM: {self.hw_info['ram']} GB")]),
+                ft.Row([ft.Icon(ft.Icons.STORAGE), ft.Icon(ft.Icons.DEVELOPER_BOARD), ft.Text(f"GPU VRAM: {self.hw_info['vram']} GB")]),
             ]
         )
 

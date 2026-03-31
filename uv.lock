@@ -2394,6 +2394,15 @@ wheels = [
 ]
 
 [[package]]
+name = "python-event-bus"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/e2/4bfc943ee649e7998e7366f00947b9004e514a3ad654bb5ff67550bd1081/python_event_bus-1.2.0.tar.gz", hash = "sha256:31e1f4b41db29f7b0409cf27db80d14d1443e760493990a990e479b5e7bf1297", size = 4208 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ee/a0/4a1f1aef8e7dbc4f5e0154f27dba7ac03a7d56f2be945f2d7a32f7c31fdf/python_event_bus-1.2.0-py3-none-any.whl", hash = "sha256:8359a4ed423fb5b558eb7e87765085b85be8cd610e32cef2063b236ea0b840f7", size = 5183 },
+]
+
+[[package]]
 name = "python-slugify"
 version = "8.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -2854,6 +2863,7 @@ dependencies = [
     { name = "pyaudiowpatch", marker = "sys_platform == 'win32'" },
     { name = "pyautogui" },
     { name = "python-dotenv" },
+    { name = "python-event-bus" },
     { name = "torch" },
     { name = "torchaudio" },
     { name = "torchvision" },
@@ -2885,6 +2895,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "python-dotenv" },
+    { name = "python-event-bus" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "torch", index = "https://download.pytorch.org/whl/cu121" },
     { name = "torchaudio", index = "https://download.pytorch.org/whl/cu121" },

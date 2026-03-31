@@ -17,13 +17,13 @@ class ResourceAdvisor:
     Analyzes system resources (RAM/VRAM) to recommend optimal AI models.
     """
 
-    # Static Golden Rules for 2026 hardware
+    # Static Golden Rules for 2026 hardware (Prioritizing Gemma 3 for Local Vision)
     TIER_MAPPING = {
-        "Entry": {"min_ram": 8, "min_vram": 0, "whisper": "base", "ollama": "llama3.2:1b-instruct-q4_K_M"},
-        "SmallGPU": {"min_ram": 8, "min_vram": 4, "whisper": "small", "ollama": "phi3.5:3.8b-mini-instruct-q4_K_M"},
-        "Standard": {"min_ram": 16, "min_vram": 8, "whisper": "medium", "ollama": "llama3.1:8b-instruct-q4_K_M"},
-        "Pro": {"min_ram": 32, "min_vram": 10, "whisper": "large-v3", "ollama": "gemma2:9b-instruct-q4_K_M"},
-        "Monster": {"min_ram": 64, "min_vram": 22, "whisper": "large-v3", "ollama": "llama3.3:70b-instruct-q4_K_M"},
+        "Entry": {"min_ram": 8, "min_vram": 0, "whisper": "base", "ollama": "gemma3:1b"},
+        "SmallGPU": {"min_ram": 8, "min_vram": 4, "whisper": "small", "ollama": "gemma3:4b"},  # Multimodal enabled
+        "Standard": {"min_ram": 16, "min_vram": 8, "whisper": "medium", "ollama": "gemma3:4b"},
+        "Pro": {"min_ram": 32, "min_vram": 10, "whisper": "large-v3", "ollama": "gemma3:12b"},
+        "Monster": {"min_ram": 64, "min_vram": 22, "whisper": "large-v3", "ollama": "gemma3:27b"},
     }
 
     @classmethod

@@ -8,6 +8,7 @@ import numpy as np
 
 from src.core.recorder_factory import create_recorder
 from src.core.whisper_transcriber import WhisperTranscriber
+from src.core.event_bus import event_bus, EVENT_TRANSCRIPTION_SEGMENT
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class LiveTranscriptionManager:
         self.stop_event = threading.Event()
         self.worker_thread = None
         self.full_transcript = ""
+        self.all_segments = []
 
         # Statistics
         self.chunks_processed = 0
@@ -69,7 +71,7 @@ class LiveTranscriptionManager:
         logger.info(
             f"Live transcription stopped. Summary: {self.chunks_processed} chunks processed, {self.total_errors} errors, Duration: {duration:.1f}s"
         )
-        return self.full_transcript
+        return self.full_transcript, self.all_segments
 
     def _process_chunks_loop(self):
         """Background thread loop that checks for new chunks via queue."""
@@ -112,15 +114,31 @@ class LiveTranscriptionManager:
             rms = np.sqrt(np.mean(audio_data**2))
             logger.info(f"Chunk Stats - Peak: {peak:.6f}, RMS: {rms:.6f}, Duration: {duration:.1f}s")
 
-            # Strict silence suppression to prevent Whisper from hallucinating on digital noise
+            # Strict silence suppression
             if peak < 0.01 or rms < 0.001:
                 logger.debug(f"Chunk is too quiet (Peak: {peak:.4f}, RMS: {rms:.4f}), skipping transcription.")
                 return
 
-            text = self.transcriber.transcribe(audio_data, model_name=self.model_name, force_gpu=self.force_gpu, language=self.language)
+            result = self.transcriber.transcribe(audio_data, model_name=self.model_name, force_gpu=self.force_gpu, language=self.language)
+            text = result["text"]
+            segments = result["segments"]
 
             if text:
                 logger.info(f"Transcribed chunk: {text[:50]}...")
+                
+                # Session-relative offset
+                offset = time.time() - self.start_time - duration
+                if offset < 0: offset = 0
+                
+                # Adjust segment timestamps to be session-relative
+                for seg in segments:
+                    seg["start"] = round(seg["start"] + offset, 2)
+                    seg["end"] = round(seg["end"] + offset, 2)
+                    
+                    self.all_segments.append(seg)
+                    # Publish each segment individually for granular UI updates
+                    event_bus.publish(EVENT_TRANSCRIPTION_SEGMENT, seg)
+
                 self.full_transcript += text + " "
                 if self.on_text_added:
                     self.on_text_added(text)

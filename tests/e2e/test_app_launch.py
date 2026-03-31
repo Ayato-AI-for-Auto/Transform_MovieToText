@@ -31,6 +31,9 @@ def test_view_instantiation_smoke():
     page = MagicMock(spec=ft.Page)
     config_mgr = MagicMock(spec=ConfigManager)
     service = MagicMock(spec=TranscriptionService)
+    # Corrected: ensure nested mock exists for TranscriptionView's __init__
+    service.transcriber = MagicMock()
+    service.transcriber.get_hardware_info.return_value = {"ram": 16.0, "vram": 4.0, "device": "GPU"}
 
     # 1. Transcription View
     t_view = TranscriptionView(page, config_mgr, service)

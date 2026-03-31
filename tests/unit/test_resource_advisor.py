@@ -20,24 +20,24 @@ class TestResourceAdvisor(unittest.TestCase):
         # Entry: RAM 8GB, VRAM 0GB
         mock_specs.return_value = (8.0, 0.0)
         res = ResourceAdvisor.get_best_match()
-        self.assertEqual(res["tier"], "Entry")
-        self.assertEqual(res["ollama"], "llama3.2")
+        assert res["tier"] == "Entry"
+        assert res["ollama"] == "llama3.2:1b-instruct-q4_K_M"
 
     @patch("src.core.resource_advisor.ResourceAdvisor.get_system_specs")
     def test_small_gpu_tier(self, mock_specs):
         # SmallGPU: RAM 8GB, VRAM 4GB
         mock_specs.return_value = (8.0, 4.0)
         res = ResourceAdvisor.get_best_match()
-        self.assertEqual(res["tier"], "SmallGPU")
-        self.assertEqual(res["ollama"], "phi3.5")
+        assert res["tier"] == "SmallGPU"
+        assert res["ollama"] == "phi3.5:3.8b-mini-instruct-q4_K_M"
 
     @patch("src.core.resource_advisor.ResourceAdvisor.get_system_specs")
     def test_monster_tier(self, mock_specs):
         # Monster: RAM 64GB, VRAM 24GB
         mock_specs.return_value = (64.0, 24.0)
         res = ResourceAdvisor.get_best_match()
-        self.assertEqual(res["tier"], "Monster")
-        self.assertEqual(res["ollama"], "llama3.1:70b")
+        assert res["tier"] == "Monster"
+        assert res["ollama"] == "llama3.3:70b-instruct-q4_K_M"
 
 
 if __name__ == "__main__":

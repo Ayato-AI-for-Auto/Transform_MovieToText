@@ -9,6 +9,7 @@ from src.core.history_mgr import history_mgr
 from src.core.intent_router import IntentRouter
 from src.core.state import state
 from src.ui.ui_utils import sync_llm_models
+from src.core.event_bus import event_bus, EVENT_STATUS_UPDATE, EVENT_TRANSCRIPTION_SEGMENT, EVENT_TRANSCRIPTION_FINISHED, EVENT_TRANSCRIPTION_ERROR
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,38 @@ class LiveTranscriptionView(ft.Column):
         self.hw_info = hw_info
         self.service = ctrl.service
         self.router = IntentRouter(config_mgr)
+        self._setup_event_handlers()
+        self._build_ui()
 
+    def _setup_event_handlers(self):
+        @event_bus.subscribe(EVENT_STATUS_UPDATE)
+        def on_status(status):
+            self.status_text.value = status
+            self._safe_update()
+
+        @event_bus.subscribe(EVENT_TRANSCRIPTION_SEGMENT)
+        def on_segment(segment_data):
+            # segment_data usually has 'text', 'start', 'end'
+            text = segment_data.get("text", "")
+            self.raw_transcript_text.value += text + " "
+            self._safe_update()
+
+        @event_bus.subscribe(EVENT_TRANSCRIPTION_FINISHED)
+        def on_finished(result):
+            self._on_transcription_finished(result)
+
+        @event_bus.subscribe(EVENT_TRANSCRIPTION_ERROR)
+        def on_error(err):
+            self.status_text.value = f"⚠️ エラー: {err}"
+            self.status_text.color = ft.Colors.RED_400
+            self._stop_ui_state()
+            self._safe_update()
+
+    def _safe_update(self):
+        if self._page:
+            self.update()
+
+    def _build_ui(self):
         # --- Top Selection Area ---
         self.dd_whisper = ft.Dropdown(
             label="Whisperモデル",
@@ -144,6 +176,16 @@ class LiveTranscriptionView(ft.Column):
                     self.dd_whisper,
                     self.dd_provider,
                     self.dd_llm,
+                    ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Text(f"RAM: {self.hw_info['ram']}GB", size=10, color=ft.Colors.BLUE_200),
+                                ft.Text(f"VRAM: {self.hw_info['vram']}GB", size=10, color=ft.Colors.PURPLE_200),
+                            ],
+                            spacing=0,
+                        ),
+                        margin=ft.margin.only(left=10),
+                    ),
                 ],
                 spacing=10,
             ),
@@ -211,66 +253,81 @@ class LiveTranscriptionView(ft.Column):
 
         if not is_recording:
             # START
-            self.btn_live.disabled = True
-            self.btn_stop.disabled = False
-            self.dd_source.disabled = True
-            self.dd_provider.disabled = True
-            self.dd_whisper.disabled = True
-            self.dd_project.disabled = True
-            self.tf_new_project.disabled = True
-            self.status_text.value = "🎙 録音開始中..."
-            self.tabs.selected_index = 0
-            self.update()
-
+            self._start_ui_state()
+            
             # Resolve project name
             if self.dd_project.value == "__new__":
                 project_name = self.tf_new_project.value.strip() or "新規プロジェクト"
             else:
                 project_name = self.dd_project.value or "その他"
 
-            def on_chunk(text):
-                self.raw_transcript_text.value += text + " "
-                self.update()
-
             try:
-                self.service.start_live_recording(
+                self.ctrl.start_live_transcription(
                     model_name=self.dd_whisper.value,
                     source=self.dd_source.value,
-                    project_name=project_name,
-                    on_text_added=on_chunk,
+                    project_name=project_name
                 )
-                state.set("is_recording", True)
-                self.status_text.value = "🎙 リアルタイム録音・解析中..."
-                self.update()
             except Exception as ex:
-                error_msg = str(ex)
-                if "VRAM不足" in error_msg:
-                    self.status_text.value = f"⚠️ {error_msg}"
-                    self.status_text.color = ft.Colors.RED_ACCENT_400
-                else:
-                    self.status_text.value = f"⚠️ 起動失敗: {ex}"
-                    self.status_text.color = ft.Colors.RED_400
+                logger.error(f"Live transcription failed to start: {ex}", exc_info=True)
+                self.status_text.value = f"⚠️ 起動失敗: {ex}"
+                self.status_text.color = ft.Colors.RED_400
                 self._stop_ui_state()
-                self.update()
+                self._safe_update()
         else:
             # STOP
-            self.status_text.value = "解析の最終処理を行っています..."
-            self.update()
-            self.service.stop_live_recording(finalize_callback=self._on_finalized)
+            self.ctrl.stop_live_transcription()
+            self._safe_update()
 
-    def _on_finalized(self, full_text, category):
-        state.set("is_recording", False)
-        self._stop_ui_state()
-        self.raw_transcript_text.value = full_text
-        self.status_text.value = f"✅ 完了 (自動分類: {category if category else '未分類'})"
+    def _on_transcription_finished(self, result):
+        if "transformed" in result:
+            # Case 2: AI Transformation is COMPLETE
+            self.result_text.value = result["transformed"]
+            self.tabs.selected_index = 1
+            self.status_text.value = result.get("status", "✨ すべての処理が完了しました")
+            self.status_text.color = ft.Colors.GREEN_400
+            self._stop_ui_state()
+            self._safe_update()
+        else:
+            # Case 1: Raw Transcription is COMPLETE, start AI Transformation
+            full_text = result.get("text", "")
+            meeting_id = result.get("meeting_id") or state.get("current_meeting_id")
+            
+            if full_text and len(full_text.strip()) >= 50:
+                self._run_ai_conversion(meeting_id, full_text)
+            else:
+                # Record too short for AI
+                self.result_text.value = f"文字起こしデータが短すぎるため、AI変換はスキップされました。\n\n{full_text}"
+                self.status_text.value = "⚠️ 文字起こし完了 (AI変換スキップ)"
+                self._stop_ui_state()
+                self._safe_update()
 
-        # Run AI Report Logic
+    def _run_ai_conversion(self, meeting_id, text):
+        """Triggers the background AI transformation process."""
         provider = self.dd_provider.value
         llm_model = self.dd_llm.value
-        # Use simple formatting for now, complex routing can be added later
-        self.result_text.value = f"# ライブ録音レポート ({provider} / {llm_model})\n\n{full_text}"
-        self.tabs.selected_index = 1
-        self.update()
+        
+        self.status_text.value = "🧠 AI変換の準備中..."
+        self._safe_update()
+        
+        # Controller handles the strategy detection and LLM execution in a thread
+        self.ctrl.transform_transcript(
+            meeting_id=meeting_id,
+            transcript=text,
+            provider=provider,
+            model=llm_model
+        )
+
+    def _start_ui_state(self):
+        self.btn_live.disabled = True
+        self.btn_stop.disabled = False
+        self.dd_source.disabled = True
+        self.dd_provider.disabled = True
+        self.dd_whisper.disabled = True
+        self.dd_project.disabled = True
+        self.tf_new_project.disabled = True
+        self.raw_transcript_text.value = ""
+        self.tabs.selected_index = 0
+        self._safe_update()
 
     def _stop_ui_state(self):
         self.btn_live.disabled = False

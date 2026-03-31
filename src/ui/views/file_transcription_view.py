@@ -11,6 +11,7 @@ from src.core.constants import WHISPER_MODELS
 from src.core.history_mgr import history_mgr
 from src.core.intent_router import IntentRouter
 from src.core.minutes_service import MinutesService
+from src.core.event_bus import event_bus, EVENT_STATUS_UPDATE, EVENT_TRANSCRIPTION_PROGRESS, EVENT_TRANSCRIPTION_FINISHED, EVENT_TRANSCRIPTION_ERROR
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,36 @@ class FileTranscriptionView(ft.Column):
         self.minutes_service = MinutesService(config_mgr)
         self.local_smart_ctrl = LocalSmartController(config_mgr)
         self.router = IntentRouter(config_mgr)
+        self._setup_event_handlers()
+
+    def _setup_event_handlers(self):
+        @event_bus.subscribe(EVENT_STATUS_UPDATE)
+        def on_status(status):
+            self.status_text.value = status
+            self._safe_update()
+
+        @event_bus.subscribe(EVENT_TRANSCRIPTION_PROGRESS)
+        def on_progress(p):
+            self.progress_bar.visible = True
+            self.progress_bar.value = p
+            self._safe_update()
+
+        @event_bus.subscribe(EVENT_TRANSCRIPTION_FINISHED)
+        def on_finished(result):
+            self.raw_transcript_text.value = result.get("text", "")
+            self.progress_bar.visible = False
+            self.btn_pick.disabled = False
+            # Trigger AI conversion (this is still slightly coupled, could be an event too)
+            self._run_ai_conversion(result.get("text", ""))
+            self._safe_update()
+
+        @event_bus.subscribe(EVENT_TRANSCRIPTION_ERROR)
+        def on_error(err):
+            self.status_text.value = f"エラー: {err}"
+            self.status_text.color = ft.Colors.RED_400
+            self.progress_bar.visible = False
+            self.btn_pick.disabled = False
+            self._safe_update()
 
         # File Pickers
         self.file_picker = ft.FilePicker()
@@ -174,8 +205,8 @@ class FileTranscriptionView(ft.Column):
                     ft.Container(
                         content=ft.Column(
                             [
-                                ft.Text(f"RAM: {hw_info['ram']}GB", size=10, color=ft.Colors.BLUE_200),
-                                ft.Text(f"VRAM: {hw_info['vram']}GB", size=10, color=ft.Colors.PURPLE_200),
+                                ft.Text(f"RAM: {self.hw_info['ram']}GB", size=10, color=ft.Colors.BLUE_200),
+                                ft.Text(f"VRAM: {self.hw_info['vram']}GB", size=10, color=ft.Colors.PURPLE_200),
                             ],
                             spacing=0,
                         ),
@@ -269,68 +300,40 @@ class FileTranscriptionView(ft.Column):
         else:
             project_name = self.dd_project.value or "その他"
 
-        threading.Thread(target=self._process_flow, args=(file_path, project_name), daemon=True).start()
+        self.btn_pick.disabled = True
+        self.ctrl.start_file_transcription(file_path, self.dd_whisper.value)
 
-    def _process_flow(self, file_path: str, project_name: str):
+    def _run_ai_conversion(self, text: str):
+        if not text or len(text.strip()) < 10:
+            return
+
+        self.status_text.value = "🧠 AI 変換処理を開始します..."
+        self._safe_update()
+
+        # TODO: Move AI transformation to a dedicated controller/service event flow later.
+        # For now, keep it here to maintain existing functionality while refactoring.
+        threading.Thread(target=self._ai_worker, args=(text,), daemon=True).start()
+
+    def _ai_worker(self, text: str):
         try:
-            self.btn_pick.disabled = True
-            self.status_text.value = f"読み込み中: {os.path.basename(file_path)}"
-            self.progress_bar.visible = True
-            self.progress_bar.value = 0
-            self.update()
-
-            whisper_model = self.dd_whisper.value
-            use_visual = self.sw_visual.value
-
-            result_data = self.service.transcribe_file_sync(
-                file_path=file_path,
-                model_name=whisper_model,
-                project_name=project_name,
-                progress_callback=lambda p: self._update_progress(p),
-                use_visual=use_visual,
-            )
-
-            text = result_data["transcript"]
-            visual_contexts = result_data.get("visual_contexts", [])
-
-            self.raw_transcript_text.value = text
-            if use_visual and visual_contexts:
-                self.status_text.value = f"AIによるマルチモーダル解析中... (画像: {len(visual_contexts)}枚)"
-            else:
-                self.status_text.value = "AIによる解析中..."
-            self.update()
-
             provider = self.dd_provider.value
             llm_model = self.dd_llm.value
-
-            # Use unified transform for multimodal support
-            system_prompt = (
-                "あなたは文字起こしデータの分析エキスパートです。"
-                "提供されたテキスト（および動画から抽出された画像コンテキスト）を分析し、"
-                "最も重要と思われる内容を構造化されたレポートとして出力してください。"
-            )
-
+            use_visual = self.sw_visual.value
+            
+            # This part still uses service directly but in a worker
+            system_prompt = "文字起こしデータの分析エキスパートとしてレポートを作成してください。"
             ai_output = self.service.config_mgr.get_llm_client(provider, None).transform(
-                transcript=text, model_name=llm_model, system_instruction=system_prompt, visual_contexts=visual_contexts if use_visual else None
+                transcript=text, model_name=llm_model, system_instruction=system_prompt, visual_contexts=None
             )
 
             self.result_text.value = ai_output
             self.tabs.selected_index = 0
             self.status_text.value = "処理完了"
-            self.progress_bar.visible = False
-            self.btn_pick.disabled = False
-            self.update()
-        except Exception as ex:
-            error_msg = str(ex)
-            if "VRAM不足" in error_msg:
-                self.status_text.value = f"⚠️ {error_msg}"
-                self.status_text.color = ft.Colors.RED_ACCENT_400
-            else:
-                self.status_text.value = f"エラー: {ex}"
-                self.status_text.color = ft.Colors.RED_400
-            self.btn_pick.disabled = False
-            self.progress_bar.visible = False
-            self.update()
+            self._safe_update()
+        except Exception as e:
+            logger.error(f"AI conversion error: {e}")
+            self.status_text.value = f"AI変換エラー: {e}"
+            self._safe_update()
 
     def _toggle_local_smart(self, e):
         self.local_smart_enabled = not self.local_smart_enabled

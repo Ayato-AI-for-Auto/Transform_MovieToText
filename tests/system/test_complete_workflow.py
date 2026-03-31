@@ -23,13 +23,17 @@ class TestSystemCompleteWorkflow(unittest.TestCase):
         self.config_mgr = MagicMock()
         self.config_mgr.get_active_provider.return_value = "ollama_local"
         self.page = MagicMock()
+        # Must return list for segments to be JSON serializable
+        self.mock_transcriber = MagicMock()
+        self.mock_transcriber.transcribe.return_value = {"text": "Transcription result", "segments": []}
 
     def tearDown(self):
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
-    @patch("src.llm.providers.ollama.OllamaLLMClient.chat")
-    def test_full_user_story_flow(self, mock_chat):
+    @patch("src.llm.providers.ollama_client.OllamaLocalClient.chat")
+    @patch("src.llm.providers.ollama_client.OllamaCloudClient.chat")
+    def test_full_user_story_flow(self, mock_chat_cloud, mock_chat):
         # 1. Data Generation (Story: A user just finished a meeting about "Pizza")
         self.mgr.add_meeting(title="Pizza Strategy", transcript="The best pizza has pineapple.", audio_path="mock.mp3")
         self.mgr.update_minutes(1, minutes="Summary: Pineapple is recommended for pizza.")
