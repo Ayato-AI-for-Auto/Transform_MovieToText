@@ -4,7 +4,7 @@ import subprocess
 import flet as ft
 
 # List of heavy dependencies that should be installed on-demand
-HEAVY_DEPS = ["faster-whisper", "torch", "torchvision", "torchaudio", "fastembed", "opencv-python"]
+HEAVY_DEPS = ["faster-whisper", "torch", "torchvision", "torchaudio", "opencv-python"]
 
 
 def is_env_ready():

@@ -1,4 +1,5 @@
 import logging
+import contextlib
 from typing import Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
@@ -47,19 +48,15 @@ class ModelManager:
         # Unload others
         for name, client in self._clients.items():
             if name != requester_name:
-                try:
+                with contextlib.suppress(Exception):
                     logger.info(f"ModelManager: Unloading '{name}' to make room for '{requester_name}'...")
                     client.unload()
-                except Exception as e:
-                    logger.error(f"ModelManager: Failed to unload '{name}': {e}")
 
         self._active_client = requester_name
         logger.info(f"ModelManager: VRAM access granted to '{requester_name}'.")
 
     def release_all(self):
         """Unlocks everything. Useful for app shutdown or low-power modes."""
-        import contextlib
-
         for _name, client in self._clients.items():
             with contextlib.suppress(Exception):
                 client.unload()

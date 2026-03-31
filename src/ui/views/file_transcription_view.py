@@ -350,6 +350,9 @@ class FileTranscriptionView(ft.Column):
         self.local_smart_ctrl.apply_optimization(self.dd_provider, self.dd_llm, self.status_text, dd_whisper=self.dd_whisper)
         self._safe_update()
 
+    def _on_category_change(self, e):
+        self.transcription_card.update_category(e.control.value)
+
     def _on_project_change(self, e):
         is_new = self.dd_project.value == "__new__"
         self.tf_new_project.visible = is_new

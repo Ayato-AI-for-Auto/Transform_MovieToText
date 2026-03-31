@@ -52,7 +52,6 @@ dependencies = [
     "python-dotenv",
     "pyautogui",
     "opencv-python",
-    "fastembed",
     "colorlog",
     "python-event-bus",
 ]
