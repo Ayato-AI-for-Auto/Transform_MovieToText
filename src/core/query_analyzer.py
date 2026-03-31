@@ -140,5 +140,5 @@ class QueryAnalyzer:
         return {
             "projects": sorted(found_projects),
             "categories": sorted(found_categories),
-            "keywords": sorted(list(set(keywords))[:8]), # list(set(...))[:8] is fine to get slice first
+            "keywords": sorted(list(set(keywords))[:8]),  # list(set(...))[:8] is fine to get slice first
         }

@@ -28,10 +28,7 @@ def system_setup():
     mock_config.get_visual_capture_enabled.return_value = False
 
     mock_transcriber = Mock(spec=WhisperTranscriber)
-    mock_transcriber.transcribe.return_value = {
-        "text": LONG_TEXT,
-        "segments": [{"start": 0.0, "end": 1.0, "text": "Something long."}]
-    }
+    mock_transcriber.transcribe.return_value = {"text": LONG_TEXT, "segments": [{"start": 0.0, "end": 1.0, "text": "Something long."}]}
 
     # Reset global state for each test
     state.set("is_processing", False)
@@ -40,8 +37,7 @@ def system_setup():
     # In-memory history for system test integration
     history = HistoryManager(db_path=":memory:")
     # Both the controller creates its own service AND it uses history_mgr singleton.
-    with patch("src.controllers.transcription_ctrl.history_mgr", history), \
-         patch("src.core.transcription_service._history_mgr", history):
+    with patch("src.controllers.transcription_ctrl.history_mgr", history), patch("src.core.transcription_service._history_mgr", history):
         ctrl = TranscriptionController(mock_config, mock_transcriber)
         yield ctrl, history
 
@@ -149,11 +145,8 @@ def test_system_live_recording_flow(system_setup):
             # 4. Verify DB persistence
             meeting = history.get_meeting(m_id)
             assert meeting is not None
-            assert (
-                meeting["transcript"]
-                == (
-                    "This is a very long transcription result that definitely exceeds both the fifty character limit for titles "
-                    "and the one hundred character limit for AI category extraction. It is long enough to trigger all AI "
-                    "logic paths. EXTRA TEXT FOR 100+."
-                )
+            assert meeting["transcript"] == (
+                "This is a very long transcription result that definitely exceeds both the fifty character limit for titles "
+                "and the one hundred character limit for AI category extraction. It is long enough to trigger all AI "
+                "logic paths. EXTRA TEXT FOR 100+."
             )

@@ -13,9 +13,7 @@ from tests.unit.llm.fake_llm_client import FakeLLMClient
 def mock_config():
     config = Mock(spec=ConfigManager)
     config.get_force_gpu.return_value = False
-    config.get_active_provider.return_value = (
-        "ollama_local"
-    )
+    config.get_active_provider.return_value = "ollama_local"
     config.get_provider_config.return_value = {"api_key": "fake", "base_url": "http://fb"}
     config.get_last_model.return_value = "m-1"
     config.get_visual_capture_enabled.return_value = False

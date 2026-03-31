@@ -73,6 +73,7 @@ def test_full_transcription_workflow_with_events(test_env, tmp_path):
         assert meeting["title"] == "Generated Title (video.mp4)"
         assert meeting["category"] == "Integrated"
 
+
 def test_live_recording_integration_abort(test_env):
     """Test that start_live_recording initializes the session correctly even if stopped quickly."""
     service, history, bus, long_text = test_env
