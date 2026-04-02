@@ -15,9 +15,7 @@ class FakeLLMClient(BaseLLMClient):
         return self.available_models
 
     def generate_minutes(self, transcript: str, model_name: str, image_paths: list = None) -> str:
-        self.recorded_calls.append(
-            {"method": "generate_minutes", "transcript": transcript, "model_name": model_name, "image_paths": image_paths}
-        )
+        self.recorded_calls.append({"method": "generate_minutes", "transcript": transcript, "model_name": model_name, "image_paths": image_paths})
         return "偽の議事録: 決定事項 - テストを成功させる。"
 
     def extract_category(self, transcript: str, model_name: str) -> str:
