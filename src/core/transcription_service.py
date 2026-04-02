@@ -1,15 +1,18 @@
 import logging
 import os
+import shutil
 import threading
 import time
 from collections.abc import Callable
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.core.live_processor import LiveTranscriptionManager
 
 from src.core.config_manager import ConfigManager
+from src.core.constants import DEFAULT_RECORDS_DIR
 from src.core.event_bus import (
     EVENT_STATUS_UPDATE,
     EVENT_TRANSCRIPTION_FINISHED,
@@ -17,6 +20,7 @@ from src.core.event_bus import (
     event_bus,
 )
 from src.core.history_mgr import history_mgr as _history_mgr
+from src.core.utils import sanitize_filename
 from src.core.whisper_transcriber import WhisperTranscriber
 from src.llm.factory import LLMFactory
 
@@ -84,10 +88,6 @@ class TranscriptionService:
                 logger.warning(f"Failed to extract visual frames: {e}")
 
         # Auto-save to history
-        from pathlib import Path
-        from src.core.constants import DEFAULT_RECORDS_DIR
-        from src.core.utils import sanitize_filename
-
         safe_project = sanitize_filename(project_name or "その他")
         records_dir = Path.cwd().joinpath(*DEFAULT_RECORDS_DIR.split("/")).joinpath(safe_project)
         records_dir.mkdir(parents=True, exist_ok=True)
@@ -96,8 +96,6 @@ class TranscriptionService:
         final_file_path = str(records_dir / base_name)
 
         if os.path.abspath(file_path) != os.path.abspath(final_file_path):
-            import shutil
-
             logger.info(f"transcribe_file_sync: Copying {file_path} to {final_file_path}")
             shutil.copy2(file_path, final_file_path)
 
