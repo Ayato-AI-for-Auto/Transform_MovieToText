@@ -23,7 +23,9 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -50,8 +52,10 @@ jobs:
 
       - name: Verify Flutter environment
         run: |
-          flet --version
+          which flutter
+          flutter --version
           flutter doctor -v
+          flet --version
 
       - name: Build APK (Flet)
         run: |
