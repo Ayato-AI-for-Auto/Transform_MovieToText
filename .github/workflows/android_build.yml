@@ -1,7 +1,13 @@
 name: Flet Android Build
 
 on:
-  workflow_dispatch:  # 手動実行用
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'pyproject.toml'
+      - '.github/workflows/android_build.yml'
 
 jobs:
   build:
