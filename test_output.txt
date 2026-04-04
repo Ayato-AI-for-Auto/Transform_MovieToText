@@ -1,7 +1,0 @@
-﻿============================= test session starts =============================
-collecting ... collected 2 items
-
-tests/common/unit/core/test_recorder.py::test_ffmpeg_recorder_command PASSED [ 50%]
-tests/common/unit/core/test_recorder.py::test_audio_recorder_start_stop FAILED [100%]
-
-========================= 1 failed, 1 passed in 2.22s =========================

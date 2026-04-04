@@ -2645,25 +2645,16 @@ wheels = [
 
 [[package]]
 name = "transform-movie-to-text"
-version = "2.10.0"
+version = "2.11.0"
 source = { editable = "." }
 dependencies = [
     { name = "colorlog" },
-    { name = "faster-whisper" },
     { name = "flet", extra = ["all"] },
     { name = "flet-desktop" },
     { name = "google-genai" },
-    { name = "ollama" },
-    { name = "openai" },
-    { name = "opencv-python" },
-    { name = "psutil" },
-    { name = "pyaudiowpatch", marker = "sys_platform == 'win32'" },
-    { name = "pyautogui" },
     { name = "python-dotenv" },
     { name = "python-event-bus" },
-    { name = "torch" },
-    { name = "torchaudio" },
-    { name = "torchvision" },
+    { name = "requests" },
 ]
 
 [package.optional-dependencies]
@@ -2673,31 +2664,44 @@ dev = [
     { name = "pytest-mock" },
     { name = "ruff" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "colorlog" },
+pc = [
     { name = "faster-whisper" },
-    { name = "flet", extras = ["all"], specifier = ">=0.21.0,<0.80.0" },
-    { name = "flet-desktop", specifier = ">=0.21.0,<0.80.0" },
-    { name = "google-genai" },
     { name = "ollama" },
     { name = "openai" },
     { name = "opencv-python" },
     { name = "psutil" },
     { name = "pyaudiowpatch", marker = "sys_platform == 'win32'" },
     { name = "pyautogui" },
+    { name = "torch" },
+    { name = "torchaudio" },
+    { name = "torchvision" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "colorlog" },
+    { name = "faster-whisper", marker = "extra == 'pc'" },
+    { name = "flet", extras = ["all"], specifier = ">=0.21.0,<0.80.0" },
+    { name = "flet-desktop", specifier = ">=0.21.0,<0.80.0" },
+    { name = "google-genai" },
+    { name = "ollama", marker = "extra == 'pc'" },
+    { name = "openai", marker = "extra == 'pc'" },
+    { name = "opencv-python", marker = "extra == 'pc'" },
+    { name = "psutil", marker = "extra == 'pc'" },
+    { name = "pyaudiowpatch", marker = "sys_platform == 'win32' and extra == 'pc'" },
+    { name = "pyautogui", marker = "extra == 'pc'" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "python-dotenv" },
     { name = "python-event-bus" },
+    { name = "requests" },
     { name = "ruff", marker = "extra == 'dev'" },
-    { name = "torch", index = "https://download.pytorch.org/whl/cu121" },
-    { name = "torchaudio", index = "https://download.pytorch.org/whl/cu121" },
-    { name = "torchvision", index = "https://download.pytorch.org/whl/cu121" },
+    { name = "torch", marker = "extra == 'pc'", index = "https://download.pytorch.org/whl/cu121" },
+    { name = "torchaudio", marker = "extra == 'pc'", index = "https://download.pytorch.org/whl/cu121" },
+    { name = "torchvision", marker = "extra == 'pc'", index = "https://download.pytorch.org/whl/cu121" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["pc", "dev"]
 
 [[package]]
 name = "triton"

@@ -1,0 +1,57 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.17, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\saiha\My_Service\programing\Trancform_MovieToText
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.12.1, cov-7.1.0, mock-3.15.1
+collected 96 items
+
+tests\common\integration\test_config_sync.py ..                          [  2%]
+tests\common\integration\test_history_persistence.py ...                 [  5%]
+tests\common\integration\test_local_smart_flow.py .                      [  6%]
+tests\common\integration\test_recorder_transcription_integration.py ..   [  8%]
+tests\common\integration\test_transcription_integration.py ..            [ 10%]
+tests\common\unit\core\test_advisor_logic.py .                           [ 11%]
+tests\common\unit\core\test_config_manager.py ..                         [ 13%]
+tests\common\unit\core\test_event_bus.py ....                            [ 17%]
+tests\common\unit\core\test_history_cockpit.py ....                      [ 21%]
+tests\common\unit\core\test_history_mgr.py ......                        [ 28%]
+tests\common\unit\core\test_history_mgr_rigorous.py .........            [ 37%]
+tests\common\unit\core\test_history_mgr_unit.py F..                      [ 40%]
+tests\common\unit\core\test_live_processor.py ..                         [ 42%]
+tests\common\unit\core\test_recorder.py ..                               [ 44%]
+tests\common\unit\core\test_repositories.py ......                       [ 51%]
+tests\common\unit\core\test_resource_advisor_unit.py ....                [ 55%]
+tests\common\unit\core\test_transcription_service_unit.py ...            [ 58%]
+tests\common\unit\core\test_whisper_hardening.py .                       [ 59%]
+tests\common\unit\llm\test_client_interface.py ....                      [ 63%]
+tests\common\unit\llm\test_gemini_client.py ..                           [ 65%]
+tests\common\unit\llm\test_ollama_clients.py ..                          [ 67%]
+tests\common\unit\test_factory_naming.py .                               [ 68%]
+tests\common\unit\test_hybrid_search.py ..                               [ 70%]
+tests\common\unit\test_resource_advisor.py ...                           [ 73%]
+tests\pc\e2e\test_app_launch.py ..                                       [ 76%]
+tests\pc\e2e\test_full_app_flow_e2e.py .                                 [ 77%]
+tests\pc\unit\test_chat_bot_view.py ....                                 [ 81%]
+tests\pc\unit\test_local_smart_ctrl.py ..                                [ 83%]
+tests\pc\unit\ui\test_controllers.py ...                                 [ 86%]
+tests\pc\unit\ui\test_ui_utils.py ....                                   [ 90%]
+tests\system\test_complete_workflow.py .                                 [ 91%]
+tests\system\test_recording_flow.py ..                                   [ 93%]
+tests\test_error_resilience.py ...                                       [ 96%]
+tests\test_ollama_provider_pytest.py ...                                 [100%]
+
+================================== FAILURES ===================================
+__________________________ test_add_and_get_meeting ___________________________
+tests\common\unit\core\test_history_mgr_unit.py:25: in test_add_and_get_meeting
+    meeting = mock_history_mgr.get_single_meeting(meeting_id)
+E   AttributeError: 'HistoryManager' object has no attribute 'get_single_meeting'. Did you mean: 'get_all_meetings'?
+============================== warnings summary ===============================
+.venv\lib\site-packages\requests\__init__.py:113
+  C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.4) doesn't match a supported version!
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/common/unit/core/test_history_mgr_unit.py::test_add_and_get_meeting
+================== 1 failed, 95 passed, 1 warning in 18.95s ===================

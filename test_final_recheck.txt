@@ -1,5 +1,0 @@
-﻿============================= test session starts =============================
-collecting ... collected 84 items / 1 error
-
-!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
-========================= 1 warning, 1 error in 5.92s =========================

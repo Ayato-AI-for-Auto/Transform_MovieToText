@@ -1,0 +1,32 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.17, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\saiha\My_Service\programing\Trancform_MovieToText
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.12.1, cov-7.1.0, mock-3.15.1
+collecting ... collected 2 items
+run-last-failure: rerun previous 2 failures (skipped 33 files)
+
+tests/common/unit/core/test_history_mgr_unit.py::test_add_and_get_meeting FAILED [ 50%]
+tests/pc/e2e/test_app_launch.py::test_view_instantiation_smoke FAILED    [100%]
+
+================================== FAILURES ===================================
+__________________________ test_add_and_get_meeting ___________________________
+tests\common\unit\core\test_history_mgr_unit.py:25: in test_add_and_get_meeting
+    meeting = mock_history_mgr.get_single_meeting(meeting_id)
+E   AttributeError: 'HistoryManager' object has no attribute 'get_single_meeting'. Did you mean: 'get_all_meetings'?
+________________________ test_view_instantiation_smoke ________________________
+tests\pc\e2e\test_app_launch.py:29: in test_view_instantiation_smoke
+    from src.pc.ui.views.transcription_view import TranscriptionView
+E   ModuleNotFoundError: No module named 'src.pc.ui.views.transcription_view'
+============================== warnings summary ===============================
+tests/pc/e2e/test_app_launch.py::test_view_instantiation_smoke
+  C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.4) doesn't match a supported version!
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/common/unit/core/test_history_mgr_unit.py::test_add_and_get_meeting - AttributeError: 'HistoryManager' object has no attribute 'get_single_meeting'. Did you mean: 'get_all_meetings'?
+FAILED tests/pc/e2e/test_app_launch.py::test_view_instantiation_smoke - ModuleNotFoundError: No module named 'src.pc.ui.views.transcription_view'
+======================== 2 failed, 1 warning in 5.62s =========================
