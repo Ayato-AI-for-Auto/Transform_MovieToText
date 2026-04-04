@@ -1,3 +1,10 @@
+## [2.11.8](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.7...v2.11.8) (2026-04-04)
+
+
+### Bug Fixes
+
+* **ui:** resolve TypeError in Dropdown initialization by moving on_change to property assignment ([8b57f14](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/8b57f1421f798784d315269a6828bd0970c2e650))
+
 ## [2.11.7](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.6...v2.11.7) (2026-04-04)
 
 
