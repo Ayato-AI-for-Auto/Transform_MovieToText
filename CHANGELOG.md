@@ -1,3 +1,10 @@
+## [2.11.6](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.5...v2.11.6) (2026-04-04)
+
+
+### Bug Fixes
+
+* **ci:** add missing dependencies (Pillow, numpy) and include [pc] extras in CI install ([060761c](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/060761cc7a4b874cf1079cec5b07a8c341b44ead))
+
 ## [2.11.5](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.4...v2.11.5) (2026-04-04)
 
 
