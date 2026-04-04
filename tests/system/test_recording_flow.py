@@ -3,11 +3,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.controllers.transcription_ctrl import TranscriptionController
 from src.core.config_manager import ConfigManager
 from src.core.history_mgr import HistoryManager
 from src.core.state import state
 from src.core.whisper_transcriber import WhisperTranscriber
+from src.pc.controllers.transcription_ctrl import TranscriptionController
 
 LONG_TEXT = (
     "This is a very long transcription result that definitely exceeds both the fifty "
@@ -37,7 +37,7 @@ def system_setup():
     # In-memory history for system test integration
     history = HistoryManager(db_path=":memory:")
     # Both the controller creates its own service AND it uses history_mgr singleton.
-    with patch("src.controllers.transcription_ctrl.history_mgr", history), patch("src.core.transcription_service._history_mgr", history):
+    with patch("src.pc.controllers.transcription_ctrl.history_mgr", history), patch("src.core.transcription_service._history_mgr", history):
         ctrl = TranscriptionController(mock_config, mock_transcriber)
         yield ctrl, history
 
@@ -86,8 +86,8 @@ def test_system_live_recording_flow(system_setup):
 
     # Mock recorders
     with (
-        patch("src.recorder.visual_recorder.visual_recorder.start"),
-        patch("src.recorder.visual_recorder.visual_recorder.stop"),
+        patch("src.pc.recorder.visual_recorder.visual_recorder.start"),
+        patch("src.pc.recorder.visual_recorder.visual_recorder.stop"),
         patch("src.core.live_processor.LiveTranscriptionManager.start"),
         patch(
             "src.core.live_processor.LiveTranscriptionManager.stop",

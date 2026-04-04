@@ -67,7 +67,16 @@ class IntentRouter:
                 end = raw_json.rfind("}") + 1
                 raw_json = raw_json[start:end]
 
-            data = json.loads(raw_json)
+            if not raw_json:
+                logger.error("Intent routing failed: LLM returned empty output.")
+                return {"strategy": TransformationStrategy.CLEAN, "reason": "LLM returned empty output", "confidence": 0.0}
+
+            try:
+                data = json.loads(raw_json)
+            except json.JSONDecodeError as jde:
+                logger.error(f"Intent routing failed: Invalid JSON format. Output was: {raw_json[:500]}... Error: {jde}")
+                return {"strategy": TransformationStrategy.CLEAN, "reason": f"Invalid JSON format: {jde}", "confidence": 0.0}
+
             strategy_key = data.get("strategy", "clean").lower()
 
             # Map string to Enum
@@ -77,5 +86,5 @@ class IntentRouter:
             logger.info(f"Intent detected: {strategy.name} (Conf: {data.get('confidence')})")
             return {"strategy": strategy, "reason": data.get("reason", "No reason provided"), "confidence": data.get("confidence", 0.0)}
         except Exception as e:
-            logger.error(f"Intent routing failed: {e}")
+            logger.error(f"Intent routing failed: {e}", exc_info=True)
             return {"strategy": TransformationStrategy.CLEAN, "reason": f"Classification error: {e}", "confidence": 0.0}

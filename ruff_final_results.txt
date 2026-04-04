@@ -1,0 +1,13 @@
+﻿F401 [*] `os` imported but unused
+ --> src\pc\ui\views\history_view.py:2:8
+  |
+1 | import logging
+2 | import os
+  |        ^^
+3 |
+4 | import flet as ft
+  |
+help: Remove unused import: `os`
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

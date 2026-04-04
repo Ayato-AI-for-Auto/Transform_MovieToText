@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
@@ -43,10 +43,16 @@ jobs:
           ruff format --check src tests
 
       - name: Run Tests
-        # Note: ubuntu-latest will fail on soundcard/ffmpeg native features,
-        # but pure logic tests should pass. We use a mock-heavy approach in CI.
+        shell: bash
         run: |
-          pytest --junitxml=reports/junit-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml:reports/coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
+          mkdir -p reports
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            # Windows: Run common and pc tests
+            pytest tests/common tests/pc -v --junitxml=reports/junit-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml:reports/coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
+          else
+            # Linux/macOS: Run only common tests (to avoid soundcard/flet-desktop issues)
+            pytest tests/common -v --junitxml=reports/junit-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml:reports/coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
+          fi
 
       - name: Upload Test and Coverage Results
         if: always()

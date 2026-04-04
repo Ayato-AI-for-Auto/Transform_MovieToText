@@ -43,16 +43,16 @@ class FletApp:
 
         # Lazy load heavy components
         logger.info("FletApp: Lazy loading components (this may trigger library loads)...")
-        from src.controllers.history_ctrl import HistoryController
-        from src.controllers.minutes_ctrl import MinutesController
-        from src.controllers.transcription_ctrl import TranscriptionController
         from src.core.whisper_transcriber import WhisperTranscriber
-        from src.ui.main_window import MainWindow
-        from src.ui.views.chat_bot_view import ChatBotView
-        from src.ui.views.file_transcription_view import FileTranscriptionView
-        from src.ui.views.history_view import HistoryView
-        from src.ui.views.live_transcription_view import LiveTranscriptionView
-        from src.ui.views.settings_view import SettingsView
+        from src.pc.controllers.history_ctrl import HistoryController
+        from src.pc.controllers.minutes_ctrl import MinutesController
+        from src.pc.controllers.transcription_ctrl import TranscriptionController
+        from src.pc.ui.main_window import MainWindow
+        from src.pc.ui.views.chat_bot_view import ChatBotView
+        from src.pc.ui.views.file_transcription_view import FileTranscriptionView
+        from src.pc.ui.views.history_view import HistoryView
+        from src.pc.ui.views.live_transcription_view import LiveTranscriptionView
+        from src.pc.ui.views.settings_view import SettingsView
 
         logger.info("FletApp: All core components imported.")
         self.transcriber = WhisperTranscriber()

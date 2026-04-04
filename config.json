@@ -21,7 +21,7 @@
         "google": "phi3.5",
         "ollama_cloud": "gemini-3-flash-preview"
     },
-    "visual_capture_enabled": false,
+    "visual_capture_enabled": true,
     "embedding_provider": "local",
     "local_smart_enabled": false
 }

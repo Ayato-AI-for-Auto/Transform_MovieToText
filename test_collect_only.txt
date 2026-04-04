@@ -1,0 +1,178 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.17, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\saiha\My_Service\programing\Trancform_MovieToText
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.1.0, mock-3.15.1
+collected 78 items / 3 errors
+
+<Dir Trancform_MovieToText>
+  <Dir tests>
+    <Dir common>
+      <Dir integration>
+        <Module test_config_sync.py>
+          <Function test_config_persistence>
+          <Function test_provider_specific_config>
+        <Module test_history_persistence.py>
+          <Function test_add_and_get_meeting>
+          <Function test_search_meetings>
+          <Function test_update_minutes>
+        <Module test_local_smart_flow.py>
+          <UnitTestCase TestLocalSmartIntegration>
+            <TestCaseFunction test_complete_optimization_decision_flow>
+        <Module test_recorder_transcription_integration.py>
+          <Function test_transcribe_numpy_integration>
+          <Function test_transcriber_model_switch>
+        <Module test_transcription_integration.py>
+          <Function test_full_transcription_workflow_with_events>
+          <Function test_live_recording_integration_abort>
+      <Dir unit>
+        <Dir core>
+          <Module test_advisor_logic.py>
+            <UnitTestCase TestResourceAdvisorLogic>
+              <TestCaseFunction test_get_best_match_logic>
+          <Module test_config_manager.py>
+            <Function test_config_manager_save_load>
+            <Function test_config_manager_invalid_json>
+          <Module test_event_bus.py>
+            <Function test_event_bus_singleton>
+            <Function test_event_bus_publish_subscribe>
+            <Function test_event_bus_decorator>
+            <Function test_event_bus_multiple_args>
+          <Module test_history_cockpit.py>
+            <Function test_visual_context_persistence>
+            <Function test_delete_meeting_with_dependencies>
+            <Function test_generate_minutes_for_meeting_logic>
+            <Function test_history_controller_bridge>
+          <Module test_history_mgr.py>
+            <Function test_add_and_get_meeting>
+            <Function test_search_fts5>
+            <Function test_get_projects>
+            <Function test_update_minutes>
+            <Function test_delete_meeting>
+            <Function test_get_single_meeting>
+          <Module test_history_mgr_rigorous.py>
+            <Function test_add_and_get_meeting_rigorous>
+            <Function test_get_meeting_nonexistent>
+            <Function test_delete_meeting_and_fts_sync>
+            <Function test_history_mgr_initialization_error>
+            <Function test_update_minutes_rigorous>
+            <Function test_search_advanced[Banana-1]>
+            <Function test_search_advanced[Apple-1]>
+            <Function test_search_advanced[Fruit-0]>
+            <Function test_search_advanced[-2]>
+          <Module test_history_mgr_unit.py>
+            <Function test_add_and_get_meeting>
+            <Function test_filtering_by_project>
+            <Function test_delete_project_and_migrate>
+          <Module test_recorder.py>
+            <Function test_ffmpeg_recorder_command>
+            <Function test_audio_recorder_start_stop>
+          <Module test_repositories.py>
+            <Function test_meeting_repository_add_get>
+            <Function test_meeting_repository_update>
+            <Function test_meeting_repository_search_fts>
+            <Function test_visual_context_repository>
+            <Function test_meeting_delete_cascades>
+            <Function test_json_segments_storage>
+          <Module test_resource_advisor_unit.py>
+            <Function test_tier_mapping_entry>
+            <Function test_tier_mapping_small_gpu>
+            <Function test_tier_mapping_monster>
+            <Function test_ollama_tag_consistency>
+          <Module test_whisper_hardening.py>
+            <Function test_whisper_load_model_fallback>
+        <Dir llm>
+          <Module test_client_interface.py>
+            <UnitTestCase TestLLMClientInterfaces>
+              <TestCaseFunction test_direct_instantiation_safety>
+              <TestCaseFunction test_gemini_interface>
+              <TestCaseFunction test_ollama_cloud_interface>
+              <TestCaseFunction test_ollama_local_interface>
+          <Module test_gemini_client.py>
+            <Function test_get_available_models>
+            <Function test_generate_minutes>
+          <Module test_ollama_clients.py>
+            <UnitTestCase TestOllamaClients>
+              <TestCaseFunction test_ollama_cloud_client>
+              <TestCaseFunction test_ollama_local_client>
+        <Module test_factory_naming.py>
+          <UnitTestCase TestLLMFactoryNormalization>
+            <TestCaseFunction test_provider_normalization>
+        <Module test_hybrid_search.py>
+          <UnitTestCase TestHistoryHybridSearch>
+            <TestCaseFunction test_search_hybrid_summary_context>
+            <TestCaseFunction test_search_hybrid_title_boost>
+        <Module test_resource_advisor.py>
+          <UnitTestCase TestResourceAdvisor>
+            <TestCaseFunction test_entry_tier>
+            <TestCaseFunction test_monster_tier>
+            <TestCaseFunction test_small_gpu_tier>
+    <Dir pc>
+      <Dir e2e>
+        <Module test_app_launch.py>
+          <Function test_app_initialization_smoke>
+          <Function test_view_instantiation_smoke>
+        <Module test_full_app_flow_e2e.py>
+          <Function test_full_file_transcription_flow>
+      <Dir unit>
+        <Module test_local_smart_ctrl.py>
+          <UnitTestCase TestLocalSmartController>
+            <TestCaseFunction test_apply_optimization_already_installed>
+            <TestCaseFunction test_apply_optimization_missing_triggers_pull>
+        <Dir ui>
+          <Module test_controllers.py>
+            <Function test_transcription_auto_save_heuristic_discard>
+            <Function test_transcription_auto_save_heuristic_persist>
+            <Function test_minutes_controller_persistence_with_model>
+          <Module test_ui_utils.py>
+            <Function test_sync_llm_models_initial_fetch>
+            <Function test_sync_llm_models_caching>
+            <Function test_sync_llm_models_cache_expiry>
+            <Function test_sync_llm_models_fallback_on_error>
+
+=================================== ERRORS ====================================
+_______ ERROR collecting tests/common/unit/core/test_live_processor.py ________
+ImportError while importing test module 'C:\Users\saiha\My_Service\programing\Trancform_MovieToText\tests\common\unit\core\test_live_processor.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+C:\Users\saiha\My_Service\programing\Trancform_MovieToText\tests\unit\core\test_live_processor.py:6: in <module>
+    ???
+src\core\live_processor.py:10: in <module>
+    from src.core.recorder_factory import create_recorder
+src\core\recorder_factory.py:2: in <module>
+    from src.recorder.audio_recorder import AudioRecorder
+E   ModuleNotFoundError: No module named 'src.recorder'
+_ ERROR collecting tests/common/unit/core/test_transcription_service_unit.py __
+ImportError while importing test module 'C:\Users\saiha\My_Service\programing\Trancform_MovieToText\tests\common\unit\core\test_transcription_service_unit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\common\unit\core\test_transcription_service_unit.py:9: in <module>
+    from tests.unit.llm.fake_llm_client import FakeLLMClient
+E   ModuleNotFoundError: No module named 'tests.unit.llm'
+____________ ERROR collecting tests/pc/unit/test_chat_bot_view.py _____________
+ImportError while importing test module 'C:\Users\saiha\My_Service\programing\Trancform_MovieToText\tests\pc\unit\test_chat_bot_view.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\AppData\Roaming\uv\python\cpython-3.10.17-windows-x86_64-none\lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\pc\unit\test_chat_bot_view.py:11: in <module>
+    from src.pc.ui.views.chat_bot_view import ChatBotView, ChatMessage
+src\pc\ui\views\chat_bot_view.py:6: in <module>
+    from src.controllers.local_smart_ctrl import LocalSmartController
+E   ModuleNotFoundError: No module named 'src.controllers'
+============================== warnings summary ===============================
+.venv\lib\site-packages\requests\__init__.py:113
+  C:\Users\saiha\My_Service\programing\Trancform_MovieToText\.venv\lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.0.0)/charset_normalizer (3.4.4) doesn't match a supported version!
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/common/unit/core/test_live_processor.py
+ERROR tests/common/unit/core/test_transcription_service_unit.py
+ERROR tests/pc/unit/test_chat_bot_view.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!
+==================== 78 tests collected, 3 errors in 5.87s ====================

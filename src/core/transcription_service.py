@@ -233,7 +233,7 @@ class TranscriptionService:
         # Visual Recorder
         if self.config_mgr.get_visual_capture_enabled():
             logger.info("start_live_recording: Starting VisualRecorder.")
-            from src.recorder.visual_recorder import visual_recorder
+            from src.pc.recorder.visual_recorder import visual_recorder
 
             visual_recorder.start(meeting_id)
 
@@ -258,7 +258,7 @@ class TranscriptionService:
             return
 
         logger.info("stop_live_recording: Terminating recorders and starting finalization...")
-        from src.recorder.visual_recorder import visual_recorder
+        from src.pc.recorder.visual_recorder import visual_recorder
 
         visual_recorder.stop()
 
@@ -327,10 +327,9 @@ class TranscriptionService:
 
         # Fetch visual context if available
         visual_contexts = self.history_mgr.get_visual_context(meeting_id)
-        image_paths = [ctx["image_path"] for ctx in visual_contexts]
 
         # Generate minutes using the client directly
-        minutes = llm_client.generate_minutes(transcript=transcript, model_name=llm_model, image_paths=image_paths)
+        minutes = llm_client.generate_minutes(transcript=transcript, model_name=llm_model, visual_contexts=visual_contexts)
 
         # Update history
         self.history_mgr.update_minutes(meeting_id, minutes, model_name=llm_model)
