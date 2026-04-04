@@ -36,7 +36,7 @@ jobs:
 
       - name: Install Flet CLI
         run: |
-          uv pip install flet
+          uv pip install --system flet
 
       - name: Build APK (Flet)
         run: |
