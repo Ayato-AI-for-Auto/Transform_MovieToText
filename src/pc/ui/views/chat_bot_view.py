@@ -77,8 +77,8 @@ class ChatBotView(ft.Column):
             width=180,
             options=[ft.dropdown.Option(p) for p in ["ollama_local", "ollama_cloud", "google"]],
             value=self.config_mgr.get_active_provider(),
-            on_change=self._on_provider_change,
         )
+        self.dd_provider.on_change = self._on_provider_change
         self.dd_llm = ft.Dropdown(
             label="LLMモデル",
             width=200,
