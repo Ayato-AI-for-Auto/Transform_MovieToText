@@ -18,8 +18,8 @@ except ImportError:
 
 import flet as ft
 
-from src.core.platform_utils import is_android
 from src.core.config_manager import ConfigManager
+from src.core.platform_utils import is_android
 from src.core.state import state
 
 # src.core.whisper_transcriber is now lazy-loaded
