@@ -1,3 +1,10 @@
+## [2.11.1](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.0...v2.11.1) (2026-04-04)
+
+
+### Bug Fixes
+
+* **ci:** stabilize Android build pipeline ([5f10a78](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/5f10a7827b2e0ae0b4ac8c4b9b6a6fc81e34b4e5))
+
 # [2.11.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.10.0...v2.11.0) (2026-04-04)
 
 
