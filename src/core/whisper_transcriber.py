@@ -3,8 +3,17 @@ import logging
 import os
 import time
 
-import torch
-from faster_whisper import WhisperModel
+try:
+    import torch
+except ImportError:
+    logger.warning("torch not found. GPU acceleration disabled.")
+    torch = None
+
+try:
+    from faster_whisper import WhisperModel
+except ImportError:
+    logger.warning("faster_whisper not found. transcription will be disabled.")
+    WhisperModel = None
 
 from src.core.model_manager import model_manager
 
@@ -56,7 +65,7 @@ class WhisperTranscriber:
 
         # Decide device and compute_type with Hardware Priority
         # Tier 1: GPU Native (Standardized to int8_float16 for best efficiency/accuracy ratio)
-        if force_gpu and torch.cuda.is_available():
+        if force_gpu and torch is not None and torch.cuda.is_available():
             device = "cuda"
             compute_type = "int8_float16"
             logger.info(f"WhisperTranscriber: Loading Priority 1 (GPU {compute_type}).")
@@ -68,6 +77,10 @@ class WhisperTranscriber:
                 logger.warning("WhisperTranscriber: GPU requested but unavailable. Falling back to CPU.")
             else:
                 logger.info(f"WhisperTranscriber: Loading Priority 3 (CPU {compute_type}).")
+
+        if WhisperModel is None:
+            logger.error("WhisperModel is not available. Cannot load model.")
+            raise RuntimeError("Faster-Whisper ライブラリがロードされていません。Android 環境では現在サポートされていない可能性があります。")
 
         try:
             # Load Attempt
@@ -119,7 +132,7 @@ class WhisperTranscriber:
             self.current_model_name = None
 
         gc.collect()
-        if torch.cuda.is_available():
+        if torch is not None and torch.cuda.is_available():
             torch.cuda.empty_cache()
             logger.info("WhisperTranscriber: Memory and CUDA cache cleared.")
 
@@ -175,13 +188,17 @@ class WhisperTranscriber:
         """
         Detects system RAM and GPU VRAM for model suitability.
         """
-        import psutil
+        ram = 0.0
+        try:
+            import psutil
+            ram = round(psutil.virtual_memory().total / (1024**3), 1)
+        except Exception as e:
+            logger.warning(f"Failed to detect system RAM: {e}")
 
-        ram = round(psutil.virtual_memory().total / (1024**3), 1)
         vram = 0.0
         device = "cpu"
 
-        if torch.cuda.is_available():
+        if torch is not None and torch.cuda.is_available():
             try:
                 device_id = torch.cuda.current_device()
                 vram_bytes = torch.cuda.get_device_properties(device_id).total_memory

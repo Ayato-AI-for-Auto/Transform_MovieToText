@@ -1,6 +1,11 @@
+import logging
+import os
 import flet as ft
 
 from src.core.config_manager import ConfigManager
+from src.core.platform_utils import get_log_path, is_android
+
+logger = logging.getLogger(__name__)
 
 
 class SettingsView(ft.Column):
@@ -71,6 +76,10 @@ class SettingsView(ft.Column):
                 border_radius=10,
                 padding=10,
             ),
+            ft.Divider(),
+            ft.Text("デバッグ・ログ設定", size=18, weight="w500"),
+            ft.Text(f"Log Path: {get_log_path()}", size=11, color="grey"),
+            ft.ElevatedButton("デバッグログをクリップボードにコピー", icon=ft.Icons.COPY_ALL, on_click=self._on_export_logs_click),
             ft.Divider(),
             ft.Text("Whisper設定", size=18, weight="w500"),
             self.force_gpu_checkbox,
@@ -185,3 +194,28 @@ class SettingsView(ft.Column):
 
         if self.page:
             self.update()
+
+    def _on_export_logs_click(self, e):
+        log_file = get_log_path()
+        if not os.path.exists(log_file):
+            self._show_info("ログファイルが見つかりません。")
+            return
+
+        try:
+            # Clipboard fallback for debugging
+            with open(log_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            
+            self.page.set_clipboard(content)
+            self._show_info("ログをクリップボードにコピーしました。")
+            logger.info(f"Log exported from: {log_file}")
+            
+        except Exception as ex:
+            logger.error(f"Failed to export logs: {ex}")
+            self._show_info(f"ログ出力失敗: {ex}")
+
+    def _show_info(self, text: str):
+        if self.page:
+            self.page.snack_bar = ft.SnackBar(ft.Text(text))
+            self.page.snack_bar.open = True
+            self.page.update()

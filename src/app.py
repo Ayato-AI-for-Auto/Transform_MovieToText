@@ -19,7 +19,7 @@ except ImportError:
 import flet as ft
 
 from src.core.config_manager import ConfigManager
-from src.core.platform_utils import is_android
+from src.core.platform_utils import get_log_path, is_android
 from src.core.state import state
 
 # src.core.whisper_transcriber is now lazy-loaded
@@ -29,7 +29,37 @@ from src.core.state import state
 class FletApp:
     def __init__(self, page: ft.Page):
         self.page = page
+        self.boot_text = ft.Text("Initializing system...", size=14, color=ft.Colors.BLUE_200)
+        self.boot_progress = ft.ProgressBar(width=400, color=ft.Colors.BLUE_400, bgcolor=ft.Colors.BLACK12)
+        self._show_boot_screen()
         self._init_app_safe()
+
+    def _show_boot_screen(self):
+        self.page.controls.clear()
+        self.page.add(
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(ft.Icons.AUTO_AWESOME, size=50, color=ft.Colors.BLUE_400),
+                        ft.Text("Transform Movie to Text", size=20, weight=ft.FontWeight.BOLD),
+                        self.boot_text,
+                        self.boot_progress,
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=20,
+                ),
+                expand=True,
+                alignment=ft.alignment.center,
+            )
+        )
+        self.page.update()
+
+    def _update_boot_status(self, text: str, progress: float):
+        logger.info(f"BOOT: {text}")
+        self.boot_text.value = text
+        self.boot_progress.value = progress / 5.0
+        self.page.update()
 
     def _init_app_safe(self):
         try:
@@ -39,12 +69,15 @@ class FletApp:
             logger.info("FletApp: ConfigManager ready.")
 
             # Lazy load heavy components
-            logger.info("FletApp: Lazy loading components...")
+            self._update_boot_status("Loading AI standard modules...", 1)
             from src.core.whisper_transcriber import WhisperTranscriber
+            
+            self._update_boot_status("Loading history and controllers...", 2)
             from src.pc.controllers.history_ctrl import HistoryController
             from src.pc.controllers.minutes_ctrl import MinutesController
             from src.pc.controllers.transcription_ctrl import TranscriptionController
-            from src.pc.ui.main_window import MainWindow
+            
+            self._update_boot_status("Loading UI components...", 3)
             from src.pc.ui.views.chat_bot_view import ChatBotView
             from src.pc.ui.views.file_transcription_view import FileTranscriptionView
             from src.pc.ui.views.history_view import HistoryView
@@ -78,7 +111,7 @@ class FletApp:
             self.page.overlay.extend([self.file_picker, self.save_picker, self.folder_picker])
 
             # Initialize Views
-            logger.info("FletApp: Initializing views...")
+            self._update_boot_status("Preparing workspace views...", 4)
             self.file_trans_view = FileTranscriptionView(self.page, self.config_mgr, self.trans_ctrl, self.hw_info)
             self.live_trans_view = LiveTranscriptionView(self.page, self.config_mgr, self.trans_ctrl, self.hw_info)
             self.chat_view = ChatBotView(self.page, self.config_mgr)
@@ -86,8 +119,10 @@ class FletApp:
             self.history_view = HistoryView(self.history_ctrl, self.config_mgr, self.folder_picker, self.page)
 
             # Build Main UI
-            logger.info("FletApp: Building UI layout...")
+            self._update_boot_status("Building UI layout...", 5)
+            from src.pc.ui.main_window import MainWindow
             self.main_window = MainWindow(self.file_trans_view, self.live_trans_view, self.settings_view, self.history_view, self.chat_view)
+            self.page.controls.clear()
             self.page.add(self.main_window)
 
             self._setup_initial_values()
@@ -176,6 +211,31 @@ def main(page: ft.Page):
         FletApp(page)
 
 
+def init_logging():
+    log_file = get_log_path()
+    # Basic config for stdout
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+    
+    # Add FileHandler for persistent logs on Android
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    logging.getLogger().addHandler(file_handler)
+    
+    logger.info(f"Logging initialized. Log file: {log_file}")
+    
+    # Global exception handler
+    import sys
+    import traceback
+    
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+        
+    sys.excepthook = handle_exception
+
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    init_logging()
     ft.app(target=main)
