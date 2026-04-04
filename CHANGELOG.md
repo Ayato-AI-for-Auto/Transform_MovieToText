@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.1...v2.11.2) (2026-04-04)
+
+
+### Bug Fixes
+
+* **ci:** fix Flutter version detection by using explicit flutter-version ([6542164](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/65421641b70bbfbcb516c82770f3aac73e75b5a2))
+
 ## [2.11.1](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.0...v2.11.1) (2026-04-04)
 
 
