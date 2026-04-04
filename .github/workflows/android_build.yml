@@ -40,8 +40,8 @@ jobs:
 
       - name: Build APK (Flet)
         run: |
-          # Linux 環境では Windows 特有のエンコーディング・パス問題が発生しない
-          flet build apk --verbose
+          # --yes を付与して SDK インストールの確認をスキップ
+          flet build apk --yes --verbose
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

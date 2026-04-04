@@ -85,8 +85,8 @@ class LiveTranscriptionViewModel:
             self.on_status_changed("🧠 AI変換の準備中...")
             
         self.ctrl.transform_transcript(
-            meeting_id=meeting_id, 
-            transcript=transcript, 
-            provider=provider, 
-            model=model
+            meeting_id=meeting_id,
+            transcript=transcript,
+            provider=provider,
+            model=model,
         )

@@ -266,6 +266,7 @@ class LiveTranscriptionView(ft.Column):
     # --- Action Handlers ---
     def _on_toggle_recording(self, _):
         is_recording = state.get("is_recording", False)
+        logger.info(f"LiveTranscriptionView: Toggle recording button clicked (Current: {'Recording' if is_recording else 'Idle'})")
 
         if not is_recording:
             # START
@@ -277,21 +278,25 @@ class LiveTranscriptionView(ft.Column):
             else:
                 project_name = self.dd_project.value or "その他"
 
+            logger.info(f"LiveTranscriptionView: Starting recording for project: {project_name}")
             self.vm.start_recording(
                 whisper_model=self.dd_whisper.value,
                 source=self.dd_source.value,
                 project_name=project_name,
                 provider=self.dd_provider.value,
-                llm_model=self.dd_llm.value
+                llm_model=self.dd_llm.value,
             )
         else:
             # STOP
+            logger.info("LiveTranscriptionView: Stopping recording.")
             self.vm.stop_recording()
             self._safe_update()
 
     def _on_transcription_finished(self, result):
+        logger.info("LiveTranscriptionView: Transcription finished.")
         if "transformed" in result:
             # Case 2: AI Transformation is COMPLETE
+            logger.info("LiveTranscriptionView: AI transformation complete.")
             self.result_text.value = result["transformed"]
             self.tabs.selected_index = 1
             self.status_text.value = result.get("status", "✨ すべての処理が完了しました")
@@ -300,6 +305,7 @@ class LiveTranscriptionView(ft.Column):
             self._safe_update()
         else:
             # Case 1: Raw Transcription is COMPLETE, start AI Transformation
+            logger.info("LiveTranscriptionView: Raw transcription complete, starting AI transformation.")
             full_text = result.get("text", "")
             meeting_id = result.get("meeting_id") or state.get("current_meeting_id")
 
@@ -307,6 +313,7 @@ class LiveTranscriptionView(ft.Column):
                 self._run_ai_conversion(meeting_id, full_text)
             else:
                 # Record too short for AI
+                logger.info("LiveTranscriptionView: Transcription too short for AI conversion.")
                 self.result_text.value = f"文字起こしデータが短すぎるため、AI変換はスキップされました。\n\n{full_text}"
                 self.status_text.value = "⚠️ 文字起こし完了 (AI変換スキップ)"
                 self._stop_ui_state()
@@ -318,6 +325,7 @@ class LiveTranscriptionView(ft.Column):
         llm_model = self.dd_llm.value
 
         self.status_text.value = "🧠 AI変換の準備中..."
+        logger.info(f"LiveTranscriptionView: Running AI conversion (Provider: {provider}, Model: {llm_model})")
         self._safe_update()
 
         # Controller handles the strategy detection and LLM execution in a thread
