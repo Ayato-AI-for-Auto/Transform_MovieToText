@@ -55,5 +55,16 @@ data/
 temp_chunks/
 recordings/
 
+# Root-level temporary and log files
+/*.log
+/*.txt
+/all_test_results*.txt
+/test_failures*.txt
+/debug_output.txt
+/error.txt
+/result.txt
+/flet_android_logs.txt
+
 # SharedMemoryServer local data
 .shared_memory/
+/config.json
