@@ -1,3 +1,11 @@
+# [2.12.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.8...v2.12.0) (2026-04-04)
+
+
+### Features
+
+* **android:** add log copy button to critical error screen ([db6fd7f](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/db6fd7ff336ba2b19a965aba0c9740a9fe31b6cc))
+* **android:** enhance debug capabilities with file logging, boot status UI, and library guards ([e4b666a](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/e4b666aea360f10a025b124f4c3044f03f374f7a))
+
 ## [2.11.8](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.11.7...v2.11.8) (2026-04-04)
 
 
