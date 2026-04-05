@@ -1,3 +1,10 @@
+## [2.13.1](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.13.0...v2.13.1) (2026-04-05)
+
+
+### Bug Fixes
+
+* use nttld/setup-ndk in android build workflow ([82f5ff2](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/82f5ff27024d41b40eb34d9ee29a8173fdaededf))
+
 # [2.13.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.12.0...v2.13.0) (2026-04-05)
 
 
