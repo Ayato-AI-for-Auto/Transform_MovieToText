@@ -1,3 +1,10 @@
+## [2.13.2](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.13.1...v2.13.2) (2026-04-05)
+
+
+### Bug Fixes
+
+* robustly find libwhisper.so in build output ([8971eed](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/8971eeda7a3988dae460e3f08c5a7880c6793b11))
+
 ## [2.13.1](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.13.0...v2.13.1) (2026-04-05)
 
 
