@@ -4,6 +4,7 @@ import threading
 import flet as ft
 
 from src.core.config_manager import ConfigManager
+from src.core.constants import AppEdition, EDITION_RESTRICTIONS
 from src.core.history_mgr import history_mgr
 from src.core.minutes_service import MinutesService
 from src.core.query_analyzer import QueryAnalyzer
@@ -71,11 +72,14 @@ class ChatBotView(ft.Column):
             bgcolor=ft.Colors.BLACK12,
         )
 
+        edition = self.config_mgr.get_edition()
+        allowed_providers = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
+        
         # Provider & Model Selection
         self.dd_provider = ft.Dropdown(
             label="AIプロバイダー",
             width=180,
-            options=[ft.dropdown.Option(p) for p in ["ollama_local", "ollama_cloud", "google"]],
+            options=[ft.dropdown.Option(p) for p in allowed_providers],
             value=self.config_mgr.get_active_provider(),
         )
         self.dd_provider.on_change = self._on_provider_change

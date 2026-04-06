@@ -12,7 +12,7 @@
   <img src="https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/actions/workflows/ci.yml/badge.svg" alt="CI">
   <img src="https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/actions/workflows/desktop_distribution.yml/badge.svg" alt="Desktop Build">
   <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/license-Apache%202.0-green.svg" alt="License">
+  <img src="https://img.shields.io/badge/license-AGPL--3.0-orange.svg" alt="License">
   <img src="https://img.shields.io/badge/code%20style-ruff-purple.svg" alt="Ruff">
 </p>
 
@@ -241,24 +241,40 @@ uv run main.py
 
 ---
 
-## 🏢 チーム・組織での導入をご検討の方へ
+---
 
-本システムは、**個人での利用（シングルユーザー）を前提に設計・最適化**されています。
-SQLiteを使用したスタンドアロン構成のため、複数人でのデータ共有や、組織内での閲覧権限管理（RBAC）が必要な環境には、そのままでは適さない場合があります。
+## 🧭 ライセンスとエディション (Licensing & Editions)
 
-もし、以下のような「組織レベルでの導入」をご希望の場合は、有償にて個別カスタマイズ・導入支援のご相談を承ります。
+本プロジェクトは **GNU Affero General Public License v3.0 (AGPL-3.0)** の下で公開されています。個人の非営利利用や研究目的では自由にご利用いただけますが、**商用利用や高度な機能（Pro/Enterprise）については商用ライセンスの購入が必要です。**
 
-- **中央集権型管理**: MySQL / PostgreSQL 等の外部データベースへの移行
-- **サーバーサイド運用**: ローカルサーバー / クラウド環境での常時稼働
-- **セキュリティの高度化**: ログイン認証、ユーザーごとの閲覧・編集権限の構築
-- **既存システム連携**: 社内ポータルや外部ナレッジベースとのAPI連携
+### エディション比較 (Edition Comparison)
 
-**[お問い合わせ先]**
-[cwblog69@gmail.com]
-（個別要件に応じたお見積もりをさせていただきます）
+| 機能 / 特典 | Free (Community) | Pro (Business) | Enterprise |
+| :--- | :---: | :---: | :---: |
+| **文字起こし (Whisper)** | ✅ ローカルのみ | ✅ ローカル | ✅ ローカル |
+| **LLM 推論 (Local)** | ✅ **Gemma 限定** | ✅ 無制限 | ✅ 無制限 |
+| **外部 AI API (Gemini等)** | ❌ | ✅ | ✅ |
+| **データベース** | ✅ SQLite | ✅ SQLite | ✅ **MySQL / PostgreSQL** |
+| **プライバシー保証** | 100% On-Device | 100% On-Device | 100% On-Device |
+| **ライセンス** | **AGPL-3.0** | **Commercial** | **Commercial** |
+
+### 商用利用・導入支援について
+以下のようなケースでは、別途商用ライセンスの発行および導入支援を承ります。
+- **社内業務での本格的な利用**: セキュリティポリシーに準拠した社内インフラへの展開
+- **中央集権型管理**: MySQL 等の外部 DB への移行、複数人でのデータ共有
+- **高度な権限管理**: ログイン認証、ユーザーごとの閲覧・編集権限の構築
+- **既存システム連携**: 社内ポータルや外部ナレッジベースとの API 連携
+
+> [!IMPORTANT]
+> **「情報は社外に出さない（No Cloud Leakage）」** という本プロダクトのコアバリューは、すべてのエディションで共通の設計思想です。
+
+**[お問い合わせ先]**  
+[cwblog69@gmail.com]  
+（個別要件に応じたお見積もり・ライセンス発行をさせていただきます）
 
 ---
 
-## License
+## 📋 License
 
-[Apache License 2.0](LICENSE)
+[GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE)  
+Copyright (c) 2026 Ayato-AI

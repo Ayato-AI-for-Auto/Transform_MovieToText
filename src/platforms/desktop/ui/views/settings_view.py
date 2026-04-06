@@ -3,6 +3,7 @@ import os
 import flet as ft
 
 from src.core.config_manager import ConfigManager
+from src.core.constants import AppEdition, EDITION_RESTRICTIONS
 from src.core.platform_utils import get_log_path, is_android
 
 logger = logging.getLogger(__name__)
@@ -63,9 +64,7 @@ class SettingsView(ft.Column):
             ft.Row([self.project_to_delete_dd, self.delete_project_btn], alignment=ft.MainAxisAlignment.START),
             ft.Divider(),
             ft.Text("AIプロバイダー設定", size=18, weight="w500"),
-            self._create_card("Google Gemini", [self.gemini_api_key]),
-            self._create_card("Ollama Local (ローカルまたはPattern 1)", [self.ollama_local_url]),
-            self._create_card("Ollama Cloud (クラウドAPIを消費)", [self.ollama_cloud_api_key, self.ollama_cloud_url]),
+            self._create_provider_cards(),
             ft.Divider(),
             ft.Text("ハードウェア情報", size=18, weight="w500"),
             self.hw_rows,
@@ -85,8 +84,69 @@ class SettingsView(ft.Column):
             self.force_gpu_checkbox,
         ]
 
-    def _create_card(self, title: str, controls: list):
-        return ft.Card(content=ft.Container(content=ft.Column([ft.Text(title, weight="bold")] + controls), padding=15))
+    def _create_card(self, title: str, controls: list, disabled: bool = False, badge_text: str = None):
+        header = [ft.Text(title, weight="bold")]
+        if badge_text:
+            header.append(
+                ft.Container(
+                    content=ft.Text(badge_text, size=10, color=ft.Colors.WHITE, weight="bold"),
+                    bgcolor=ft.Colors.BLUE_ACCENT_700 if "PRO" in badge_text else ft.Colors.ORANGE_800,
+                    padding=ft.padding.symmetric(horizontal=8, vertical=2),
+                    border_radius=5,
+                )
+            )
+
+        card_content = ft.Column(
+            [
+                ft.Row(header, alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                ft.Column(controls, disabled=disabled),
+            ]
+        )
+        
+        if disabled:
+            card_content.controls.append(
+                ft.Text("この機能は上位プランで利用可能です。", size=12, color=ft.Colors.AMBER_300, italic=True)
+            )
+
+        return ft.Card(
+            content=ft.Container(content=card_content, padding=15),
+            opacity=0.6 if disabled else 1.0
+        )
+
+    def _create_provider_cards(self):
+        edition = self.config_mgr.get_edition()
+        allowed = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
+        
+        cards = ft.Column(spacing=10)
+        
+        # Google Gemini
+        is_gemini_locked = "gemini" not in allowed
+        cards.controls.append(
+            self._create_card(
+                "Google Gemini", 
+                [self.gemini_api_key], 
+                disabled=is_gemini_locked,
+                badge_text="PRO / ENTERPRISE" if is_gemini_locked else None
+            )
+        )
+        
+        # Ollama Local
+        cards.controls.append(
+            self._create_card("Ollama Local (ローカル・Gemmaなど)", [self.ollama_local_url])
+        )
+        
+        # Ollama Cloud
+        is_ollama_cloud_locked = "ollama_cloud" not in allowed
+        cards.controls.append(
+            self._create_card(
+                "Ollama Cloud (API利用)", 
+                [self.ollama_cloud_api_key, self.ollama_cloud_url],
+                disabled=is_ollama_cloud_locked,
+                badge_text="PRO / ENTERPRISE" if is_ollama_cloud_locked else None
+            )
+        )
+        
+        return cards
 
     def _build_compatibility_list(self):
         self.comp_items.controls.clear()

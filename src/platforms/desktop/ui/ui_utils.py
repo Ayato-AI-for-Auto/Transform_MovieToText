@@ -5,7 +5,6 @@ import time
 import flet as ft
 
 from src.core.constants import DEFAULT_LLM_MODELS
-from src.llm.factory import LLMFactory
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +66,12 @@ def sync_llm_models(page: ft.Page, config_mgr, provider: str, dd_model: ft.Dropd
 
     def fetch_task():
         try:
-            # Setup client and fetch
-            conf = config_mgr.get_provider_config(provider)
-            client = LLMFactory.create_client(provider, api_key=conf.get("api_key"), base_url=conf.get("base_url"))
-            models = client.get_available_models()
+            # Fetch filtered models through ConfigManager (which enforces edition rules)
+            models = config_mgr.get_llm_models(provider)
 
-            # Update Cache
-            _model_cache[provider] = {"models": models, "timestamp": time.time()}
+            # Update Cache (only if models were returned)
+            if models:
+                _model_cache[provider] = {"models": models, "timestamp": time.time()}
 
             if not models:
                 logger.warning(f"No models returned for {provider}.")

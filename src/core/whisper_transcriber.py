@@ -5,29 +5,8 @@ import sys
 import time
 from src.core.platform_utils import is_android
 
-# --- Guarded Imports for Android Compatibility ---
-# We avoid loading torch and faster-whisper on Android because they are
-# currently incompatible with the mobile environment (Chaquopy/Resource limits).
-if not is_android():
-    try:
-        import torch
-    except ImportError:
-        torch = None
-        
-    try:
-        from faster_whisper import WhisperModel
-    except ImportError:
-        WhisperModel = None
-else:
-    # Android placeholders
-    torch = None
-    WhisperModel = None
-    logger.info("WhisperTranscriber: Running on Android. Native torch/whisper loading disabled.")
-    try:
-        from src.core.android_whisper_engine import AndroidWhisperEngine
-    except ImportError:
-        AndroidWhisperEngine = None
-        logger.warning("WhisperTranscriber: AndroidWhisperEngine not found.")
+import torch
+from faster_whisper import WhisperModel
 
 from src.core.model_manager import model_manager
 
@@ -81,32 +60,41 @@ class WhisperTranscriber:
         # Proactive Memory Cleanup
         self.unload()
 
-        # Decide device and compute_type with Hardware Priority
-        # Tier 1: GPU Native (Standardized to int8_float16 for best efficiency/accuracy ratio)
-        if force_gpu and torch is not None and torch.cuda.is_available():
+        # Decide device and compute_type with Hardware Priority (Windows/Desktop Focused)
+        # Tier 1: CUDA GPU (Preferred)
+        if torch.cuda.is_available():
             device = "cuda"
+            # int8_float16 is the sweet spot for performance/accuracy on modern NVIDIA GPUs
             compute_type = "int8_float16"
-            logger.info(f"WhisperTranscriber: Loading Priority 1 (GPU {compute_type}).")
+            logger.info(f"WhisperTranscriber: Using CUDA GPU with {compute_type}.")
         else:
-            # Fallback or CPU-forced
+            # Tier 3: CPU Fallback
             device = "cpu"
             compute_type = "int8"
-            if force_gpu:
-                logger.warning("WhisperTranscriber: GPU requested but unavailable. Falling back to CPU.")
-            else:
-                logger.info(f"WhisperTranscriber: Loading Priority 3 (CPU {compute_type}).")
-
-        if WhisperModel is None:
-            logger.error("WhisperModel is not available. Cannot load model.")
-            raise RuntimeError("Faster-Whisper ライブラリがロードされていません。Android 環境では現在サポートされていない可能性があります。")
+            logger.warning("WhisperTranscriber: CUDA unavailable. Falling back to CPU (int8).")
 
         try:
             # Load Attempt
-            logger.info(f"WhisperTranscriber: Attempting load on {device} with {compute_type}...")
             self.model = WhisperModel(model_name, device=device, compute_type=compute_type, download_root=self.cache_dir)
             self.current_model_name = model_name
             duration = time.time() - start_time
             logger.info(f"WhisperTranscriber: SUCCESSFULLY LOADED using {device} ({compute_type}) in {duration:.2f}s")
+        except Exception as e:
+            # Detailed Error for GPU Failure
+            if device == "cuda":
+                logger.error(f"WhisperTranscriber: CUDA load failed: {e}. Attempting CPU fallback...")
+                try:
+                    self._clear_memory()
+                    self.model = WhisperModel(model_name, device="cpu", compute_type="int8", download_root=self.cache_dir)
+                    self.current_model_name = model_name
+                    logger.info("WhisperTranscriber: SUCCESS on CPU Fallback.")
+                    return
+                except Exception as retry_e:
+                    logger.error(f"WhisperTranscriber: All load attempts failed: {retry_e}")
+                    raise RuntimeError(f"モデルのロードに失敗しました: {retry_e}") from retry_e
+            else:
+                logger.error(f"WhisperTranscriber: CPU Load failed: {e}")
+                raise
         except Exception as e:
             # Detailed Error for GPU Failure
             if device == "cuda":

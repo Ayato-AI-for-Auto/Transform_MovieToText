@@ -11,6 +11,7 @@ from src.core.state import state
 from src.platforms.desktop.controllers.history_ctrl import HistoryController
 from src.platforms.desktop.controllers.minutes_ctrl import MinutesController
 from src.platforms.desktop.controllers.transcription_ctrl import TranscriptionController
+from src.platforms.desktop.ui.theme_manager import ThemeManager
 from src.platforms.desktop.ui.views.about_view import AboutView
 from src.platforms.common.ui.views.chat_bot_view import ChatBotView
 from src.platforms.desktop.ui.views.file_transcription_view import FileTranscriptionView
@@ -33,15 +34,16 @@ class DesktopApp:
         self._init_app_safe()
 
     def _show_boot_screen(self):
+        ThemeManager.apply_theme(self.page)
         self.page.controls.clear()
         self.page.add(
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Icon(ft.Icons.AUTO_AWESOME, size=50, color=ft.Colors.BLUE_400),
-                        ft.Text("Transform Movie to Text", size=20, weight=ft.FontWeight.BOLD),
+                        ft.Icon(ft.Icons.AUTO_AWESOME_ROUNDED, size=64, color=ThemeManager.ACCENT),
+                        ft.Text("Transform Movie to Text", size=24, weight=ft.FontWeight.BOLD, color=ThemeManager.TEXT_PRIMARY),
                         self.boot_text,
-                        self.boot_progress,
+                        ft.Container(self.boot_progress, width=400, border_radius=10),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -49,6 +51,7 @@ class DesktopApp:
                 ),
                 expand=True,
                 alignment=ft.alignment.center,
+                bgcolor=ThemeManager.BACKGROUND,
             )
         )
         self.page.update()
@@ -143,11 +146,13 @@ class DesktopApp:
             self.live_trans_view.refresh_dependency_state()
 
     def _setup_page_properties(self):
-        self.page.title = "Movie to Text v2.0 (Desktop)"
-        self.page.theme_mode = "dark"
+        self.page.title = "Movie to Text v2.5 (Windows Specialized)"
         self.page.padding = 0
         self.page.window_width = 1100
         self.page.window_height = 850
+        self.page.window_min_width = 800
+        self.page.window_min_height = 600
+        # self.page.window_title_bar_hidden = True # Cleaner look but requires custom window controls
         self.page.window_icon = "assets/icon.png"
 
     def _handle_critical_error(self, ex):

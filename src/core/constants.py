@@ -1,10 +1,17 @@
+import os
+from enum import Enum
+from .platform_utils import get_app_data_path
+
+# Root App Data
+APP_DATA_DIR = get_app_data_path()
+
 # Paths
-DEFAULT_DB_PATH = "data/history.db"
-DEFAULT_CONFIG_PATH = "config.json"
-DEFAULT_RECORDS_DIR = "data/history"
-TEMP_DIR = "data/temp"
-TEMP_CHUNKS_DIR = "data/temp/chunks"
-TEMP_VIDEO_DIR = "data/temp/frames"
+DEFAULT_DB_PATH = os.path.join(APP_DATA_DIR, "history.db")
+DEFAULT_CONFIG_PATH = os.path.join(APP_DATA_DIR, "config.json")
+DEFAULT_RECORDS_DIR = os.path.join(APP_DATA_DIR, "history")
+TEMP_DIR = os.path.join(APP_DATA_DIR, "temp")
+TEMP_CHUNKS_DIR = os.path.join(APP_DATA_DIR, "temp", "chunks")
+TEMP_VIDEO_DIR = os.path.join(APP_DATA_DIR, "temp", "frames")
 
 # Recording Defaults
 DEFAULT_SEGMENT_TIME = 30
@@ -29,3 +36,29 @@ WHISPER_MODELS = ["tiny", "base", "small", "medium", "large-v2", "large-v3"]
 # Embedding Defaults (Privacy-First: FastEmbed is the non-negotiable default)
 DEFAULT_EMBEDDING_PROVIDER = "local"
 DEFAULT_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+
+# --- Business Edition Management ---
+
+class AppEdition(Enum):
+    FREE = "free"           # Local SQLite, Gemma Local LLM only
+    PRO = "pro"             # Local SQLite, All LLM APIs (Gemini, etc.)
+    ENTERPRISE = "enterprise" # MySQL, All LLM APIs, Custom Support
+
+EDITION_RESTRICTIONS = {
+    AppEdition.FREE: {
+        "allowed_providers": ["ollama_local"],
+        "allowed_models_prefix": "gemma", # Only allow models starting with gemma
+        "disallowed_keywords": ["cloud"], # Explicitly block any model with 'cloud' in name
+        "db_type": "sqlite"
+    },
+    AppEdition.PRO: {
+        "allowed_providers": ["gemini", "ollama_local", "ollama_cloud"],
+        "allowed_models": "*", # All available
+        "db_type": "sqlite"
+    },
+    AppEdition.ENTERPRISE: {
+        "allowed_providers": ["gemini", "ollama_local", "ollama_cloud"],
+        "allowed_models": "*",
+        "db_type": "mysql"
+    }
+}

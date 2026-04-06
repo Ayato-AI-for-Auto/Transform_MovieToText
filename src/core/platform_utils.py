@@ -7,7 +7,10 @@ logger = logging.getLogger(__name__)
 
 def is_android():
     """Returns True if running on Android."""
-    return sys.platform == "android" or "ANDROID_ARGUMENT" in os.environ
+    # Specialization: Force False on Windows unless explicitly forced via env
+    if sys.platform == "win32":
+        return os.environ.get("FORCE_ANDROID_MODE") == "1"
+    return sys.platform == "android"
 
 
 def get_platform_name():
@@ -19,16 +22,8 @@ def get_platform_name():
 def get_app_data_path(app_name="MovieToText"):
     """Returns a safe path for storing app data depending on the platform."""
     if is_android():
-        # On Android, we try to use the most stable app-specific directory.
-        # Flet sometimes sets ANDROID_DATA or similar.
-        path = os.environ.get("FILESDIR") or "/data/data/com.example.movietotext/files"
-        if not os.path.exists(path):
-            try:
-                # Fallback to home if filesdir is not set/exists
-                path = os.path.expanduser("~")
-            except Exception:
-                pass
-        
+        # Fallback for Android if still needed for some reason
+        path = os.environ.get("FILESDIR") or os.path.expanduser("~")
         final_path = os.path.join(path, app_name)
         os.makedirs(final_path, exist_ok=True)
         return final_path

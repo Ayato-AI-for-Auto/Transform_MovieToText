@@ -39,6 +39,7 @@ license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
     "flet>=0.21.0",
+    "flet-desktop>=0.21.0",
     "google-genai",
     "python-dotenv",
     "colorlog",
@@ -46,11 +47,6 @@ dependencies = [
     "requests",
     "Pillow",
     "numpy",
-]
-
-[project.optional-dependencies]
-desktop = [
-    "flet-desktop>=0.21.0",
     "faster-whisper",
     "torch",
     "torchvision",
@@ -62,6 +58,8 @@ desktop = [
     "pyautogui",
     "opencv-python",
 ]
+
+[project.optional-dependencies]
 dev = [
     "pytest",
     "pytest-mock",

@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 
-from .constants import DEFAULT_ACTIVE_PROVIDER, DEFAULT_CONFIG_PATH
+from .constants import DEFAULT_ACTIVE_PROVIDER, DEFAULT_CONFIG_PATH, AppEdition, EDITION_RESTRICTIONS
 from .migrator import ConfigMigrator
 
 logger = logging.getLogger(__name__)
@@ -39,8 +39,26 @@ class ConfigManager:
         if ConfigMigrator.migrate(self.config):
             self.save_config()
 
+    def get_edition(self) -> AppEdition:
+        """Returns the current application edition (FREE, PRO, or ENTERPRISE)."""
+        # In a real app, this would be validated with a license key or backend call.
+        ed_str = self.config.get("edition", "free").lower()
+        try:
+            return AppEdition(ed_str)
+        except ValueError:
+            return AppEdition.FREE
+
     def get_active_provider(self):
-        return self.config.get("active_provider", DEFAULT_ACTIVE_PROVIDER)
+        active = self.config.get("active_provider", DEFAULT_ACTIVE_PROVIDER)
+        edition = self.get_edition()
+        
+        # Restriction check
+        allowed = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
+        if active not in allowed:
+            logger.warning(f"Provider {active} is restricted in {edition.name} edition. Falling back to ollama_local.")
+            return "ollama_local"
+            
+        return active
 
     def set_active_provider(self, provider_name):
         old = self.get_active_provider()
@@ -92,12 +110,34 @@ class ConfigManager:
         if not provider_name:
             provider_name = self.get_active_provider()
 
+        edition = self.get_edition()
+        restrictions = EDITION_RESTRICTIONS.get(edition, {})
+        allowed_providers = restrictions.get("allowed_providers", [])
+        
+        if provider_name not in allowed_providers:
+            logger.warning(f"Provider {provider_name} is not allowed in {edition.name} edition.")
+            return []
+
         try:
             from src.llm.factory import LLMFactory
 
             conf = self.get_provider_config(provider_name)
             client = LLMFactory.create_client(provider_name=provider_name, api_key=conf.get("api_key"), base_url=conf.get("base_url"))
             models = client.get_available_models()
+            
+            # Filter models based on edition syntax
+            allowed_prefix = restrictions.get("allowed_models_prefix")
+            disallowed_keywords = restrictions.get("disallowed_keywords", [])
+
+            if models:
+                # 1. Filter by keyword exclusion (e.g. "cloud")
+                if disallowed_keywords:
+                    models = [m for m in models if not any(k.lower() in m.lower() for k in disallowed_keywords)]
+                
+                # 2. Filter by prefix (e.g. "gemma")
+                if allowed_prefix:
+                    models = [m for m in models if m.lower().startswith(allowed_prefix.lower())]
+
             if models:
                 return models
         except Exception as e:
@@ -105,8 +145,18 @@ class ConfigManager:
 
         # Fallback to constants if live fetch fails
         from .constants import DEFAULT_LLM_MODELS
+        models = DEFAULT_LLM_MODELS.get(provider_name, [])
 
-        return DEFAULT_LLM_MODELS.get(provider_name, [])
+        # Apply same restrictions to fallback list
+        allowed_prefix = restrictions.get("allowed_models_prefix")
+        disallowed_keywords = restrictions.get("disallowed_keywords", [])
+        
+        if disallowed_keywords:
+            models = [m for m in models if not any(k.lower() in m.lower() for k in disallowed_keywords)]
+        if allowed_prefix:
+            models = [m for m in models if m.lower().startswith(allowed_prefix.lower())]
+
+        return models
 
     def get_whisper_model(self):
         return self.config.get("whisper_model", "base")

@@ -2,6 +2,7 @@ import logging
 
 import flet as ft
 
+from src.platforms.desktop.ui.theme_manager import ThemeManager
 from src.platforms.desktop.ui.views.about_view import AboutView
 from src.platforms.common.ui.views.chat_bot_view import ChatBotView
 from src.platforms.desktop.ui.views.file_transcription_view import FileTranscriptionView
@@ -34,50 +35,83 @@ class MainWindow(ft.Row):
         self.nav_rail = ft.NavigationRail(
             selected_index=0,
             label_type=ft.NavigationRailLabelType.SELECTED,
-            min_width=72,
-            min_extended_width=72,
+            min_width=80,
+            min_extended_width=80,
             group_alignment=-0.9,
             expand=True,
+            bgcolor=ft.Colors.TRANSPARENT,
             destinations=[
-                ft.NavigationRailDestination(icon=ft.Icons.ATTACH_FILE_OUTLINED, selected_icon=ft.Icons.ATTACH_FILE, label="文字起こし"),
-                ft.NavigationRailDestination(icon=ft.Icons.MIC_OUTLINED, selected_icon=ft.Icons.MIC, label="録音"),
-                ft.NavigationRailDestination(icon=ft.Icons.HISTORY_OUTLINED, selected_icon=ft.Icons.HISTORY, label="履歴"),
-                ft.NavigationRailDestination(icon=ft.Icons.CHAT_OUTLINED, selected_icon=ft.Icons.CHAT, label="AI"),
-                ft.NavigationRailDestination(icon=ft.Icons.SETTINGS_OUTLINED, selected_icon=ft.Icons.SETTINGS, label="設定"),
-                ft.NavigationRailDestination(icon=ft.Icons.INFO_OUTLINED, selected_icon=ft.Icons.INFO, label="情報"),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.ATTACH_FILE_OUTLINED, 
+                    selected_icon=ft.Icons.ATTACH_FILE, 
+                    label="文字起こし",
+                    padding=ft.padding.symmetric(vertical=5)
+                ),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.MIC_OUTLINED, 
+                    selected_icon=ft.Icons.MIC, 
+                    label="録音",
+                    padding=ft.padding.symmetric(vertical=5)
+                ),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.HISTORY_OUTLINED, 
+                    selected_icon=ft.Icons.HISTORY, 
+                    label="履歴",
+                    padding=ft.padding.symmetric(vertical=5)
+                ),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.CHAT_ROUNDED, 
+                    selected_icon=ft.Icons.CHAT_ROUNDED, 
+                    label="AI",
+                    padding=ft.padding.symmetric(vertical=5)
+                ),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.SETTINGS_OUTLINED, 
+                    selected_icon=ft.Icons.SETTINGS, 
+                    label="設定",
+                    padding=ft.padding.symmetric(vertical=5)
+                ),
+                ft.NavigationRailDestination(
+                    icon=ft.Icons.INFO_OUTLINED, 
+                    selected_icon=ft.Icons.INFO, 
+                    label="情報",
+                    padding=ft.padding.symmetric(vertical=5)
+                ),
             ],
             on_change=self._on_nav_change,
         )
 
-        # Content Container
+        # Content Area with subtle container effect
         self.content_container = ft.Container(
             content=self.file_trans_view,
             expand=True,
             padding=ft.padding.all(30),
             alignment=ft.alignment.top_left,
+            bgcolor=ThemeManager.SURFACE,
+            border_radius=ft.border_radius.only(top_left=24),
+            border=ft.border.only(top=ft.BorderSide(1, ThemeManager.BORDER), left=ft.BorderSide(1, ThemeManager.BORDER)),
         )
 
-        # Setup status indicator (at the bottom of nav rail)
-        self.setup_icon = ft.Icon(ft.Icons.DOWNLOAD_FOR_OFFLINE, size=18, color=ft.Colors.BLUE_400, visible=False)
-        self.setup_status_text = ft.Text("...", size=10, color=ft.Colors.BLUE_200, visible=False)
+        # Setup status indicator
+        self.setup_icon = ft.Icon(ft.Icons.DOWNLOAD_FOR_OFFLINE_ROUNDED, size=20, color=ThemeManager.ACCENT)
+        self.setup_status_text = ft.Text("...", size=10, color=ThemeManager.TEXT_SECONDARY)
         self.setup_container = ft.Container(
-            content=ft.Column([self.setup_icon, self.setup_status_text], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=2),
+            content=ft.Row([self.setup_icon, self.setup_status_text], alignment=ft.MainAxisAlignment.CENTER, spacing=5),
             padding=ft.padding.only(bottom=20),
-            alignment=ft.alignment.center,
             visible=False,
         )
 
         self.controls = [
             ft.Container(
                 content=ft.Column([
+                    ft.Container(height=20), # Spacer
                     self.nav_rail,
                     ft.Container(expand=True), # Filler
                     self.setup_container
                 ], spacing=0),
-                width=72,
-                bgcolor=ft.Colors.with_opacity(0.05, ft.Colors.BLACK),
+                width=80,
+                bgcolor=ThemeManager.BACKGROUND,
             ),
-            ft.VerticalDivider(width=1, color=ft.Colors.GREY_800),
             self.content_container,
         ]
 

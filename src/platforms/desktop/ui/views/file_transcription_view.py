@@ -3,7 +3,7 @@ import threading
 import flet as ft
 
 from src.core.config_manager import ConfigManager
-from src.core.constants import WHISPER_MODELS
+from src.core.constants import WHISPER_MODELS, EDITION_RESTRICTIONS
 from src.core.event_bus import (
     EVENT_STATUS_UPDATE,
     EVENT_TRANSCRIPTION_ERROR,
@@ -61,10 +61,13 @@ class FileTranscriptionView(ft.Column):
             on_change=self._on_whisper_change,
         )
 
+        edition = self.config_mgr.get_edition()
+        allowed_providers = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
+
         self.dd_provider = ft.Dropdown(
             label="AIプロバイダー",
             width=180,
-            options=[ft.dropdown.Option(p) for p in ["ollama_local", "ollama_cloud", "google"]],
+            options=[ft.dropdown.Option(p) for p in allowed_providers],
             value=self.config_mgr.get_active_provider(),
             on_change=self._on_provider_change,
         )
@@ -280,10 +283,13 @@ class FileTranscriptionView(ft.Column):
             on_change=self._on_whisper_change,
         )
 
+        edition = self.config_mgr.get_edition()
+        allowed_providers = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
+
         self.dd_provider = ft.Dropdown(
             label="AIプロバイダー",
             width=180,
-            options=[ft.dropdown.Option(p) for p in ["ollama_local", "ollama_cloud", "google"]],
+            options=[ft.dropdown.Option(p) for p in allowed_providers],
             value=self.config_mgr.get_active_provider(),
             on_change=self._on_provider_change,
         )
