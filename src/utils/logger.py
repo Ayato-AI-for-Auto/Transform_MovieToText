@@ -53,7 +53,9 @@ def get_system_info():
 
         ram_total = psutil.virtual_memory().total
         info["ram_gb"] = round(ram_total / (1024**3), 1)
-    except Exception:
+    except Exception as e:
+        # psutil might not be installed yet during initial setup
+        logging.debug(f"psutil RAM detection failed: {e}")
         info["ram_gb"] = "Unknown"
 
     # Try to detect GPU
@@ -63,7 +65,8 @@ def get_system_info():
         gpu_cmd = "nvidia-smi --query-gpu=name --format=csv,noheader"
         gpu_info = subprocess.check_output(gpu_cmd, shell=True, stderr=subprocess.DEVNULL).decode().strip()
         info["gpu"] = gpu_info if gpu_info else "None detected"
-    except Exception:
+    except Exception as e:
+        logging.debug(f"nvidia-smi GPU detection failed: {e}")
         info["gpu"] = "None detected or nvidia-smi missing"
 
     return info
