@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import sqlite3
 
 from src.core.db.connection import DatabaseConnection, db_conn
 from src.core.utils import sanitize_fts_query
@@ -43,9 +44,17 @@ class MeetingRepository:
             migration_needed = False
             for col, col_type in target_cols.items():
                 if col not in columns:
-                    logger.info(f"MeetingRepository: Adding missing column: {col}")
-                    conn.execute(f"ALTER TABLE meetings ADD COLUMN {col} {col_type}")
-                    migration_needed = True
+                    try:
+                        logger.info(f"MeetingRepository: Adding missing column: {col}")
+                        conn.execute(f"ALTER TABLE meetings ADD COLUMN {col} {col_type}")
+                        migration_needed = True
+                        logger.info(f"MeetingRepository: Successfully added column: {col}")
+                    except sqlite3.OperationalError as e:
+                        if "duplicate column name" in str(e).lower():
+                            logger.debug(f"MeetingRepository: Column {col} already exists (likely already migrated).")
+                        else:
+                            logger.error(f"MeetingRepository: Failed to add column {col}: {e}")
+                            raise
 
             # 3. FTS5 Table Management
             cursor = conn.execute("PRAGMA table_info(meetings_fts)")

@@ -239,6 +239,7 @@ class TranscriptionService:
             try:
                 logger.info("start_live_recording: Starting VisualRecorder.")
                 from src.platforms.desktop.recorder.visual_recorder import visual_recorder
+
                 visual_recorder.start(meeting_id)
             except ImportError:
                 logger.warning("VisualRecorder not available on this platform.")
@@ -267,9 +268,10 @@ class TranscriptionService:
         if not is_android():
             try:
                 from src.platforms.desktop.recorder.visual_recorder import visual_recorder
+
                 visual_recorder.stop()
             except ImportError:
-                pass
+                logger.debug("VisualRecorder not available; skipping stop.")
 
         def _finalize_worker():
             logger.info("_finalize_worker: Starting background finalization...")
