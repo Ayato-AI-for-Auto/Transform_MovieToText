@@ -1,14 +1,19 @@
 import gc
 import logging
 import os
-import sys
 import time
-from src.core.platform_utils import is_android
 
 import torch
 from faster_whisper import WhisperModel
 
 from src.core.model_manager import model_manager
+from src.core.platform_utils import is_android
+
+# Add missing import for Android
+try:
+    from src.core.android_whisper_engine import AndroidWhisperEngine
+except ImportError:
+    AndroidWhisperEngine = None
 
 logger = logging.getLogger(__name__)
 
@@ -82,27 +87,11 @@ class WhisperTranscriber:
         except Exception as e:
             # Detailed Error for GPU Failure
             if device == "cuda":
-                logger.error(f"WhisperTranscriber: CUDA load failed: {e}. Attempting CPU fallback...")
-                try:
-                    self._clear_memory()
-                    self.model = WhisperModel(model_name, device="cpu", compute_type="int8", download_root=self.cache_dir)
-                    self.current_model_name = model_name
-                    logger.info("WhisperTranscriber: SUCCESS on CPU Fallback.")
-                    return
-                except Exception as retry_e:
-                    logger.error(f"WhisperTranscriber: All load attempts failed: {retry_e}")
-                    raise RuntimeError(f"モデルのロードに失敗しました: {retry_e}") from retry_e
-            else:
-                logger.error(f"WhisperTranscriber: CPU Load failed: {e}")
-                raise
-        except Exception as e:
-            # Detailed Error for GPU Failure
-            if device == "cuda":
                 logger.error(f"WhisperTranscriber: GPU Priority 1 failed: {e}")
                 logger.info("WhisperTranscriber: Attempting Priority 2 (GPU with limited offload/int8)...")
                 try:
                     # Tier 2: Try even lighter GPU (int8) if int8_float16 failed
-                    self._clear_memory()
+                    self.unload()
                     self.model = WhisperModel(model_name, device=device, compute_type="int8", download_root=self.cache_dir)
                     self.current_model_name = model_name
                     logger.info(f"WhisperTranscriber: SUCCESS on Priority 2 (GPU int8) after {time.time() - start_time:.2f}s")
@@ -133,11 +122,11 @@ class WhisperTranscriber:
         """Loads a GGML model using the native whisper.cpp engine on Android."""
         if not AndroidWhisperEngine:
             raise RuntimeError("AndroidNativeEngine がロードされていません。")
-        
+
         # GGML models have different filenames (e.g., ggml-tiny.bin)
         ggml_name = f"ggml-{model_name}.bin"
         model_path = os.path.join(self.cache_dir, ggml_name)
-        
+
         if not os.path.exists(model_path):
             logger.warning(f"WhisperTranscriber: GGML model not found at {model_path}. Need download.")
             # Trigger download logic here in future
@@ -145,7 +134,7 @@ class WhisperTranscriber:
 
         if self.model is None:
             self.model = AndroidWhisperEngine()
-        
+
         success = self.model.load_model(model_path)
         if success:
             self.current_model_name = model_name
@@ -228,6 +217,7 @@ class WhisperTranscriber:
         ram = 0.0
         try:
             import psutil
+
             ram = round(psutil.virtual_memory().total / (1024**3), 1)
         except Exception as e:
             if not is_android():
@@ -246,7 +236,7 @@ class WhisperTranscriber:
                 logger.warning(f"Failed to detect VRAM details: {e}")
         elif is_android():
             device = "Android Mobile (Cloud Preferred)"
-            ram = 4.0 if ram == 0 else ram # Guessing if psutil failed
+            ram = 4.0 if ram == 0 else ram  # Guessing if psutil failed
 
         return {"ram": ram, "vram": vram, "device": device}
 
