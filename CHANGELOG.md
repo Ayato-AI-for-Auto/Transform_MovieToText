@@ -1,3 +1,17 @@
+# [2.15.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.14.0...v2.15.0) (2026-04-11)
+
+
+### Bug Fixes
+
+* **core:** finalize error handling and remove emojis to comply with user rules ([cbe5834](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/cbe58349a130353a759be44aa0c2d36c241f864c))
+* **core:** resolve AttributeError in whisper_transcriber and update ui_utils tests ([3ac13f4](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/3ac13f490fcc9d94bb0bf4760b6529674b2b373f))
+
+
+### Features
+
+* implement core architecture, desktop UI components, and comprehensive test suite for transcription service ([15c8d5c](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/15c8d5c6f368f6826f4ba5c07a024bff553567b2))
+* implement edition-based restrictions and migrate to AGPL-3.0 license ([5cddf4d](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/commit/5cddf4d31b78ef7420a8abd31815b4f4fd654671))
+
 # [2.14.0](https://github.com/Ayato-AI-for-Auto/Transform_MovieToText/compare/v2.13.2...v2.14.0) (2026-04-05)
 
 
