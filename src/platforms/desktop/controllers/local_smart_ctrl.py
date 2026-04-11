@@ -53,11 +53,11 @@ class LocalSmartController:
             logger.info(f"LocalSmart: Found existing match '{existing_match}' for base '{base_name}'. Using it.")
             dd_llm.options = [ft.dropdown.Option(m) for m in all_local_models]
             dd_llm.value = existing_match
-            status_text.value = f"Local Smart: {rec['tier']} 構成 (既存 {existing_match}) を適用 ✨"
+            status_text.value = f"Local Smart: {rec['tier']} 構成 (既存 {existing_match}) を適用"
             self.config_mgr.set_last_model(existing_match)
         else:
             # Model missing, start background pull
-            status_text.value = f"⏳ 推奨モデル {target_model} を構成中... (初回のみ)"
+            status_text.value = f"推奨モデル {target_model} を構成中... (初回のみ)"
             status_text.color = ft.Colors.BLUE_400
             threading.Thread(target=self._pull_and_update, args=(target_model, dd_llm, status_text, rec["tier"]), daemon=True).start()
 
@@ -81,7 +81,7 @@ class LocalSmartController:
             def update_ui():
                 dd_llm.options = [ft.dropdown.Option(m) for m in models]
                 dd_llm.value = model_name
-                status_text.value = f"Local Smart: {tier} 構成の準備が完了しました ✨"
+                status_text.value = f"Local Smart: {tier} 構成の準備が完了しました"
                 status_text.color = ft.Colors.GREEN_400
                 if dd_llm.page:
                     dd_llm.page.update()

@@ -84,6 +84,9 @@ class WhisperTranscriber:
             self.current_model_name = model_name
             duration = time.time() - start_time
             logger.info(f"WhisperTranscriber: SUCCESSFULLY LOADED using {device} ({compute_type}) in {duration:.2f}s")
+        except ValueError:
+            # Usage error (e.g. invalid model size) - re-raise immediately
+            raise
         except Exception as e:
             # Detailed Error for GPU Failure
             if device == "cuda":

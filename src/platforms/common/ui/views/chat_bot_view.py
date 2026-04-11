@@ -4,7 +4,7 @@ import threading
 import flet as ft
 
 from src.core.config_manager import ConfigManager
-from src.core.constants import AppEdition, EDITION_RESTRICTIONS
+from src.core.constants import EDITION_RESTRICTIONS
 from src.core.history_mgr import history_mgr
 from src.core.minutes_service import MinutesService
 from src.core.query_analyzer import QueryAnalyzer
@@ -74,7 +74,7 @@ class ChatBotView(ft.Column):
 
         edition = self.config_mgr.get_edition()
         allowed_providers = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
-        
+
         # Provider & Model Selection
         self.dd_provider = ft.Dropdown(
             label="AIプロバイダー",
@@ -193,7 +193,7 @@ class ChatBotView(ft.Column):
         self.dd_llm.value = None
         self._safe_update()
 
-        models = self.minutes_service.get_available_models(actual_provider)
+        models = self.config_mgr.get_llm_models(actual_provider)
         config = self.config_mgr.get_provider_config(provider)
         last_model = config.get("model")
 
@@ -311,11 +311,11 @@ class ChatBotView(ft.Column):
                         seen_sources.add(s_label)
 
                 if source_bullets:
-                    source_footer = "\n\n---\n💡 **参考にした会議:**\n" + "\n".join(source_bullets)
+                    source_footer = "\n\n---\n**参考にした会議:**\n" + "\n".join(source_bullets)
                     response += source_footer
 
             self.chat_history.controls.append(ChatMessage(response, is_user=False))
-            self.status_text.value = "回答完了 ✨"
+            self.status_text.value = "回答完了"
             self._safe_update()
         except Exception as ex:
             logger.error(f"RAG Chat error: {ex}")
