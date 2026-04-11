@@ -8,12 +8,14 @@ from src.core.constants import EDITION_RESTRICTIONS
 from src.core.history_mgr import history_mgr
 from src.core.minutes_service import MinutesService
 from src.core.query_analyzer import QueryAnalyzer
+from src.platforms.common.ui.ui_utils import Debouncer, safe_update
 from src.platforms.desktop.controllers.local_smart_ctrl import LocalSmartController
 
 logger = logging.getLogger(__name__)
 
 
 class ChatMessage(ft.Row):
+# ... (ChatMessage class implementation)
     def __init__(self, text: str, is_user: bool):
         super().__init__()
         self.vertical_alignment = ft.CrossAxisAlignment.START
@@ -51,9 +53,6 @@ class ChatBotView(ft.Column):
 
     def __init__(self, page: ft.Page, config_mgr: ConfigManager):
         super().__init__(expand=True)
-        # self.page is a property of ft.Control, cannot be set directly.
-        # It will be set automatically when the control is added to a page.
-        # For unit tests and immediate access, we can keep a local reference.
         self._page_ref = page
         self.config_mgr = config_mgr
         self.history_mgr = history_mgr
@@ -61,13 +60,25 @@ class ChatBotView(ft.Column):
         self.local_smart_ctrl = LocalSmartController(config_mgr)
         self.hw_info = self._get_hw_info()
         self.local_smart_enabled = config_mgr.get_local_smart_enabled()
+        
+        # UI State
+        self.search_debouncer = Debouncer(delay=0.5)
 
         # UI Components
         self.chat_history = ft.Column(expand=True, scroll=ft.ScrollMode.ALWAYS, spacing=20)
+        
+        # Context Preview (Real-time feedback as typing)
+        self.context_preview = ft.Row(
+            spacing=10,
+            scroll=ft.ScrollMode.ALWAYS,
+            visible=False
+        )
+
         self.input_field = ft.TextField(
             hint_text="文字起こしデータについて質問してください...",
             expand=True,
             on_submit=self._on_send_click,
+            on_change=self._on_input_change,
             border_radius=20,
             bgcolor=ft.Colors.BLACK12,
         )
@@ -138,16 +149,22 @@ class ChatBotView(ft.Column):
                 bgcolor=ft.Colors.BLACK26,
                 border_radius=15,
             ),
-            ft.Row(
+            ft.Column(
                 [
-                    self.input_field,
-                    ft.FloatingActionButton(
-                        icon=ft.Icons.SEND_ROUNDED,
-                        on_click=self._on_send_click,
-                        bgcolor=ft.Colors.BLUE_700,
+                    self.context_preview,
+                    ft.Row(
+                        [
+                            self.input_field,
+                            ft.FloatingActionButton(
+                                icon=ft.Icons.SEND_ROUNDED,
+                                on_click=self._on_send_click,
+                                bgcolor=ft.Colors.BLUE_700,
+                            ),
+                        ],
+                        spacing=10,
                     ),
                 ],
-                spacing=10,
+                spacing=5,
             ),
         ]
 
@@ -322,3 +339,57 @@ class ChatBotView(ft.Column):
             self.chat_history.controls.append(ChatMessage(f"エラーが発生しました: {ex}", is_user=False))
             self.status_text.value = "エラー発生"
             self._safe_update()
+
+    def _on_input_change(self, e):
+        query = self.input_field.value.strip()
+        if len(query) < 3:
+            self.context_preview.visible = False
+            self.context_preview.controls.clear()
+            self._safe_update()
+            return
+        
+        self.search_debouncer.run(self._update_context_preview)
+
+    def _update_context_preview(self):
+        query = self.input_field.value.strip()
+        if not query:
+            return
+
+        try:
+            # Fast Intent Extraction (Local LLM or Keyword)
+            all_projs = self.history_mgr.get_projects()
+            all_cats = self.history_mgr.get_categories()
+            analyzer = QueryAnalyzer(all_projs, all_cats, config_mgr=self.config_mgr)
+            intent = analyzer.analyze(query)
+            
+            # Fast FTS5 Search
+            search_text = " ".join(intent["keywords"]) if intent["keywords"] else query
+            results = self.history_mgr.get_meetings_filtered(
+                project_names=intent["projects"], 
+                categories=intent["categories"], 
+                search_query=search_text, 
+                limit=3
+            )
+
+            # Update UI
+            self.context_preview.controls.clear()
+            if results:
+                self.context_preview.controls.append(ft.Text("🔍 関連:", size=10, color=ft.Colors.GREY_500))
+                for r in results:
+                    title = r.get("title", "無題")
+                    self.context_preview.controls.append(
+                        ft.Container(
+                            content=ft.Text(title, size=10, color=ft.Colors.BLUE_200),
+                            bgcolor=ft.Colors.BLUE_900 if r.get("minutes") else ft.Colors.BLUE_GREY_900,
+                            padding=ft.padding.symmetric(horizontal=8, vertical=2),
+                            border_radius=10,
+                            tooltip=f"日付: {r.get('timestamp', '不明')}\nプロジェクト: {r.get('project_name') or 'なし'}"
+                        )
+                    )
+                self.context_preview.visible = True
+            else:
+                self.context_preview.visible = False
+            
+            self._safe_update()
+        except Exception as e:
+            logger.debug(f"Context preview update failed: {e}")

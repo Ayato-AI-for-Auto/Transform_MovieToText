@@ -7,6 +7,7 @@ from src.core.constants import DEFAULT_LLM_MODELS, DEFAULT_PROVIDERS
 from src.core.transcription_service import TranscriptionService
 from src.core.whisper_transcriber import WhisperTranscriber
 from src.platforms.desktop.controllers.history_ctrl import HistoryController
+from src.platforms.common.ui.ui_utils import Debouncer
 from src.platforms.desktop.ui.ui_utils import sync_llm_models
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,9 @@ class HistoryView(ft.Column):
         self.folder_picker = folder_picker
         self.selected_meeting_id = None
         self.audio_player = None
+        
+        # Search debouncer to avoid flooding DB during typing
+        self.search_debouncer = Debouncer(delay=0.3)
 
         self.folder_picker.on_result = self._on_folder_result
 
@@ -32,6 +36,7 @@ class HistoryView(ft.Column):
             prefix_icon=ft.Icons.SEARCH,
             expand=True,
             on_submit=lambda _: self._refresh_history(),
+            on_change=self._on_search_change,
         )
 
         self.project_dropdown = ft.Dropdown(label="プロジェクトで絞り込み", width=250, on_change=lambda _: self._on_project_filter_change())
@@ -95,6 +100,9 @@ class HistoryView(ft.Column):
         if self._page:
             self.update()
             self._page.update()
+
+    def _on_search_change(self, e):
+        self.search_debouncer.run(self._refresh_history)
 
     def _on_project_filter_change(self):
         self._refresh_history()

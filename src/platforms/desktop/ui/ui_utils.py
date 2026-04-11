@@ -133,3 +133,26 @@ def safe_update_control(control: ft.Control):
         control.update()
     except Exception as e:
         logger.debug(f"Control update skipped: {e}")
+
+
+class Debouncer:
+    """
+    Utility to delay execution of a function until after a specified silence period.
+    Commonly used for 'Search-as-you-type' to avoid flooding the DB/API with requests.
+    """
+
+    def __init__(self, delay=0.4):
+        self.delay = delay
+        self._timer = None
+
+    def run(self, action, *args, **kwargs):
+        """Triggers the action after the delay, cancelling any pending ones."""
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = threading.Timer(self.delay, action, args=args, kwargs=kwargs)
+        self._timer.start()
+
+    def cancel(self):
+        """Cancels any pending action."""
+        if self._timer is not None:
+            self._timer.cancel()
