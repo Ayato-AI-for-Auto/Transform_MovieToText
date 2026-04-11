@@ -1,14 +1,16 @@
+import contextlib
 import logging
+
 import flet as ft
 
 from src.common.ui.view_models.live_transcription_vm import LiveTranscriptionViewModel
 from src.core.config_manager import ConfigManager
 from src.core.constants import DEFAULT_PROVIDERS, WHISPER_MODELS
 from src.core.history_mgr import history_mgr
-from src.core.state import state
 from src.core.setup_manager import setup_manager
+from src.core.state import state
 from src.platforms.desktop.controllers.transcription_ctrl import TranscriptionController
-from src.platforms.desktop.ui.ui_utils import sync_llm_models
+from src.platforms.desktop.ui.ui_utils import safe_update, safe_update_control, sync_llm_models
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ class LiveTranscriptionView(ft.Column):
             self.btn_live.text = "録音開始"
             self.btn_live.icon = ft.Icons.MIC
             self.status_text.value = "機材準備完了..."
-        
+
         if not initial:
             self._safe_update()
 
@@ -92,11 +94,7 @@ class LiveTranscriptionView(ft.Column):
 
     def _safe_update(self):
         """Safely updates the control if it is attached to a page."""
-        if self.page:
-            try:
-                self.update()
-            except Exception:
-                pass
+        safe_update_control(self)
 
     def _build_ui(self):
         # --- Top Selection Area ---
@@ -165,12 +163,7 @@ class LiveTranscriptionView(ft.Column):
             on_change=self._on_llm_change,
         )
         sync_llm_models(
-            self._page, 
-            self.config_mgr, 
-            self.dd_provider.value, 
-            self.dd_llm, 
-            self.status_text,
-            on_empty_results=self._handle_empty_models
+            self._page, self.config_mgr, self.dd_provider.value, self.dd_llm, self.status_text, on_empty_results=self._handle_empty_models
         )
 
         # Text Areas Container
@@ -274,14 +267,6 @@ class LiveTranscriptionView(ft.Column):
     def _on_whisper_change(self, e):
         self.config_mgr.set_whisper_model(self.dd_whisper.value)
 
-    def _on_provider_change(self, e):
-        self.config_mgr.set_active_provider(self.dd_provider.value)
-        sync_llm_models(self._page, self.config_mgr, self.dd_provider.value, self.dd_llm, self.status_text)
-        self.update()
-
-    def _on_llm_change(self, e):
-        self.config_mgr.set_last_model(self.dd_llm.value)
-
     def _on_visual_change(self, e):
         self.config_mgr.set_visual_capture_enabled(self.sw_visual.value)
 
@@ -377,14 +362,7 @@ class LiveTranscriptionView(ft.Column):
     def _on_provider_change(self, e):
         provider = self.dd_provider.value
         self.config_mgr.set_active_provider(provider)
-        sync_llm_models(
-            self._page,
-            self.config_mgr,
-            provider,
-            self.dd_llm,
-            self.status_text,
-            on_empty_results=self._handle_empty_models
-        )
+        sync_llm_models(self._page, self.config_mgr, provider, self.dd_llm, self.status_text, on_empty_results=self._handle_empty_models)
 
     def _on_llm_change(self, e):
         self.config_mgr.set_last_model(self.dd_llm.value)
@@ -392,11 +370,11 @@ class LiveTranscriptionView(ft.Column):
     def _handle_empty_models(self, provider: str):
         """Callback when a provider returns no models."""
         logger.warning(f"LiveTranscriptionView: Provider {provider} returned no models. Hiding.")
-        
+
         # Remove from dropdown options
         new_options = [opt for opt in self.dd_provider.options if opt.key != provider]
         self.dd_provider.options = new_options
-        
+
         # If currently selected, fallback to something else
         if self.dd_provider.value == provider:
             if new_options:
@@ -406,7 +384,7 @@ class LiveTranscriptionView(ft.Column):
                 sync_llm_models(self._page, self.config_mgr, fallback, self.dd_llm, self.status_text, on_empty_results=self._handle_empty_models)
             else:
                 self.dd_provider.value = None
-        
+
         self._safe_update()
 
     def _stop_ui_state(self):

@@ -1,9 +1,11 @@
+import contextlib
 import logging
 import threading
+
 import flet as ft
 
 from src.core.config_manager import ConfigManager
-from src.core.constants import WHISPER_MODELS, EDITION_RESTRICTIONS
+from src.core.constants import EDITION_RESTRICTIONS, WHISPER_MODELS
 from src.core.event_bus import (
     EVENT_STATUS_UPDATE,
     EVENT_TRANSCRIPTION_ERROR,
@@ -17,7 +19,7 @@ from src.core.minutes_service import MinutesService
 from src.core.setup_manager import setup_manager
 from src.platforms.desktop.controllers.local_smart_ctrl import LocalSmartController
 from src.platforms.desktop.controllers.transcription_ctrl import TranscriptionController
-from src.platforms.desktop.ui.ui_utils import sync_llm_models
+from src.platforms.desktop.ui.ui_utils import safe_update, safe_update_control, sync_llm_models
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ class FileTranscriptionView(ft.Column):
         self.minutes_service = MinutesService(config_mgr)
         self.local_smart_ctrl = LocalSmartController(config_mgr)
         self.router = IntentRouter(config_mgr)
-        
+
         self._setup_view_elements()
         self._setup_event_handlers()
         self.refresh_dependency_state(initial=True)
@@ -233,7 +235,7 @@ class FileTranscriptionView(ft.Column):
             self.btn_pick.text = "ファイルを選択して開始"
             self.btn_pick.icon = ft.Icons.UPLOAD_FILE
             self.status_text.value = "待機中..."
-        
+
         if not initial:
             self._safe_update()
 
@@ -254,7 +256,6 @@ class FileTranscriptionView(ft.Column):
             self.raw_transcript_text.value = result.get("text", "")
             self.progress_bar.visible = False
             self.btn_pick.disabled = False
-            # Trigger AI conversion (this is still slightly coupled, could be an event too)
             self._run_ai_conversion(result.get("text", ""))
             self._safe_update()
 
@@ -266,186 +267,6 @@ class FileTranscriptionView(ft.Column):
             self.btn_pick.disabled = False
             self._safe_update()
 
-        # File Pickers
-        self.file_picker = ft.FilePicker()
-        self.file_picker.on_result = self._on_file_picked
-        self.save_picker = ft.FilePicker()
-        self.save_picker.on_result = self._on_save_picked
-        if self._page:
-            self._page.overlay.extend([self.file_picker, self.save_picker])
-
-        # --- Top Selection Area ---
-        self.dd_whisper = ft.Dropdown(
-            label="Whisperモデル",
-            width=180,
-            options=[self._create_whisper_option(m) for m in WHISPER_MODELS],
-            value=self.config_mgr.get_whisper_model(),
-            on_change=self._on_whisper_change,
-        )
-
-        edition = self.config_mgr.get_edition()
-        allowed_providers = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
-
-        self.dd_provider = ft.Dropdown(
-            label="AIプロバイダー",
-            width=180,
-            options=[ft.dropdown.Option(p) for p in allowed_providers],
-            value=self.config_mgr.get_active_provider(),
-            on_change=self._on_provider_change,
-        )
-
-        self.status_text = ft.Text("待機中...", color=ft.Colors.GREY_500)
-        self.progress_bar = ft.ProgressBar(value=0, visible=False, color=ft.Colors.BLUE_400, height=8)
-
-        # UI Components
-        self.model_dropdown = ft.Dropdown(
-            label="Whisper Model",
-            width=250,
-            options=[self._create_whisper_option(m) for m in WHISPER_MODELS],
-            value=self.config_mgr.get_whisper_model(),
-        )
-
-        self.local_smart_btn = ft.IconButton(
-            icon=ft.Icons.AUTO_AWESOME_OUTLINED,
-            selected_icon=ft.Icons.AUTO_AWESOME,
-            on_click=self._toggle_local_smart,
-            tooltip="Local Smart: Optimize models for my hardware",
-            selected=self.config_mgr.get_local_smart_enabled(),
-        )
-
-        self.dd_llm = ft.Dropdown(
-            label="LLMモデル",
-            width=220,
-            options=[ft.dropdown.Option("取得中...", disabled=True)],
-            value=None,
-            on_change=self._on_llm_change,
-        )
-
-        # --- Project Selection ---
-        existing_projects = self.service.history_mgr.get_projects() if hasattr(self.service, "history_mgr") else history_mgr.get_projects()
-        project_options = [
-            ft.dropdown.Option("その他", "その他 (デフォルト)"),
-            ft.dropdown.Option("__new__", "＋新規プロジェクト作成"),
-        ]
-        project_options.extend([ft.dropdown.Option(p) for p in existing_projects if p != "その他"])
-
-        self.dd_project = ft.Dropdown(
-            label="プロジェクト選択",
-            width=200,
-            options=project_options,
-            value="その他",
-            on_change=self._on_project_change,
-        )
-        self.tf_new_project = ft.TextField(
-            label="新規プロジェクト名",
-            width=200,
-            hint_text="プロジェクト名を入力...",
-            visible=False,
-        )
-
-        # Initial background load
-        threading.Thread(target=self._initial_load, daemon=True).start()
-
-        self.sw_visual = ft.Switch(
-            label="映像情報を使用", value=False, tooltip="動画ファイルから10秒ごとに画像を抽出してAIに送信します（分析精度が向上します）"
-        )
-
-        self.btn_pick = ft.ElevatedButton(
-            "ファイルを選択して開始",
-            icon=ft.Icons.UPLOAD_FILE,
-            bgcolor=ft.Colors.BLUE_700,
-            color=ft.Colors.WHITE,
-            on_click=lambda _: self.file_picker.pick_files(allow_multiple=False),
-        )
-
-        # Result Areas
-        self.result_text = ft.TextField(
-            label="AI 変換結果",
-            multiline=True,
-            min_lines=20,
-            max_lines=None,
-            expand=True,
-            text_size=14,
-            border_color=ft.Colors.BLUE_700,
-            bgcolor=ft.Colors.BLACK12,
-        )
-        self.raw_transcript_text = ft.TextField(
-            label="文字起こし全文",
-            multiline=True,
-            min_lines=20,
-            max_lines=None,
-            expand=True,
-            text_size=12,
-            border_color=ft.Colors.GREY_700,
-            bgcolor=ft.Colors.BLACK12,
-        )
-
-        self.tabs = ft.Tabs(
-            selected_index=0,
-            expand=True,
-            tabs=[
-                ft.Tab(text="AI 変換結果", icon=ft.Icons.AUTO_AWESOME, content=self.result_text),
-                ft.Tab(text="全文テキスト", icon=ft.Icons.LIST_ALT, content=self.raw_transcript_text),
-            ],
-        )
-
-        self.controls = [
-            ft.Row(
-                [
-                    ft.Column(
-                        [
-                            ft.Text("ファイル文字起こし", size=32, weight=ft.FontWeight.BOLD),
-                            ft.Text("動画・音声ファイルをAIで解析し、要約や議事録を作成します", size=14, color=ft.Colors.GREY_400),
-                        ]
-                    ),
-                    ft.IconButton(ft.Icons.REFRESH, on_click=lambda _: self.update(), tooltip="表示を更新"),
-                ],
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            ),
-            ft.Divider(height=20, color=ft.Colors.GREY_800),
-            ft.Row(
-                [
-                    ft.Text("Smart Local Optimization:", weight=ft.FontWeight.BOLD),
-                    self.model_dropdown,
-                    self.local_smart_btn,
-                    ft.Container(
-                        content=ft.Column(
-                            [
-                                ft.Text(f"RAM: {self.hw_info['ram']}GB", size=10, color=ft.Colors.BLUE_200),
-                                ft.Text(f"VRAM: {self.hw_info['vram']}GB", size=10, color=ft.Colors.PURPLE_200),
-                            ],
-                            spacing=0,
-                        ),
-                        padding=ft.padding.only(left=10),
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.START,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            ft.Row([self.dd_provider, self.dd_llm, self.sw_visual], spacing=10),
-            ft.Row([self.dd_project, self.tf_new_project], spacing=10),
-            ft.Container(height=10),
-            self.btn_pick,
-            ft.Container(height=10),
-            self.status_text,
-            self.progress_bar,
-            ft.Container(
-                content=self.tabs,
-                expand=True,
-                height=500,
-                padding=15,
-                bgcolor=ft.Colors.BLACK26,
-                border=ft.border.all(1, ft.Colors.GREY_800),
-                border_radius=15,
-            ),
-            ft.Row(
-                [
-                    ft.ElevatedButton("結果を保存", icon=ft.Icons.SAVE, on_click=lambda _: self.save_picker.save_file(file_name="result.md")),
-                ],
-                alignment=ft.MainAxisAlignment.END,
-            ),
-        ]
-
     def _create_whisper_option(self, model_name: str):
         return ft.dropdown.Option(key=model_name, text=model_name)
 
@@ -454,11 +275,7 @@ class FileTranscriptionView(ft.Column):
 
     def _safe_update(self):
         """Safely updates the control if it is attached to a page."""
-        if self.page:
-            try:
-                self.update()
-            except Exception:
-                pass
+        safe_update_control(self)
 
     def _initial_load(self):
         if self.local_smart_enabled:
@@ -471,22 +288,16 @@ class FileTranscriptionView(ft.Column):
     def _on_provider_change(self, e):
         provider = self.dd_provider.value
         self.config_mgr.set_active_provider(provider)
-        sync_llm_models(
-            self.page, 
-            self.config_mgr, 
-            provider, 
-            self.dd_llm, 
-            on_empty_results=self._handle_empty_models
-        )
+        sync_llm_models(self.page, self.config_mgr, provider, self.dd_llm, on_empty_results=self._handle_empty_models)
 
     def _handle_empty_models(self, provider: str):
         """Callback when a provider returns no models (e.g. invalid key)."""
         logger.warning(f"Provider {provider} returned no models. Hiding from UI.")
-        
+
         # Remove from dropdown options
         new_options = [opt for opt in self.dd_provider.options if opt.key != provider]
         self.dd_provider.options = new_options
-        
+
         # If currently selected, fallback to something else
         if self.dd_provider.value == provider:
             if new_options:
@@ -497,7 +308,7 @@ class FileTranscriptionView(ft.Column):
                 sync_llm_models(self.page, self.config_mgr, fallback, self.dd_llm, on_empty_results=self._handle_empty_models)
             else:
                 self.dd_provider.value = None
-        
+
         self._safe_update()
 
     def _update_model_options(self, provider: str):
@@ -586,4 +397,4 @@ class FileTranscriptionView(ft.Column):
 
     def _update_progress(self, val):
         self.progress_bar.value = val
-        self.update()
+        self._safe_update()

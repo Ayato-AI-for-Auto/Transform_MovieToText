@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import threading
 import time
@@ -14,11 +15,27 @@ _model_cache = {}
 CACHE_TTL = 3600  # 1 hour in seconds
 
 
+def safe_update(page: ft.Page):
+    """
+    Safely updates the Flet page, logging failures instead of crashing
+    or silently swallowing important errors.
+    """
+    if not page:
+        return
+    try:
+        page.update()
+    except Exception as e:
+        # Often happens during shutdown or if the page was closed prematurely.
+        # We log at DEBUG to avoid flooding the user logs in production,
+        # but keep it visible for developer diagnostics.
+        logger.debug(f"UI update skipped (Page state likely invalid): {e}")
+
+
 def sync_llm_models(page: ft.Page, config_mgr, provider: str, dd_model: ft.Dropdown, status_text: ft.Text = None, on_empty_results=None):
     """
     Common utility to fetch available LLM models for a provider and update a dropdown.
     Includes 1-hour caching, loading state, error handling, and background threading.
-    
+
     Args:
         page: Flet page instance.
         config_mgr: Configuration manager.
@@ -40,12 +57,8 @@ def sync_llm_models(page: ft.Page, config_mgr, provider: str, dd_model: ft.Dropd
                 on_empty_results(provider)
             else:
                 _update_dropdown_ui(dd_model, cache_entry["models"], config_mgr, provider, status_text)
-            
-            if page:
-                try:
-                    page.update()
-                except Exception:
-                    pass
+
+            safe_update(page)
             return
 
     # 2. If not cached or expired, show loading state and fetch
@@ -58,11 +71,7 @@ def sync_llm_models(page: ft.Page, config_mgr, provider: str, dd_model: ft.Dropd
         original_status = status_text.value
         status_text.value = f"📡 {provider} の利用可能モデルを取得中..."
 
-    if page:
-        try:
-            page.update()
-        except Exception:
-            pass
+    safe_update(page)
 
     def fetch_task():
         try:
@@ -90,11 +99,7 @@ def sync_llm_models(page: ft.Page, config_mgr, provider: str, dd_model: ft.Dropd
             fallback = DEFAULT_LLM_MODELS.get(provider, ["error-fallback"])
             _update_dropdown_ui(dd_model, fallback, config_mgr, provider, status_text, f"⚠️ {provider} モデル取得失敗: {str(e)[:40]}")
 
-        if page:
-            try:
-                page.update()
-            except Exception:
-                pass
+        safe_update(page)
 
     # Run in background
     threading.Thread(target=fetch_task, daemon=True).start()
@@ -117,4 +122,14 @@ def _update_dropdown_ui(dd_model: ft.Dropdown, models: list[str], config_mgr, pr
         status_text.value = status_val
     elif status_text:
         # If no status_val provided, we might assume success/idle
-        pass
+        logger.debug(f"UI Update: {provider} model list refreshed with {len(models)} items.")
+
+
+def safe_update_control(control: ft.Control):
+    """Safely updates a single control."""
+    if not control or not control.page:
+        return
+    try:
+        control.update()
+    except Exception as e:
+        logger.debug(f"Control update skipped: {e}")
