@@ -1,8 +1,10 @@
 import logging
 import threading
+
 import flet as ft
 
 logger = logging.getLogger(__name__)
+
 
 def safe_update(control: ft.Control):
     """Safely updates a Flet control, ensuring it is attached to a page."""
@@ -15,6 +17,7 @@ def safe_update(control: ft.Control):
             control.update()
     except Exception as e:
         logger.debug(f"UI update skipped for {control.__class__.__name__}: {e}")
+
 
 class Debouncer:
     """

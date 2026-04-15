@@ -30,7 +30,9 @@ class MeetingRepository:
                     audio_path TEXT,
                     model_info TEXT,
                     project_name TEXT,
-                    category TEXT
+                    category TEXT,
+                    source_type TEXT DEFAULT 'meeting',
+                    file_path TEXT
                 )
             """)
 
@@ -39,7 +41,14 @@ class MeetingRepository:
             columns = [row["name"] for row in cursor.fetchall()]
 
             # Explicit list of columns that might be missing in older versions
-            target_cols = {"project_name": "TEXT", "category": "TEXT", "minutes_model": "TEXT", "transcript_segments": "TEXT"}
+            target_cols = {
+                "project_name": "TEXT",
+                "category": "TEXT",
+                "minutes_model": "TEXT",
+                "transcript_segments": "TEXT",
+                "source_type": "TEXT DEFAULT 'meeting'",
+                "file_path": "TEXT",
+            }
 
             migration_needed = False
             for col, col_type in target_cols.items():
@@ -60,18 +69,18 @@ class MeetingRepository:
             cursor = conn.execute("PRAGMA table_info(meetings_fts)")
             fts_columns = [row["name"] for row in cursor.fetchall()]
 
-            if migration_needed or not fts_columns or "project_name" not in fts_columns:
+            if migration_needed or not fts_columns or "source_type" not in fts_columns:
                 logger.info("MeetingRepository: Syncing FTS5 virtual table.")
                 conn.execute("DROP TABLE IF EXISTS meetings_fts")
                 conn.execute("""
                     CREATE VIRTUAL TABLE meetings_fts USING fts5(
-                        title, transcript, minutes, project_name, category, minutes_model,
+                        title, transcript, minutes, project_name, category, minutes_model, source_type,
                         tokenize='unicode61'
                     )
                 """)
                 conn.execute(
-                    "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) "
-                    "SELECT id, title, transcript, minutes, project_name, category, minutes_model FROM meetings"
+                    "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model, source_type) "
+                    "SELECT id, title, transcript, minutes, project_name, category, minutes_model, source_type FROM meetings"
                 )
             conn.commit()
 
@@ -79,27 +88,29 @@ class MeetingRepository:
         self,
         title: str,
         transcript: str,
-        audio_path: str,
+        audio_path: str = "",
         model_info: str = "",
         project_name: str = "",
         category: str = "",
         transcript_segments: list[dict] | None = None,
+        source_type: str = "meeting",
+        file_path: str = "",
     ) -> int:
         segments_json = json.dumps(transcript_segments) if transcript_segments else None
-        logger.info(f"MeetingRepository: Adding new meeting: {title} (Project: {project_name})")
+        logger.info(f"MeetingRepository: Adding new {source_type}: {title} (Project: {project_name})")
 
         with self.db.get_connection() as conn:
             cursor = conn.execute(
-                "INSERT INTO meetings (title, transcript, transcript_segments, audio_path, model_info, project_name, category, minutes_model) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (title, transcript, segments_json, audio_path, model_info, project_name, category, ""),
+                "INSERT INTO meetings (title, transcript, transcript_segments, audio_path, model_info, project_name, category, minutes_model, source_type, file_path) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (title, transcript, segments_json, audio_path, model_info, project_name, category, "", source_type, file_path),
             )
             meeting_id = cursor.lastrowid
 
             # Sync FTS
             conn.execute(
-                "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (meeting_id, title, transcript, "", project_name, category, ""),
+                "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model, source_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (meeting_id, title, transcript, "", project_name, category, "", source_type),
             )
             conn.commit()
             return meeting_id
@@ -123,8 +134,17 @@ class MeetingRepository:
             if row:
                 conn.execute("DELETE FROM meetings_fts WHERE rowid = ?", (meeting_id,))
                 conn.execute(
-                    "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (meeting_id, row["title"], row["transcript"], row["minutes"], row["project_name"], row["category"], row["minutes_model"]),
+                    "INSERT INTO meetings_fts(rowid, title, transcript, minutes, project_name, category, minutes_model, source_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        meeting_id,
+                        row["title"],
+                        row["transcript"],
+                        row["minutes"],
+                        row["project_name"],
+                        row["category"],
+                        row["minutes_model"],
+                        row["source_type"],
+                    ),
                 )
             conn.commit()
 
@@ -237,7 +257,7 @@ class MeetingRepository:
             "total_chars": int(total_chars),
             "estimated_minutes": int(estimated_minutes),
             "cost_avoided_jpy": int(cost_avoided_jpy),
-            "time_saved_hours": round(time_saved_hours, 1)
+            "time_saved_hours": round(time_saved_hours, 1),
         }
 
 

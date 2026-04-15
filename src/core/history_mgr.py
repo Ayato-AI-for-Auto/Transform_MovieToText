@@ -2,6 +2,7 @@ import logging
 
 from src.core.db.connection import DatabaseConnection
 from src.core.db.repositories import MeetingRepository, VisualContextRepository
+from src.core.knowledge_scanner import KnowledgeScanner
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class HistoryManager:
 
         self.meetings = MeetingRepository(self._conn)
         self.visuals = VisualContextRepository(self._conn)
+        self.scanner = KnowledgeScanner(self)
         try:
             self._init_db()
         except Exception as e:
@@ -168,6 +170,13 @@ class HistoryManager:
     def get_roi_metrics(self) -> dict:
         """Exposes ROI metrics calculation from the repository."""
         return self.meetings.get_roi_metrics()
+
+    def sync_knowledge(self, knowledge_dir: str):
+        """Triggers local directory scan for knowledge documents."""
+        initial_count = len(self.get_all_meetings())
+        self.scanner.scan_directory(knowledge_dir)
+        new_count = len(self.get_all_meetings())
+        return new_count - initial_count
 
 
 # Singleton instance

@@ -4,18 +4,17 @@ import threading
 import flet as ft
 
 from src.core.config_manager import ConfigManager
-from src.core.constants import EDITION_RESTRICTIONS
 from src.core.history_mgr import history_mgr
 from src.core.minutes_service import MinutesService
 from src.core.query_analyzer import QueryAnalyzer
-from src.platforms.common.ui.ui_utils import Debouncer, safe_update
+from src.platforms.common.ui.ui_utils import Debouncer
 from src.platforms.desktop.controllers.local_smart_ctrl import LocalSmartController
 
 logger = logging.getLogger(__name__)
 
 
 class ChatMessage(ft.Row):
-# ... (ChatMessage class implementation)
+    # ... (ChatMessage class implementation)
     def __init__(self, text: str, is_user: bool):
         super().__init__()
         self.vertical_alignment = ft.CrossAxisAlignment.START
@@ -48,7 +47,7 @@ class ChatMessage(ft.Row):
 class ChatBotView(ft.Column):
     """
     RAG-powered ChatBot View with Local Smart integration.
-    Allows users to query their transcription knowledge base.
+    Allows users to query their meeting history and local knowledge documents.
     """
 
     def __init__(self, page: ft.Page, config_mgr: ConfigManager):
@@ -60,19 +59,15 @@ class ChatBotView(ft.Column):
         self.local_smart_ctrl = LocalSmartController(config_mgr)
         self.hw_info = self._get_hw_info()
         self.local_smart_enabled = config_mgr.get_local_smart_enabled()
-        
+
         # UI State
         self.search_debouncer = Debouncer(delay=0.5)
 
         # UI Components
         self.chat_history = ft.Column(expand=True, scroll=ft.ScrollMode.ALWAYS, spacing=20)
-        
+
         # Context Preview (Real-time feedback as typing)
-        self.context_preview = ft.Row(
-            spacing=10,
-            scroll=ft.ScrollMode.ALWAYS,
-            visible=False
-        )
+        self.context_preview = ft.Row(spacing=10, scroll=ft.ScrollMode.ALWAYS, visible=False)
 
         self.input_field = ft.TextField(
             hint_text="文字起こしデータについて質問してください...",
@@ -177,11 +172,11 @@ class ChatBotView(ft.Column):
     def _initial_load(self):
         # Update project list
         self._update_project_options()
-        
+
         if self.local_smart_enabled:
             self._apply_local_smart()
         else:
-            provider = "ollama_local" # Fixed to local
+            provider = "ollama_local"  # Fixed to local
             self._update_model_options(provider)
         self._safe_update()
 
@@ -272,16 +267,18 @@ class ChatBotView(ft.Column):
             # 3. Format Context with Metadata
             context_blocks = []
             for r in results:
-                title = r.get("title", "名称未設定の会議")
+                title = r.get("title", "名称未設定のアイテム")
                 timestamp = r.get("timestamp", "不明な日時")
                 project = r.get("project_name") or "その他"
                 category = r.get("category") or "未分類"
+                s_type = r.get("source_type", "meeting")
+                label = "Meeting" if s_type == "meeting" else "Document"
 
-                content_source = "Summary" if r.get("minutes") else "Transcript"
+                content_source = "Summary" if r.get("minutes") else "Content"
                 content = r.get("minutes") if r.get("minutes") else r.get("transcript", "")
 
                 context_blocks.append(
-                    f"### Meeting: {title} ({timestamp})\n"
+                    f"### {label}: {title} ({timestamp})\n"
                     f"- Project: {project}\n"
                     f"- Tags: {category}\n"
                     f"- Source: {content_source}\n"
@@ -312,7 +309,7 @@ class ChatBotView(ft.Column):
             # Build standardized message list
             messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": query}]
 
-            conf = self.config_mgr.get_provider_config(provider)
+            self.config_mgr.get_provider_config(provider)
             client = self.config_mgr.get_llm_client(provider)
 
             # Call using standardized 'messages'
@@ -324,7 +321,8 @@ class ChatBotView(ft.Column):
                 seen_sources = set()
                 source_bullets = []
                 for r in results:
-                    s_label = f"{r.get('title', '無題')} ({r.get('timestamp', '不明')})"
+                    icon = "📄" if r.get("source_type") == "document" else "🎙️"
+                    s_label = f"{icon} {r.get('title', '無題')} ({r.get('timestamp', '不明')})"
                     if s_label not in seen_sources:
                         source_bullets.append(f"- {s_label}")
                         seen_sources.add(s_label)
@@ -352,7 +350,7 @@ class ChatBotView(ft.Column):
             self.context_preview.controls.clear()
             self._safe_update()
             return
-        
+
         self.search_debouncer.run(self._update_context_preview)
 
     def _update_context_preview(self):
@@ -366,14 +364,11 @@ class ChatBotView(ft.Column):
             all_cats = self.history_mgr.get_categories()
             analyzer = QueryAnalyzer(all_projs, all_cats, config_mgr=self.config_mgr)
             intent = analyzer.analyze(query)
-            
+
             # Fast FTS5 Search
             search_text = " ".join(intent["keywords"]) if intent["keywords"] else query
             results = self.history_mgr.get_meetings_filtered(
-                project_names=intent["projects"], 
-                categories=intent["categories"], 
-                search_query=search_text, 
-                limit=3
+                project_names=intent["projects"], categories=intent["categories"], search_query=search_text, limit=3
             )
 
             # Update UI
@@ -388,13 +383,13 @@ class ChatBotView(ft.Column):
                             bgcolor=ft.Colors.BLUE_900 if r.get("minutes") else ft.Colors.BLUE_GREY_900,
                             padding=ft.padding.symmetric(horizontal=8, vertical=2),
                             border_radius=10,
-                            tooltip=f"日付: {r.get('timestamp', '不明')}\nプロジェクト: {r.get('project_name') or 'なし'}"
+                            tooltip=f"日付: {r.get('timestamp', '不明')}\nプロジェクト: {r.get('project_name') or 'なし'}",
                         )
                     )
                 self.context_preview.visible = True
             else:
                 self.context_preview.visible = False
-            
+
             self._safe_update()
         except Exception as e:
             logger.debug(f"Context preview update failed: {e}")

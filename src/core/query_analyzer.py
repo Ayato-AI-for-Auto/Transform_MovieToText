@@ -35,14 +35,16 @@ class QueryAnalyzer:
         "マーケ": "Marketing-Promotion",
     }
 
-    def __init__(self, projects: list[str], categories: list[str], config_mgr: ConfigManager = None, provider: str = None, model: str = None, client=None):
+    def __init__(
+        self, projects: list[str], categories: list[str], config_mgr: ConfigManager = None, provider: str = None, model: str = None, client=None
+    ):
         self.projects = projects
         self.categories = categories
         self.config_mgr = config_mgr or ConfigManager()
 
         # Determine provider and model
         self.active_provider = provider or self.config_mgr.get_active_provider()
-        
+
         # If model is not provided, try to get the last used model for that provider
         if not model:
             p_conf = self.config_mgr.get_provider_config(self.active_provider)
@@ -58,9 +60,7 @@ class QueryAnalyzer:
             try:
                 p_conf = self.config_mgr.get_provider_config(self.active_provider)
                 self.client = LLMFactory.create_client(
-                    provider_name=self.active_provider,
-                    api_key=p_conf.get("api_key"),
-                    base_url=p_conf.get("base_url")
+                    provider_name=self.active_provider, api_key=p_conf.get("api_key"), base_url=p_conf.get("base_url")
                 )
                 logger.info(f"QueryAnalyzer: Initialized with {self.active_provider} ({self.model_id})")
             except Exception as e:
@@ -117,7 +117,7 @@ class QueryAnalyzer:
         for proj in self.projects:
             if proj.lower() in search_pool.lower():
                 found_projects.add(proj)
-        
+
         for cat in self.categories:
             if cat.lower() in search_pool.lower():
                 found_categories.add(cat)
@@ -131,11 +131,11 @@ class QueryAnalyzer:
 
         # 2. Token-based and Fuzzy Matching
         words = re.findall(r"[a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\-]+", search_pool)
-        
+
         for word in words:
             if len(word) < 2:
                 continue
-            
+
             # Fuzzy Matching (FTS-friendly)
             if word not in found_projects and word not in found_categories:
                 p_match = difflib.get_close_matches(word, self.projects, n=1, cutoff=0.8)
@@ -151,19 +151,19 @@ class QueryAnalyzer:
         # 3. Keyword extraction
         # Physically remove identified metadata and synonyms from the query to isolate keywords
         exclude_set = found_projects | found_categories
-        
+
         clean_pool = search_pool
         # Sort by length descending to replace longer phrases first
-        for meta in sorted(list(exclude_set), key=len, reverse=True):
+        for meta in sorted(exclude_set, key=len, reverse=True):
             clean_pool = clean_pool.replace(meta, " ")
-        
+
         # Also remove synonym keys
-        for syn_key in sorted(list(self.SYNONYMS.keys()), key=len, reverse=True):
+        for syn_key in sorted(self.SYNONYMS.keys(), key=len, reverse=True):
             clean_pool = clean_pool.replace(syn_key, " ")
 
         # Now extract tokens from the cleaned pool
         tokens = re.findall(r"[a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\-]+", clean_pool)
-        
+
         keywords = []
         for t in tokens:
             if 2 <= len(t) <= 15:

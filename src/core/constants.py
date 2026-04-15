@@ -1,5 +1,4 @@
 import os
-from enum import Enum
 
 from .platform_utils import get_app_data_path
 
@@ -10,9 +9,12 @@ APP_DATA_DIR = get_app_data_path()
 DEFAULT_DB_PATH = os.path.join(APP_DATA_DIR, "history.db")
 DEFAULT_CONFIG_PATH = os.path.join(APP_DATA_DIR, "config.json")
 DEFAULT_RECORDS_DIR = os.path.join(APP_DATA_DIR, "history")
+from pathlib import Path
+
 TEMP_DIR = os.path.join(APP_DATA_DIR, "temp")
 TEMP_CHUNKS_DIR = os.path.join(APP_DATA_DIR, "temp", "chunks")
 TEMP_VIDEO_DIR = os.path.join(APP_DATA_DIR, "temp", "frames")
+DEFAULT_KNOWLEDGE_DIR = str(Path.home() / "Documents" / "AyatoKnowledge")
 
 # Recording Defaults
 DEFAULT_SEGMENT_TIME = 30

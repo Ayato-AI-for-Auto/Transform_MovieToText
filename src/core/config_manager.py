@@ -100,6 +100,7 @@ class ConfigManager:
 
         # Fallback to constants if live fetch fails
         from .constants import DEFAULT_LLM_MODELS
+
         return DEFAULT_LLM_MODELS.get(provider_name, [])
 
     def get_whisper_model(self):
@@ -176,4 +177,16 @@ class ConfigManager:
         if old != source:
             self.config["audio_source"] = source
             logger.info(f"Audio source changed: {old} -> {source}")
+            self.save_config()
+
+    def get_knowledge_dir(self):
+        """Returns the configured knowledge library directory."""
+        return self.config.get("knowledge_dir", "")
+
+    def set_knowledge_dir(self, directory_path):
+        """Sets the knowledge library directory."""
+        old = self.get_knowledge_dir()
+        if old != directory_path:
+            self.config["knowledge_dir"] = directory_path
+            logger.info(f"Knowledge directory changed: {old} -> {directory_path}")
             self.save_config()

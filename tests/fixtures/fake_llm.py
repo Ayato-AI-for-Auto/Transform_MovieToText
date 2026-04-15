@@ -2,11 +2,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class FakeLLMClient:
     """
     A deterministic LLM client for unit tests.
     Does not use MagicMock, satisfying the strict unit testing constraints.
     """
+
     def __init__(self, responses=None):
         # Mapping of prompt substring to response string
         self.responses = responses or {}

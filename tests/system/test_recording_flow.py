@@ -37,7 +37,10 @@ def system_setup():
     # In-memory history for system test integration
     history = HistoryManager(db_path=":memory:")
     # Both the controller creates its own service AND it uses history_mgr singleton.
-    with patch("src.platforms.desktop.controllers.transcription_ctrl.history_mgr", history), patch("src.core.transcription_service._history_mgr", history):
+    with (
+        patch("src.platforms.desktop.controllers.transcription_ctrl.history_mgr", history),
+        patch("src.core.transcription_service._history_mgr", history),
+    ):
         ctrl = TranscriptionController(mock_config, mock_transcriber)
         yield ctrl, history
 

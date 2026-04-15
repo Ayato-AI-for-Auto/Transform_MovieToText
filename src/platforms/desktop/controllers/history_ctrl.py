@@ -91,3 +91,7 @@ class HistoryController:
         except Exception as e:
             logger.error(f"Failed to update meeting {meeting_id}: {e}")
             return False
+
+    def sync_knowledge(self, target_dir):
+        """Triggers knowledge directory sync via HistoryManager."""
+        return history_mgr.sync_knowledge(target_dir)

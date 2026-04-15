@@ -1,4 +1,3 @@
-import contextlib
 import logging
 
 import flet as ft
@@ -10,7 +9,7 @@ from src.core.history_mgr import history_mgr
 from src.core.setup_manager import setup_manager
 from src.core.state import state
 from src.platforms.desktop.controllers.transcription_ctrl import TranscriptionController
-from src.platforms.desktop.ui.ui_utils import safe_update, safe_update_control, sync_llm_models
+from src.platforms.desktop.ui.ui_utils import safe_update_control, sync_llm_models
 
 logger = logging.getLogger(__name__)
 

@@ -162,33 +162,27 @@ Pythonのインストール不要です。
 
 `run.bat` をダブルクリックするだけで、Python・依存関係・AIモデルがすべて自動構築されます。
 
-### Option 3: ソースから起動
-
-```bash
-git clone https://github.com/Ayato-AI-for-Auto/Transform_MovieToText.git
-cd Transform_MovieToText
-
-# 依存関係のインストール
-uv pip install -e .
-
-# GPU を使う場合（CUDA 12.1）
-uv pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
-
-# 起動
-uv run main.py
-```
+### 🧠 Secure Local Knowledge Engine (RAG)
+No more searching through endless folders. Chat with all your knowledge sources simultaneously.
+- **Meeting Intelligence**: Query across months of meeting transcripts and AI summaries.
+- **Local Document Indexing**: Automatically index `.md`, `.txt`, and `.csv` files from your local folders.
+- **Zero-Cloud RAG**: Context retrieval and answer generation happen 100% on your machine.
+- **Smart Citations**: AI responses include clickable source links (Meeting 🎙️ or Document 📄).
 
 ---
 
-## システム要件
+## 🗺️ Roadmap & Ecosystem
 
-| 項目 | 要件 |
-| :--- | :--- |
-| **OS** | Windows 10 / 11（Primary）、macOS（Experimental） |
-| **FFmpeg** | システムにインストール済み、PATHが通っていること |
-| **RAM** | 8GB 以上（16GB+ 推奨） |
-| **GPU** | NVIDIA CUDA 対応 GPU があれば高速化。なくても動作可能 |
-| **Ollama** | バックグラウンドで起動していること |
+| Feature | Status | Target |
+| :--- | :--- | :--- |
+| **Local Transcription (Whisper)** | ✅ Ready | Production |
+| **Local LLM Summary (Ollama)** | ✅ Ready | Production |
+| **Secure Knowledge Engine (.md, .txt)** | ✅ Ready | NEW |
+| **CSV Data Analysis** | ✅ Ready | NEW |
+| **Local Smart Optimization** | ✅ Ready | Production |
+| **PDF / DOCX Parsing** | 🏗️ In Dev | Phase 2 |
+| **Excel (.xlsx) Intelligence** | 📅 Planned | Phase 2 |
+| **Mobile Companion (Local Sync)** | 📅 Planned | Future |
 
 ---
 

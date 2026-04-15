@@ -17,11 +17,28 @@ class SettingsView(ft.Column):
         self.model_requirements = model_requirements
         self.history_ctrl = history_ctrl
 
+        # Folder picker for Knowledge Library
+        self.knowledge_folder_picker = ft.FilePicker(on_result=self._on_knowledge_folder_result)
+
         # Initialize UI Components
         self.ollama_local_url = ft.TextField(
             label="Ollama Local Base URL", width=500, hint_text="http://localhost:11434", on_change=self._on_settings_change
         )
         self.force_gpu_checkbox = ft.Checkbox(label="GPUを強制使用する (VRAM不足警告を無視)", on_change=self._on_force_gpu_change)
+
+        # Knowledge Library UI
+        self.knowledge_dir_field = ft.TextField(
+            label="ナレッジライブラリのディレクトリ (.md, .txt, .csv)",
+            expand=True,
+            read_only=True,
+            hint_text="フォルダを選択してください...",
+        )
+        self.knowledge_sync_btn = ft.ElevatedButton(
+            "ナレッジを同期",
+            icon=ft.Icons.SYNC,
+            on_click=self._on_sync_click,
+            tooltip="フォルダ内のファイルをスキャンしてデータベースを更新します",
+        )
 
         # Project Management
         self.project_to_delete_dd = ft.Dropdown(
@@ -52,6 +69,17 @@ class SettingsView(ft.Column):
         self.controls = [
             ft.Text("設定", size=24, weight="bold"),
             ft.Divider(),
+            ft.Text("ナレッジエンジン (Local RAG)", size=18, weight="w500"),
+            ft.Text("指定したフォルダ内のドキュメントを検索対象に含めます。外部送信は一切行われません。", size=13, color="grey500"),
+            ft.Row(
+                [
+                    self.knowledge_dir_field,
+                    ft.IconButton(ft.Icons.FOLDER_OPEN, on_click=lambda _: self.knowledge_folder_picker.get_directory_path()),
+                    self.knowledge_sync_btn,
+                ],
+                alignment=ft.MainAxisAlignment.START,
+            ),
+            ft.Divider(),
             ft.Text("プロジェクト管理", size=18, weight="w500"),
             ft.Text("プロジェクトを削除すると、そのプロジェクトに属していたデータは自動的に「その他」へ移動されます。", size=13, color="grey500"),
             ft.Row([self.project_to_delete_dd, self.delete_project_btn], alignment=ft.MainAxisAlignment.START),
@@ -60,10 +88,7 @@ class SettingsView(ft.Column):
             ft.Text("1バイトも外部に送信されません。機密情報は安全に保護されます。", size=13, color=ft.Colors.GREEN),
             ft.Card(
                 content=ft.Container(
-                    content=ft.Column([
-                        ft.Text("Ollama Local", weight="bold"),
-                        self.ollama_local_url
-                    ]),
+                    content=ft.Column([ft.Text("Ollama Local", weight="bold"), self.ollama_local_url]),
                     padding=15,
                     border_radius=10,
                 )
@@ -104,14 +129,45 @@ class SettingsView(ft.Column):
                 )
             )
 
+    def _on_knowledge_folder_result(self, e: ft.FilePickerResultEvent):
+        if e.path:
+            self.knowledge_dir_field.value = e.path
+            self.config_mgr.set_knowledge_dir(e.path)
+            self._show_info(f"ナレッジディレクトリを設定しました: {e.path}")
+            self.update()
+
+    def _on_sync_click(self, e):
+        if not self.history_ctrl:
+            return
+
+        target_dir = self.knowledge_dir_field.value
+        if not target_dir or not os.path.exists(target_dir):
+            self._show_info("有効なディレクトリを選択してください。", bgcolor=ft.Colors.RED_400)
+            return
+
+        self.knowledge_sync_btn.disabled = True
+        self.knowledge_sync_btn.text = "同期中..."
+        self.update()
+
+        try:
+            # We'll implement sync_knowledge in the controller later
+            if hasattr(self.history_ctrl, "sync_knowledge"):
+                count = self.history_ctrl.sync_knowledge(target_dir)
+                self._show_info(f"同期完了: {count}個のファイルをインデックスしました。")
+            else:
+                self._show_info("エラー: 同期機能がまだ実装されていません。", bgcolor=ft.Colors.RED_400)
+        except Exception as ex:
+            logger.error(f"Sync failed: {ex}")
+            self._show_info(f"同期失敗: {ex}", bgcolor=ft.Colors.RED_400)
+
+        self.knowledge_sync_btn.disabled = False
+        self.knowledge_sync_btn.text = "ナレッジを同期"
+        self.update()
+
     def _show_delete_confirmation(self, e):
         project_name = self.project_to_delete_dd.value
         if not project_name:
-            # Show snackbar or error if no project selected
-            if self.page:
-                self.page.snack_bar = ft.SnackBar(ft.Text("削除するプロジェクトを選択してください。"))
-                self.page.snack_bar.open = True
-                self.page.update()
+            self._show_info("削除するプロジェクトを選択してください。")
             return
 
         def confirm_delete(e_close):
@@ -143,25 +199,16 @@ class SettingsView(ft.Column):
 
         success = self.history_ctrl.reassign_project(project_name, "その他")
         if success:
-            # Refresh project list after deletion
             self._update_project_options()
-            if self.page:
-                self.page.snack_bar = ft.SnackBar(ft.Text(f"プロジェクト「{project_name}」を削除し、データを「その他」に移動しました。"))
-                self.page.snack_bar.open = True
-                self.page.update()
+            self._show_info(f"プロジェクト「{project_name}」を削除しました。")
         else:
-            if self.page:
-                self.page.snack_bar = ft.SnackBar(ft.Text("プロジェクトの削除に失敗しました。"), bgcolor=ft.Colors.RED_700)
-                self.page.snack_bar.open = True
-                self.page.update()
+            self._show_info("プロジェクトの削除に失敗しました。", bgcolor=ft.Colors.RED_700)
 
     def _update_project_options(self):
         if not self.history_ctrl:
             return
 
         projects = self.history_ctrl.get_projects()
-        # Exclude internal/default names from deletion list if necessary
-        # We allow deleting any project that exists.
         self.project_to_delete_dd.options = [ft.dropdown.Option(p) for p in projects if p and p != "その他"]
         self.project_to_delete_dd.value = None
         if self.page:
@@ -174,123 +221,16 @@ class SettingsView(ft.Column):
         self.config_mgr.set_force_gpu(e.control.value)
 
     def init_view(self):
-        ollama_local_conf = self.config_mgr.get_provider_config("ollama_local")
-        self.ollama_local_url.value = ollama_local_conf.get("base_url", "http://localhost:11434")
-
-        self.force_gpu_checkbox.value = self.config_mgr.get_force_gpu()
-
-        # Load and update projects list
-        self._update_project_options()
-
-        if self.page:
-            self.update()
-
-    def _build_compatibility_list(self):
-        self.comp_items.controls.clear()
-        for m, req in self.model_requirements.items():
-            can_gpu = self.hw_info["vram"] >= req
-            can_cpu = self.hw_info["ram"] >= req
-            status_icon = ft.Icons.CHECK_CIRCLE if (can_gpu or can_cpu) else ft.Icons.CANCEL
-            status_color = ft.Colors.GREEN if can_gpu else (ft.Colors.AMBER if can_cpu else ft.Colors.RED)
-            device_text = f"適合 (Requirement: {req}GB)" if (can_gpu or can_cpu) else "推奨スペック不足"
-
-            self.comp_items.controls.append(
-                ft.ListTile(
-                    leading=ft.Icon(status_icon, color=status_color),
-                    title=ft.Text(m),
-                    subtitle=ft.Text(device_text),
-                )
-            )
-
-    def _show_delete_confirmation(self, e):
-        project_name = self.project_to_delete_dd.value
-        if not project_name:
-            # Show snackbar or error if no project selected
-            if self.page:
-                self.page.snack_bar = ft.SnackBar(ft.Text("削除するプロジェクトを選択してください。"))
-                self.page.snack_bar.open = True
-                self.page.update()
-            return
-
-        def confirm_delete(e_close):
-            confirm_dialog.open = False
-            self.page.update()
-            self._execute_project_deletion(project_name)
-
-        def cancel_delete(e_close):
-            confirm_dialog.open = False
-            self.page.update()
-
-        confirm_dialog = ft.AlertDialog(
-            title=ft.Text("プロジェクトの削除"),
-            content=ft.Text(f"プロジェクト「{project_name}」を削除しますか？\n所属していたデータは「その他」に移動されます。"),
-            actions=[
-                ft.TextButton("キャンセル", on_click=cancel_delete),
-                ft.TextButton("削除する", on_click=confirm_delete, font_weight="bold", color=ft.Colors.RED),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-
-        self.page.dialog = confirm_dialog
-        confirm_dialog.open = True
-        self.page.update()
-
-    def _execute_project_deletion(self, project_name):
-        if not self.history_ctrl:
-            return
-
-        success = self.history_ctrl.reassign_project(project_name, "その他")
-        if success:
-            # Refresh project list after deletion
-            self._update_project_options()
-            if self.page:
-                self.page.snack_bar = ft.SnackBar(ft.Text(f"プロジェクト「{project_name}」を削除し、データを「その他」に移動しました。"))
-                self.page.snack_bar.open = True
-                self.page.update()
-        else:
-            if self.page:
-                self.page.snack_bar = ft.SnackBar(ft.Text("プロジェクトの削除に失敗しました。"), bgcolor=ft.Colors.RED_700)
-                self.page.snack_bar.open = True
-                self.page.update()
-
-    def _update_project_options(self):
-        if not self.history_ctrl:
-            return
-
-        projects = self.history_ctrl.get_projects()
-        # Exclude internal/default names from deletion list if necessary
-        # We allow deleting any project that exists.
-        self.project_to_delete_dd.options = [ft.dropdown.Option(p) for p in projects if p and p != "その他"]
-        self.project_to_delete_dd.value = None
-        if self.page:
-            self.update()
-
-    def _on_settings_change(self, e):
-        self.config_mgr.set_provider_config("gemini", {"api_key": self.gemini_api_key.value})
-        self.config_mgr.set_provider_config("ollama_local", {"base_url": self.ollama_local_url.value})
-        self.config_mgr.set_provider_config("ollama_cloud", {"api_key": self.ollama_cloud_api_key.value, "base_url": self.ollama_cloud_url.value})
-
-    def _on_force_gpu_change(self, e):
-        self.config_mgr.set_force_gpu(e.control.value)
-
-    def init_view(self):
-        self.cloud_token.value = self.config_mgr.get_cloud_token()
-
-        gemini_conf = self.config_mgr.get_provider_config("gemini")
-        self.gemini_api_key.value = gemini_conf.get("api_key", "")
+        # Attach file picker to page overlay
+        if self.page and self.knowledge_folder_picker not in self.page.overlay:
+            self.page.overlay.append(self.knowledge_folder_picker)
 
         ollama_local_conf = self.config_mgr.get_provider_config("ollama_local")
         self.ollama_local_url.value = ollama_local_conf.get("base_url", "http://localhost:11434")
-
-        ollama_cloud_conf = self.config_mgr.get_provider_config("ollama_cloud")
-        self.ollama_cloud_api_key.value = ollama_cloud_conf.get("api_key", "")
-        self.ollama_cloud_url.value = ollama_cloud_conf.get("base_url", "https://ollama.com")
-
         self.force_gpu_checkbox.value = self.config_mgr.get_force_gpu()
+        self.knowledge_dir_field.value = self.config_mgr.get_knowledge_dir()
 
-        # Load and update projects list
         self._update_project_options()
-
         if self.page:
             self.update()
 
@@ -299,19 +239,14 @@ class SettingsView(ft.Column):
         if not os.path.exists(log_file):
             self._show_info("ログファイルが見つかりません。")
             return
-
         try:
-            # Clipboard fallback for debugging
             with open(log_file, encoding="utf-8") as f:
                 content = f.read()
-
             self.page.set_clipboard(content)
             self._show_info("ログをクリップボードにコピーしました。")
-            logger.info(f"Log exported from: {log_file}")
-
         except Exception as ex:
             logger.error(f"Failed to export logs: {ex}")
-            self._show_info(f"ログ出力失敗: {ex}")
+            self._show_info(f"ログ出力失敗: {ex}", bgcolor=ft.Colors.RED_400)
 
     def _show_info(self, text: str, bgcolor: str = None):
         if self.page:
