@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 
-from .constants import DEFAULT_ACTIVE_PROVIDER, DEFAULT_CONFIG_PATH, EDITION_RESTRICTIONS, AppEdition
+from .constants import DEFAULT_ACTIVE_PROVIDER, DEFAULT_CONFIG_PATH
 from .migrator import ConfigMigrator
 
 logger = logging.getLogger(__name__)
@@ -39,59 +39,15 @@ class ConfigManager:
         if ConfigMigrator.migrate(self.config):
             self.save_config()
 
-    def get_edition(self) -> AppEdition:
-        """Returns the current application edition (FREE, PRO, or ENTERPRISE)."""
-        # 1. Check for manual override in config (Enterprise usually)
-        ed_str = self.config.get("edition")
-        if ed_str:
-            try:
-                return AppEdition(ed_str.lower())
-            except ValueError:
-                logger.warning(f"Invalid edition in config: {ed_str}. Falling back to default detection.")
-
-        # 2. Check for Cloud Token (Pro Activation)
-        token = self.get_cloud_token()
-        if token and self._is_valid_cloud_token(token):
-            return AppEdition.PRO
-
-        return AppEdition.FREE
-
-    def _is_valid_cloud_token(self, token: str) -> bool:
-        """
-        Validates the cloud token with the Ayato Cloud Gateway.
-        For now, any token starting with 'ayato-' is considered valid (Mock).
-        In the next phase, this will be a real API call.
-        """
-        return token.startswith("ayato-")
-
-    def get_cloud_token(self):
-        return self.config.get("cloud_token", "")
-
-    def set_cloud_token(self, token: str):
-        self.config["cloud_token"] = token
-        logger.info("Cloud token updated.")
-        self.save_config()
-
     def get_active_provider(self):
-        active = self.config.get("active_provider", DEFAULT_ACTIVE_PROVIDER)
-        edition = self.get_edition()
-
-        # Restriction check
-        allowed = EDITION_RESTRICTIONS.get(edition, {}).get("allowed_providers", [])
-        if active not in allowed:
-            logger.warning(f"Provider {active} is restricted in {edition.name} edition. Falling back to ollama_local.")
-            return "ollama_local"
-
-        return active
+        # We only support local now.
+        return DEFAULT_ACTIVE_PROVIDER
 
     def set_active_provider(self, provider_name):
-        old = self.get_active_provider()
-        if old != provider_name:
-            self.config["active_provider"] = provider_name
-            logger.info(f"Active provider changed: {old} -> {provider_name}")
-            self.save_config()
+        # Fixed to local. Kept for API compatibility.
+        logger.info(f"Ignored request to set provider to {provider_name}. Only ollama_local is supported.")
 
-    def get_provider_config(self, provider_name):
+    def get_provider_config(self, provider_name="ollama_local"):
         conf = self.config.get("providers", {}).get(provider_name, {}).copy()
 
         # Override with environment variables if present
@@ -118,49 +74,24 @@ class ConfigManager:
         self.save_config()
 
     def get_last_model(self, provider_name=None):
-        if not provider_name:
-            provider_name = self.get_active_provider()
+        provider_name = "ollama_local"
         return self.config.get("last_models", {}).get(provider_name, "")
 
     def set_last_model(self, model_name, provider_name=None):
-        if not provider_name:
-            provider_name = self.get_active_provider()
+        provider_name = "ollama_local"
         if "last_models" not in self.config:
             self.config["last_models"] = {}
         self.config["last_models"][provider_name] = model_name
         self.save_config()
 
     def get_llm_models(self, provider_name=None):
-        if not provider_name:
-            provider_name = self.get_active_provider()
-
-        edition = self.get_edition()
-        restrictions = EDITION_RESTRICTIONS.get(edition, {})
-        allowed_providers = restrictions.get("allowed_providers", [])
-
-        if provider_name not in allowed_providers:
-            logger.warning(f"Provider {provider_name} is not allowed in {edition.name} edition.")
-            return []
-
+        provider_name = "ollama_local"
         try:
             from src.llm.factory import LLMFactory
 
             conf = self.get_provider_config(provider_name)
             client = LLMFactory.create_client(provider_name=provider_name, api_key=conf.get("api_key"), base_url=conf.get("base_url"))
             models = client.get_available_models()
-
-            # Filter models based on edition syntax
-            allowed_prefix = restrictions.get("allowed_models_prefix")
-            disallowed_keywords = restrictions.get("disallowed_keywords", [])
-
-            if models:
-                # 1. Filter by keyword exclusion (e.g. "cloud")
-                if disallowed_keywords:
-                    models = [m for m in models if not any(k.lower() in m.lower() for k in disallowed_keywords)]
-
-                # 2. Filter by prefix (e.g. "gemma")
-                if allowed_prefix:
-                    models = [m for m in models if m.lower().startswith(allowed_prefix.lower())]
 
             if models:
                 return models
@@ -169,19 +100,7 @@ class ConfigManager:
 
         # Fallback to constants if live fetch fails
         from .constants import DEFAULT_LLM_MODELS
-
-        models = DEFAULT_LLM_MODELS.get(provider_name, [])
-
-        # Apply same restrictions to fallback list
-        allowed_prefix = restrictions.get("allowed_models_prefix")
-        disallowed_keywords = restrictions.get("disallowed_keywords", [])
-
-        if disallowed_keywords:
-            models = [m for m in models if not any(k.lower() in m.lower() for k in disallowed_keywords)]
-        if allowed_prefix:
-            models = [m for m in models if m.lower().startswith(allowed_prefix.lower())]
-
-        return models
+        return DEFAULT_LLM_MODELS.get(provider_name, [])
 
     def get_whisper_model(self):
         return self.config.get("whisper_model", "base")
@@ -219,7 +138,7 @@ class ConfigManager:
 
     def get_llm_model(self):
         """Returns the current LLM model name (e.g. for summary)."""
-        return self.config.get("llm_model", "phi3.5:mini")  # Default for 2026-03
+        return self.config.get("llm_model", "gemma3:1b")  # Local default
 
     def set_llm_model(self, model_name):
         """Sets the LLM model name."""
@@ -241,8 +160,7 @@ class ConfigManager:
 
     def get_llm_client(self, provider_name=None, api_key=None):
         """Returns an initialized LLM client for the provider."""
-        if not provider_name:
-            provider_name = self.get_active_provider()
+        provider_name = "ollama_local"
         conf = self.get_provider_config(provider_name)
         from src.llm.factory import LLMFactory
 
@@ -259,5 +177,3 @@ class ConfigManager:
             self.config["audio_source"] = source
             logger.info(f"Audio source changed: {old} -> {source}")
             self.save_config()
-
-    # --- Transcription Configurations ---
