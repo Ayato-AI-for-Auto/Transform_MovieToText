@@ -16,26 +16,29 @@ class KnowledgeScanner:
     def __init__(self, history_mgr):
         self.history_mgr = history_mgr
 
-    def scan_directory(self, target_dir: str):
+    def scan_directory(self, target_dir: str) -> int:
         """
-        Crawls the target directory and syncs files to the database.
+        Crawls the target directory and syncs files incrementally.
+        Returns the number of added or updated files.
         """
         if not target_dir or not os.path.exists(target_dir):
             logger.warning(f"KnowledgeScanner: Skip scan. Directory does not exist: {target_dir}")
-            return
+            return 0
 
-        logger.info(f"KnowledgeScanner: Starting scan of {target_dir}")
-        Path(target_dir)
-
-        # Get current documents in DB to track deletions/updates
-        # Note: We need a way to filter only documents from DB.
-        # meetings = self.history_mgr.get_meetings_filtered(source_type="document")
-        # For now, we list all and filter.
+        logger.info(f"KnowledgeScanner: Starting incremental scan of {target_dir}")
+        indexed_count = 0
+        
+        # 1. Load current DB state for documents
         all_records = self.history_mgr.get_all_meetings()
-        db_docs = {r["file_path"]: r for r in all_records if r.get("source_type") == "document"}
+        db_docs = {
+            r["file_path"]: {"id": r["id"], "mtime": r.get("file_mtime")} 
+            for r in all_records if r.get("source_type") == "document"
+        }
 
-        found_paths = set()
+        # Sets to track what we've seen on disk vs what's in DB
+        found_on_disk = set()
 
+        # 2. Iterate disk files
         for root, _, files in os.walk(target_dir):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -43,28 +46,41 @@ class KnowledgeScanner:
                 ext = os.path.splitext(file)[1].lower()
 
                 if ext in self.SUPPORTED_EXTENSIONS:
-                    found_paths.add(abs_path)
+                    found_on_disk.add(abs_path)
                     try:
-                        os.path.getmtime(abs_path)
-                        # TODO: Store mtime in DB to avoid unnecessary re-parsing.
-                        # For now, we compare if the file exists in DB.
+                        mtime = os.path.getmtime(abs_path)
+                        db_info = db_docs.get(abs_path)
 
-                        if abs_path not in db_docs:
-                            self._process_file(abs_path, ext)
+                        # Decision: Index if new or file modified
+                        if not db_info:
+                            self._process_file(abs_path, ext, mtime)
+                            indexed_count += 1
+                        elif db_info["mtime"] is None or mtime > db_info["mtime"]:
+                            logger.info(f"KnowledgeScanner: Update detected for {abs_path}")
+                            # Delete old record and re-insert to refresh search index
+                            self.history_mgr.delete_meeting(db_info["id"])
+                            self._process_file(abs_path, ext, mtime)
+                            indexed_count += 1
                         else:
-                            # Simple update check: if we decide to store mtime, we'd check it here.
-                            pass
+                            # Already in DB and mtime matches
+                            continue
+                            
                     except Exception as e:
                         logger.error(f"Failed to process file {abs_path}: {e}")
 
-        # Optional: Handle deletions (files in DB but not on disk)
-        # for path, record in db_docs.items():
-        #     if path not in found_paths:
-        #         self.history_mgr.delete_meeting(record["id"])
+        # 3. Handle Deletions (files in DB but gone from disk)
+        for path, info in db_docs.items():
+            if path not in found_on_disk:
+                logger.info(f"KnowledgeScanner: Removing deleted file from DB: {path}")
+                try:
+                    self.history_mgr.delete_meeting(info["id"])
+                except Exception as e:
+                    logger.warning(f"Failed to delete ghost record {path}: {e}")
 
-        logger.info("KnowledgeScanner: Scan complete.")
+        logger.info(f"KnowledgeScanner: Scan complete. {indexed_count} files processed.")
+        return indexed_count
 
-    def _process_file(self, file_path: str, ext: str):
+    def _process_file(self, file_path: str, ext: str, mtime: float):
         """Parses a single file and adds it to the history manager."""
         try:
             with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -75,13 +91,8 @@ class KnowledgeScanner:
                     content = f.read()
 
             title = os.path.basename(file_path)
-            # Use file modified time as the timestamp
-            from datetime import datetime
-
-            datetime.fromtimestamp(os.path.getmtime(file_path)).strftime("%Y-%m-%d %H:%M:%S")
-
-            # Determine project based on parent folder name if it's deeper than root
-            # Or just default to 'Documents'
+            
+            # Simple heuristic for project name
             project_name = "Knowledge Library"
 
             self.history_mgr.add_meeting(
@@ -92,6 +103,7 @@ class KnowledgeScanner:
                 category=ext.upper()[1:],  # MD, TXT, CSV
                 source_type="document",
                 file_path=file_path,
+                file_mtime=mtime
             )
             logger.info(f"KnowledgeScanner: Indexed {title}")
 

@@ -59,8 +59,11 @@ class HistoryManager:
         project_name: str = "",
         category: str = "",
         transcript_segments: list[dict] | None = None,
+        source_type: str = "meeting",
+        file_path: str | None = None,
+        file_mtime: float | None = None,
     ) -> int:
-        """Adds a new meeting with optional segment data."""
+        """Adds a new meeting or document record."""
         try:
             return self.meetings.add(
                 title=title,
@@ -70,6 +73,9 @@ class HistoryManager:
                 project_name=project_name,
                 category=category,
                 transcript_segments=transcript_segments,
+                source_type=source_type,
+                file_path=file_path or "",
+                file_mtime=file_mtime,
             )
         except Exception as e:
             logger.error(f"Error adding meeting: {e}")

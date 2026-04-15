@@ -48,6 +48,7 @@ class MeetingRepository:
                 "transcript_segments": "TEXT",
                 "source_type": "TEXT DEFAULT 'meeting'",
                 "file_path": "TEXT",
+                "file_mtime": "REAL",
             }
 
             migration_needed = False
@@ -95,15 +96,16 @@ class MeetingRepository:
         transcript_segments: list[dict] | None = None,
         source_type: str = "meeting",
         file_path: str = "",
+        file_mtime: float | None = None,
     ) -> int:
         segments_json = json.dumps(transcript_segments) if transcript_segments else None
         logger.info(f"MeetingRepository: Adding new {source_type}: {title} (Project: {project_name})")
 
         with self.db.get_connection() as conn:
             cursor = conn.execute(
-                "INSERT INTO meetings (title, transcript, transcript_segments, audio_path, model_info, project_name, category, minutes_model, source_type, file_path) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (title, transcript, segments_json, audio_path, model_info, project_name, category, "", source_type, file_path),
+                "INSERT INTO meetings (title, transcript, transcript_segments, audio_path, model_info, project_name, category, minutes_model, source_type, file_path, file_mtime) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (title, transcript, segments_json, audio_path, model_info, project_name, category, "", source_type, file_path, file_mtime),
             )
             meeting_id = cursor.lastrowid
 

@@ -134,7 +134,7 @@ class SettingsView(ft.Column):
             self.knowledge_dir_field.value = e.path
             self.config_mgr.set_knowledge_dir(e.path)
             self._show_info(f"ナレッジディレクトリを設定しました: {e.path}")
-            self.update()
+            self._safe_update()
 
     def _on_sync_click(self, e):
         if not self.history_ctrl:
@@ -147,7 +147,7 @@ class SettingsView(ft.Column):
 
         self.knowledge_sync_btn.disabled = True
         self.knowledge_sync_btn.text = "同期中..."
-        self.update()
+        self._safe_update()
 
         try:
             # We'll implement sync_knowledge in the controller later
@@ -162,7 +162,7 @@ class SettingsView(ft.Column):
 
         self.knowledge_sync_btn.disabled = False
         self.knowledge_sync_btn.text = "ナレッジを同期"
-        self.update()
+        self._safe_update()
 
     def _show_delete_confirmation(self, e):
         project_name = self.project_to_delete_dd.value
@@ -171,13 +171,15 @@ class SettingsView(ft.Column):
             return
 
         def confirm_delete(e_close):
-            confirm_dialog.open = False
-            self.page.update()
+            if self.page:
+                confirm_dialog.open = False
+                self.page.update()
             self._execute_project_deletion(project_name)
 
         def cancel_delete(e_close):
-            confirm_dialog.open = False
-            self.page.update()
+            if self.page:
+                confirm_dialog.open = False
+                self.page.update()
 
         confirm_dialog = ft.AlertDialog(
             title=ft.Text("プロジェクトの削除"),
@@ -189,9 +191,10 @@ class SettingsView(ft.Column):
             actions_alignment=ft.MainAxisAlignment.END,
         )
 
-        self.page.dialog = confirm_dialog
-        confirm_dialog.open = True
-        self.page.update()
+        if self.page:
+            self.page.dialog = confirm_dialog
+            confirm_dialog.open = True
+            self.page.update()
 
     def _execute_project_deletion(self, project_name):
         if not self.history_ctrl:
@@ -209,10 +212,10 @@ class SettingsView(ft.Column):
             return
 
         projects = self.history_ctrl.get_projects()
-        self.project_to_delete_dd.options = [ft.dropdown.Option(p) for p in projects if p and p != "その他"]
-        self.project_to_delete_dd.value = None
         if self.page:
-            self.update()
+            self.project_to_delete_dd.options = [ft.dropdown.Option(p) for p in projects if p and p != "その他"]
+            self.project_to_delete_dd.value = None
+            self._safe_update()
 
     def _on_settings_change(self, e):
         self.config_mgr.set_provider_config("ollama_local", {"base_url": self.ollama_local_url.value})
@@ -231,8 +234,16 @@ class SettingsView(ft.Column):
         self.knowledge_dir_field.value = self.config_mgr.get_knowledge_dir()
 
         self._update_project_options()
-        if self.page:
-            self.update()
+        self._safe_update()
+
+    def _safe_update(self):
+        """Helper to update the control only if it is currently attached to a page."""
+        try:
+            if self.page:
+                self.update()
+        except Exception:
+            # Control might have been removed from the page tree during async operation
+            pass
 
     def _on_export_logs_click(self, e):
         log_file = get_log_path()

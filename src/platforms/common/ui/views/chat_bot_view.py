@@ -86,6 +86,21 @@ class ChatBotView(ft.Column):
             value="すべてのプロジェクト",
         )
 
+        self.dd_llm = ft.Dropdown(
+            label="LLMモデル",
+            width=220,
+            options=[ft.dropdown.Option("取得中...", disabled=True)],
+            value=None,
+        )
+
+        self.local_smart_btn = ft.IconButton(
+            icon=ft.Icons.AUTO_AWESOME_OUTLINED,
+            selected_icon=ft.Icons.AUTO_AWESOME,
+            on_click=self._toggle_local_smart,
+            tooltip="Local Smart: ハードウェアに最適なモデルを選択",
+            selected=self.config_mgr.get_local_smart_enabled(),
+        )
+
         self.status_text = ft.Text("待機中...", size=12, color=ft.Colors.GREY_500)
 
         self.controls = [

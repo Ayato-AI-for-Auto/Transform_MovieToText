@@ -190,3 +190,9 @@ class ConfigManager:
             self.config["knowledge_dir"] = directory_path
             logger.info(f"Knowledge directory changed: {old} -> {directory_path}")
             self.save_config()
+
+    def get_edition(self):
+        """Returns the current application edition. Defaulting to PRO for local use."""
+        from .constants import AppEdition
+
+        return AppEdition.PRO
